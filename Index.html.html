@@ -1,0 +1,1519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content">
+<title>Our List</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f0e0d;
+  --card: #1a1916;
+  --border: #2e2c28;
+  --text: #f0ede6;
+  --muted: #7a776e;
+  --tag-bg: #252320;
+  --accent: #e8b84b;
+
+  /* Category colours */
+  --c-food:        #e8b84b;
+  --c-italian:     #e07b4a;
+  --c-asian:       #e84b7a;
+  --c-latino:      #4be87a;
+  --c-american:    #4b9ee8;
+  --c-brunch:      #b44be8;
+  --c-fusion:      #e8d44b;
+  --c-bars:        #4be8d4;
+  --c-coffee:      #c8885a;
+  --c-dessert:     #e84bb4;
+  --c-carts:       #88c84b;
+  --c-finedining:  #c8b8f8;
+  --c-activities:  #4bd4e8;
+  --c-hikes:       #6be84b;
+  --c-getaways:    #e84b4b;
+  --c-shopping:    #f8a84b;
+  --c-international: #a84be8;
+  --c-seafood:     #4b9ee8;
+  --c-greek:       #e8e04b;
+  --c-african:     #e8784b;
+  --c-other:       #888888;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-weight: 300; min-height: 100vh; }
+
+/* HEADER */
+header {
+  border-bottom: 1px solid var(--border);
+  padding: 20px 20px 14px;
+  display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap;
+}
+header h1 { font-family: 'Bebas Neue', sans-serif; font-size: 2.6rem; letter-spacing: 3px; color: var(--accent); line-height: 1; }
+header .sub { color: var(--muted); font-size: 0.76rem; letter-spacing: 1.5px; text-transform: uppercase; padding-bottom: 4px; }
+
+/* STICKY BAR */
+#stickyBar { position: sticky; top: 0; z-index: 20; background: var(--bg); }
+
+#favBar {
+  display: flex; align-items: center; gap: 7px;
+  padding: 7px 14px;
+  font-size: 0.74rem; color: var(--muted);
+  overflow-x: auto; overflow-y: hidden;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  white-space: nowrap;
+  transition: max-height 0.3s ease, opacity 0.25s ease, padding 0.3s ease;
+  max-height: 50px; opacity: 1;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+#favBar::-webkit-scrollbar { display: none; }
+#favBar.gone { max-height: 0; padding-top: 0; padding-bottom: 0; opacity: 0; border-bottom-color: transparent; }
+#favBar > * { flex-shrink: 0; }
+
+#topRow {
+  display: flex; gap: 8px; align-items: center;
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto; overflow-y: hidden;
+  scrollbar-width: none; -webkit-overflow-scrolling: touch;
+}
+#topRow::-webkit-scrollbar { display: none; }
+#topRow > * { flex-shrink: 0; }
+.search-wrap { flex: 1; min-width: 120px; flex-shrink: 1 !important; }
+
+/* CATEGORY FILTER ROW */
+#catRow {
+  display: flex; gap: 6px; align-items: center;
+  padding: 0 14px 8px;
+  overflow-x: auto; overflow-y: hidden;
+  scrollbar-width: none; -webkit-overflow-scrolling: touch;
+  transition: max-height 0.3s ease, opacity 0.26s ease, padding 0.3s ease;
+  max-height: 60px; opacity: 1; white-space: nowrap;
+}
+#catRow::-webkit-scrollbar { display: none; }
+#catRow.gone { max-height: 0; padding-bottom: 0; opacity: 0; pointer-events: none; }
+
+/* SUB-CATEGORY ROW */
+#subCatRow {
+  display: flex; gap: 6px; align-items: center;
+  padding: 0 14px 0;
+  overflow-x: auto; overflow-y: hidden;
+  scrollbar-width: none; -webkit-overflow-scrolling: touch;
+  max-height: 0; opacity: 0; pointer-events: none;
+  transition: max-height 0.25s ease, opacity 0.22s ease, padding 0.25s ease;
+  white-space: nowrap;
+}
+#subCatRow::-webkit-scrollbar { display: none; }
+#subCatRow.visible { max-height: 56px; opacity: 1; pointer-events: auto; padding-bottom: 8px; }
+#subCatRow.gone { max-height: 0; padding-bottom: 0; opacity: 0; pointer-events: none; }
+.sub-pill { font-size: 0.68rem !important; padding: 4px 9px !important; }
+
+/* TYPE + STAR ROW */
+#filterRow {
+  display: flex; flex-wrap: nowrap; gap: 6px;
+  padding: 0 14px 8px;
+  overflow-x: auto; overflow-y: hidden;
+  scrollbar-width: none; -webkit-overflow-scrolling: touch;
+  transition: max-height 0.3s ease, opacity 0.26s ease, padding 0.3s ease;
+  max-height: 0; opacity: 0; pointer-events: none;
+}
+#filterRow::-webkit-scrollbar { display: none; }
+#filterRow.visible { max-height: 48px; opacity: 1; pointer-events: auto; }
+#filterRow.gone { max-height: 0; padding-bottom: 0; opacity: 0; pointer-events: none; }
+
+#starRow {
+  display: flex; gap: 6px; align-items: center;
+  padding: 0 20px 8px;
+  overflow: hidden;
+  transition: max-height 0.3s ease, opacity 0.26s ease, padding 0.3s ease;
+  max-height: 56px; opacity: 1;
+}
+#starRow.gone { max-height: 0; padding-bottom: 0; opacity: 0; pointer-events: none; }
+
+#stickyBorder { border-bottom: 1px solid var(--border); }
+
+/* PILLS */
+.cat-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: var(--tag-bg); border: 2px solid transparent;
+  font-family: 'DM Sans', sans-serif; font-size: 0.72rem; font-weight: 500;
+  letter-spacing: 0.4px; padding: 5px 12px; border-radius: 20px;
+  cursor: pointer; transition: all 0.14s; white-space: nowrap; text-transform: uppercase;
+  color: var(--muted); flex-shrink: 0;
+}
+.cat-pill:hover { color: var(--text); }
+.cat-pill.active { color: #0f0e0d; font-weight: 600; }
+.cat-pill .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+.pill {
+  background: var(--tag-bg); border: 1px solid var(--border); color: var(--muted);
+  font-family: 'DM Sans', sans-serif; font-size: 0.7rem; font-weight: 500;
+  letter-spacing: 0.4px; padding: 4px 10px; border-radius: 20px;
+  cursor: pointer; transition: all 0.14s; white-space: nowrap; text-transform: uppercase;
+}
+.pill:hover { border-color: var(--accent); color: var(--accent); }
+.pill.active { background: var(--accent); border-color: var(--accent); color: #0f0e0d; }
+
+.star-pill {
+  background: var(--tag-bg); border: 1px solid var(--border); color: var(--muted);
+  font-family: 'DM Sans', sans-serif; font-size: 0.7rem; font-weight: 500;
+  padding: 4px 10px; border-radius: 20px; cursor: pointer; transition: all 0.14s; white-space: nowrap;
+}
+.star-pill:hover { border-color: var(--accent); color: var(--accent); }
+.star-pill.active { background: #2a2000; border-color: var(--accent); color: var(--accent); }
+
+.toggle-btn {
+  background: none; border: 1px solid var(--border); color: var(--muted);
+  font-family: 'DM Sans', sans-serif; font-size: 0.7rem; font-weight: 500;
+  letter-spacing: 0.4px; padding: 4px 10px; border-radius: 20px;
+  cursor: pointer; transition: all 0.14s; text-transform: uppercase; white-space: nowrap;
+}
+.toggle-btn:hover { border-color: #4caf78; color: #4caf78; }
+.toggle-btn.active-fav { background: #e84b4b22; border-color: #e84b4b; color: #e87a7a; }
+.toggle-btn.active-been { background: #0f231822; border-color: #2a6644; color: #4caf78; }
+
+/* INPUTS */
+.search-wrap { position: relative; flex: 1; min-width: 160px; }
+.search-wrap svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+input[type="text"] {
+  width: 100%; background: var(--card); border: 1px solid var(--border);
+  color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.88rem; font-weight: 300;
+  padding: 9px 10px 9px 32px; border-radius: 6px; outline: none; transition: border-color 0.18s;
+}
+input[type="text"]:focus { border-color: var(--accent); }
+input[type="text"]::placeholder { color: var(--muted); }
+.modal input[type="text"] { padding: 9px 11px; }
+select {
+  background: var(--card); border: 1px solid var(--border); color: var(--text);
+  font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
+  padding: 8px 10px; border-radius: 6px; outline: none; cursor: pointer;
+}
+.add-btn {
+  background: none; border: 1px dashed var(--border); color: var(--muted);
+  font-family: 'DM Sans', sans-serif; font-size: 0.74rem;
+  padding: 7px 12px; border-radius: 6px; cursor: pointer; transition: all 0.15s; white-space: nowrap;
+}
+.add-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* RANDOM BUTTON */
+.random-btn {
+  background: none; border: 1px solid var(--border); color: var(--muted);
+  font-family: 'DM Sans', sans-serif; font-size: 0.74rem; font-weight: 500;
+  padding: 7px 12px; border-radius: 6px; cursor: pointer; transition: all 0.15s;
+  white-space: nowrap; letter-spacing: 0.3px;
+}
+.random-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* COUNT BAR */
+#countBar { padding: 8px 20px 2px; color: var(--muted); font-size: 0.72rem; letter-spacing: 1px; text-transform: uppercase; }
+
+/* GRID */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; padding: 10px 20px 60px; }
+
+/* CARD */
+.card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 8px; padding: 14px 16px;
+  transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+  position: relative; overflow: hidden;
+}
+.card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  transform: scaleX(1); transform-origin: left;
+}
+.card:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(0,0,0,0.4); border-color: #3e3b34; }
+
+.card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px; }
+.card-name { font-size: 0.96rem; font-weight: 500; color: var(--text); line-height: 1.3; flex: 1; padding-right: 6px; }
+.card-actions { display: flex; gap: 3px; align-items: center; flex-shrink: 0; }
+.icon-btn { background: none; border: none; cursor: pointer; color: var(--muted); padding: 2px 3px; line-height: 1; font-size: 0.85rem; transition: opacity 0.14s; opacity: 0.4; }
+.icon-btn:hover { opacity: 1; }
+
+.card-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
+.card-location { font-size: 0.72rem; color: var(--muted); }
+.card-note { font-size: 0.74rem; color: var(--muted); margin-bottom: 8px; font-style: italic; }
+
+.card-footer { display: flex; justify-content: space-between; align-items: center; gap: 6px; flex-wrap: wrap; }
+.card-stars { display: flex; gap: 2px; }
+.card-stars .s { font-size: 0.85rem; cursor: pointer; color: #3a3730; transition: color 0.1s; line-height: 1; }
+.card-stars .s.lit { color: var(--accent); }
+
+.card-badges { display: flex; gap: 5px; align-items: center; flex-wrap: wrap; }
+.ctag {
+  font-size: 0.64rem; font-weight: 500; letter-spacing: 0.3px; text-transform: uppercase;
+  padding: 2px 7px; border-radius: 3px;
+  background: var(--tag-bg); border: 1px solid var(--border); color: var(--muted);
+  cursor: pointer; transition: background 0.14s; white-space: nowrap;
+}
+.ctag:hover { border-color: var(--accent); color: var(--accent); }
+.been-btn {
+  font-size: 0.64rem; font-weight: 500; letter-spacing: 0.3px; text-transform: uppercase;
+  padding: 2px 7px; border-radius: 3px; cursor: pointer; white-space: nowrap;
+  background: none; border: 1px solid var(--border); color: var(--muted);
+  font-family: 'DM Sans', sans-serif; transition: all 0.14s;
+}
+.been-btn.on { background: #0f2318; border-color: #2a6644; color: #4caf78; }
+.been-btn:hover { border-color: #4caf78; color: #4caf78; }
+.fav-btn-card { font-size: 1rem; opacity: 0.3; transition: opacity 0.14s; background: none; border: none; cursor: pointer; line-height: 1; }
+.fav-btn-card.on { opacity: 1; color: #e84b4b; }
+
+.empty { grid-column: 1/-1; text-align: center; padding: 50px 20px; color: var(--muted); font-size: 0.88rem; }
+
+/* RANDOM OVERLAY */
+.rand-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.85); z-index: 200;
+  align-items: center; justify-content: center;
+  flex-direction: column; gap: 20px; padding: 30px;
+}
+.rand-overlay.open { display: flex; }
+.rand-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 14px; padding: 28px 28px 24px;
+  width: 100%; max-width: 380px; text-align: center;
+  position: relative; overflow: hidden;
+}
+.rand-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+}
+.rand-cat { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); margin-bottom: 10px; }
+.rand-name { font-family: 'Bebas Neue', sans-serif; font-size: 2.2rem; letter-spacing: 2px; color: var(--text); line-height: 1.1; margin-bottom: 8px; }
+.rand-note { font-size: 0.82rem; color: var(--muted); font-style: italic; margin-bottom: 6px; }
+.rand-loc { font-size: 0.78rem; color: var(--muted); }
+.rand-btns { display: flex; gap: 10px; width: 100%; max-width: 380px; }
+.rand-btn { flex: 1; padding: 12px; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.86rem; font-weight: 500; cursor: pointer; border: none; transition: opacity 0.14s; }
+.rand-btn:hover { opacity: 0.82; }
+.rand-shuffle { background: var(--accent); color: #0f0e0d; }
+.rand-close { background: var(--tag-bg); color: var(--muted); border: 1px solid var(--border); }
+.rand-spinning .rand-name { opacity: 0.3; transform: scale(0.95); transition: all 0.1s; }
+
+/* MODAL */
+.overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 100; align-items: flex-end; justify-content: center; }
+.overlay.open { display: flex; }
+.modal {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 14px 14px 0 0; padding: 18px 22px env(safe-area-inset-bottom, 28px);
+  width: 100%; max-width: 480px; max-height: 90dvh; overflow-y: auto; -webkit-overflow-scrolling: touch;
+}
+.modal-handle { width: 36px; height: 4px; border-radius: 2px; background: var(--border); margin: 0 auto 14px; }
+.modal h2 { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; letter-spacing: 2px; color: var(--accent); margin-bottom: 14px; }
+.field { margin-bottom: 11px; }
+.field label { display: block; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 4px; }
+.star-picker { display: flex; gap: 8px; margin-top: 3px; }
+.star-picker .sp { font-size: 1.5rem; cursor: pointer; color: #3a3730; transition: color 0.1s; line-height: 1; }
+.star-picker .sp.lit { color: var(--accent); }
+.modal-btns { display: flex; gap: 9px; margin-top: 16px; padding-bottom: 8px; }
+.btn { flex: 1; padding: 11px; border-radius: 7px; font-family: 'DM Sans', sans-serif; font-size: 0.84rem; font-weight: 500; cursor: pointer; border: none; transition: opacity 0.14s; }
+.btn-primary { background: var(--accent); color: #0f0e0d; }
+.btn-danger { background: #3a1a15; color: #e87a7a; border: 1px solid #5a2a20; }
+.btn-secondary { background: var(--tag-bg); color: var(--muted); border: 1px solid var(--border); }
+.btn:hover { opacity: 0.82; }
+
+/* autocomplete */
+.ac-wrap { position: relative; }
+.ac-list {
+  display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+  background: #222018; border: 1px solid var(--accent); border-radius: 8px; z-index: 300;
+  max-height: 220px; overflow-y: scroll; box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+  -webkit-overflow-scrolling: touch; overscroll-behavior: contain; touch-action: pan-y;
+}
+.ac-list.open { display: block; }
+.ac-item { padding: 10px 14px; font-size: 0.88rem; color: var(--text); cursor: pointer; border-bottom: 1px solid var(--border); transition: background 0.12s; }
+.ac-item:last-child { border-bottom: none; }
+.ac-item:hover, .ac-item.highlighted { background: #2a2820; color: var(--accent); }
+
+@media (max-width: 600px) {
+  header { padding: 16px 16px 12px; }
+  #topRow, #catRow, #subCatRow, #filterRow, #starRow, #favBar, #countBar { padding-left: 12px; padding-right: 12px; }
+  .grid { padding: 8px 14px 48px; }
+  header h1 { font-size: 2rem; }
+}
+</style>
+</head>
+<body>
+
+<div id="loadingBar" style="display:flex;position:fixed;inset:0;background:rgba(15,14,13,0.92);z-index:999;align-items:center;justify-content:center;flex-direction:column;gap:14px;">
+  <div style="width:40px;height:40px;border:3px solid #2e2c28;border-top-color:#e8b84b;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+  <span style="color:#7a776e;font-size:0.82rem;letter-spacing:1px;text-transform:uppercase;">Loading your list...</span>
+</div>
+<div id="statusMsg" style="display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1a1916;border:1px solid #2e2c28;border-radius:8px;padding:8px 18px;font-size:0.8rem;z-index:500;white-space:nowrap;"></div>
+<style>@keyframes spin { to { transform: rotate(360deg); } }</style>
+
+<header>
+  <h1>Our List</h1>
+  <span class="sub">Portland &amp; beyond</span>
+</header>
+
+<div id="stickyBar">
+  <div id="favBar">
+    <span id="totalCount">0 spots</span>
+    <button class="toggle-btn" id="favOnlyBtn" onclick="toggleFavOnly()">❤ Favorites</button>
+    <button class="toggle-btn" id="beenOnlyBtn" onclick="toggleBeenOnly()">✓ Been here</button>
+    <button class="random-btn" id="randBtn" onclick="openRandom()">🎲 Surprise me</button>
+  </div>
+
+  <div id="topRow">
+    <div class="search-wrap">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+      <input type="text" id="searchInput" placeholder="Search everything..." oninput="render()">
+    </div>
+    <select id="sortSelect" onchange="render()">
+      <option value="alpha">A - Z</option>
+      <option value="alpha-desc">Z - A</option>
+      <option value="stars-desc">Top rated</option>
+      <option value="stars-asc">Lowest rated</option>
+    </select>
+    <button class="add-btn" onclick="openAdd()">+ Add</button>
+  </div>
+
+  <div id="catRow"></div>
+  <div id="subCatRow"></div>
+  <div id="filterRow"></div>
+  <div id="starRow">
+    <button class="star-pill active" onclick="setStarFilter(0,this)">All ratings</button>
+    <button class="star-pill" onclick="setStarFilter(1,this)">1+ ★</button>
+    <button class="star-pill" onclick="setStarFilter(2,this)">2+ ★</button>
+    <button class="star-pill" onclick="setStarFilter(3,this)">3+ ★</button>
+    <button class="star-pill" onclick="setStarFilter(4,this)">4+ ★</button>
+    <button class="star-pill" onclick="setStarFilter(5,this)">5 ★</button>
+  </div>
+  <div id="stickyBorder"></div>
+</div>
+
+<div id="countBar"></div>
+<div class="grid" id="grid"></div>
+
+<!-- Random picker overlay -->
+<div class="rand-overlay" id="randOverlay">
+  <div class="rand-card" id="randCard">
+    <div class="rand-cat" id="randCat"></div>
+    <div class="rand-name" id="randName"></div>
+    <div class="rand-note" id="randNote"></div>
+    <div class="rand-loc" id="randLoc"></div>
+  </div>
+  <div class="rand-btns">
+    <button class="rand-btn rand-shuffle" onclick="spinRandom()">🎲 Again</button>
+    <button class="rand-btn rand-close" onclick="closeRandom()">Done</button>
+  </div>
+</div>
+
+<!-- Add/Edit modal -->
+<div class="overlay" id="modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h2 id="modalTitle">Add a spot</h2>
+    <div class="field">
+      <label>Name</label>
+      <input type="text" id="mName" placeholder="Name" autocomplete="off" autocorrect="off">
+    </div>
+    <div class="field">
+      <label>Category</label>
+      <div class="ac-wrap">
+        <input type="text" id="mCategory" placeholder="e.g. Food, Activities, Hikes..." autocomplete="off" autocorrect="off"
+          oninput="onCategoryInput(this)" onfocus="acShow(this,'topcategory')" onblur="acBlur()">
+        <div class="ac-list" id="acCategory"></div>
+      </div>
+    </div>
+    <div class="field" id="subCatField" style="display:none">
+      <label>Sub-category</label>
+      <div class="ac-wrap">
+        <input type="text" id="mSubCat" placeholder="e.g. Asian, Italian, Brunch..." autocomplete="off" autocorrect="off"
+          oninput="acShow(this,'subcategory')" onfocus="acShow(this,'subcategory')" onblur="acBlur()">
+        <div class="ac-list" id="acSubCat"></div>
+      </div>
+    </div>
+    <div class="field">
+      <label>Type / cuisine <span style="color:var(--muted);font-size:0.65rem;text-transform:none;letter-spacing:0">(optional - e.g. Vietnamese, Burgers...)</span></label>
+      <div class="ac-wrap">
+        <input type="text" id="mCuisine" placeholder="e.g. Vietnamese, Burgers, Sushi..." autocomplete="off" autocorrect="off"
+          oninput="acShow(this,'cuisine')" onfocus="acShow(this,'cuisine')" onblur="acBlur()">
+        <div class="ac-list" id="acCuisine"></div>
+      </div>
+    </div>
+    <div class="field">
+      <label>Location</label>
+      <div class="ac-wrap">
+        <input type="text" id="mLocation" placeholder="e.g. NE Portland, Lake Oswego..." autocomplete="off" autocorrect="off"
+          oninput="acShow(this,'location')" onfocus="acShow(this,'location')" onblur="acBlur()">
+        <div class="ac-list" id="acLocation"></div>
+      </div>
+    </div>
+    <div class="field">
+      <label>Note</label>
+      <input type="text" id="mNote" placeholder="e.g. happy hour 5-6, cash only...">
+    </div>
+    <div class="field">
+      <label>Rating</label>
+      <div class="star-picker">
+        <span class="sp" onclick="pickStar(1)">★</span>
+        <span class="sp" onclick="pickStar(2)">★</span>
+        <span class="sp" onclick="pickStar(3)">★</span>
+        <span class="sp" onclick="pickStar(4)">★</span>
+        <span class="sp" onclick="pickStar(5)">★</span>
+      </div>
+    </div>
+    <div class="modal-btns" id="modalBtnsNormal">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-danger" id="deleteBtn" style="display:none" onclick="showDeleteConfirm()">Delete</button>
+      <button class="btn btn-primary" onclick="saveSpot()">Save</button>
+    </div>
+    <div class="modal-btns" id="modalBtnsConfirm" style="display:none">
+      <p style="width:100%;text-align:center;font-size:0.82rem;color:var(--muted);margin-bottom:8px;">Remove this spot for good?</p>
+      <button class="btn btn-secondary" onclick="hideDeleteConfirm()">Keep it</button>
+      <button class="btn btn-danger" onclick="deleteSpot()">Yes, delete</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const KEY = 'our-list-v2';
+
+// Category config
+// FOOD_SUBS = subcategories that live under the Food parent
+let FOOD_SUBS = ['brunch','italian','asian','latino','american','fusion','bars','coffee','dessert','carts','finedining','seafood','greek','african'];
+
+const CATS = [
+  // Top-level
+  { key: 'food',         label: 'Food',         color: '#e8b84b', parent: null },
+  // Food subcategories
+  { key: 'brunch',       label: 'Brunch',        color: '#b44be8', parent: 'food' },
+  { key: 'italian',      label: 'Italian',       color: '#e07b4a', parent: 'food' },
+  { key: 'asian',        label: 'Asian',         color: '#e84b7a', parent: 'food' },
+  { key: 'latino',       label: 'Latino',        color: '#4be87a', parent: 'food' },
+  { key: 'american',     label: 'American',      color: '#4b9ee8', parent: 'food' },
+  { key: 'fusion',       label: 'Fusion',        color: '#e8d44b', parent: 'food' },
+  { key: 'bars',         label: 'Bars',          color: '#4be8d4', parent: 'food' },
+  { key: 'coffee',       label: 'Coffee',        color: '#c8885a', parent: 'food' },
+  { key: 'dessert',      label: 'Dessert',       color: '#e84bb4', parent: 'food' },
+  { key: 'carts',        label: 'Food Carts',    color: '#88c84b', parent: 'food' },
+  { key: 'finedining',   label: 'Fine Dining',   color: '#c8b8f8', parent: 'food' },
+  // Other top-level
+  { key: 'activities',   label: 'Activities',    color: '#4bd4e8', parent: null },
+  { key: 'hikes',        label: 'Hikes',         color: '#6be84b', parent: null },
+  { key: 'getaways',     label: 'Getaways',      color: '#e84b4b', parent: null },
+  { key: 'shopping',     label: 'Shopping',      color: '#f8a84b', parent: null },
+  { key: 'international',label: 'International', color: '#a84be8', parent: null },
+  { key: 'seafood',      label: 'Seafood',       color: '#4b9ee8', parent: 'food' },
+  { key: 'greek',        label: 'Greek',         color: '#e8e04b', parent: 'food' },
+  { key: 'african',      label: 'African',       color: '#e8784b', parent: 'food' },
+  { key: 'other',        label: 'Other',         color: '#888888', parent: null },
+];
+const CAT_MAP = Object.fromEntries(CATS.map(c => [c.key, c]));
+function catColor(key) { return CAT_MAP[key] ? CAT_MAP[key].color : '#888888'; }
+function catLabel(key) { return CAT_MAP[key] ? CAT_MAP[key].label : key; }
+function isFood(key) { return key === 'food' || FOOD_SUBS.includes(key); }
+
+const LOCATION_OPTS = [
+  'Portland','NE Portland','SE Portland','NW Portland','North Portland','Downtown Portland',
+  'Lake Oswego','Beaverton','Milwaukie','Milwaukee','Tigard','Gresham','Hillsboro',
+  'Columbia Gorge','Mt Hood','Hood River','Dundee','Sellwood','Pearl District',
+  'Alberta Arts District','Division St','Mississippi Ave','Hawthorne','Belmont',
+  'Nob Hill','Burnside','Oregon Coast','Astoria','Bend','Seattle','Washington',
+  'Oregon','PNW','International'
+];
+
+// ---- MERGED SPOT DATA ----
+const BASE = [
+  // FOOD - General
+  {name:"World Foods Deli",cat:"food",cuisine:"International",location:"Barbur & Everett",note:"Imported foods, raclette nights",been:false,fav:false,stars:0},
+  {name:"Yokai Musubi",cat:"asian",cuisine:"Hawaiian",location:"Burnside near Nob Hill",note:"Hawaiian musubi and sweet shop",been:false,fav:false,stars:0},
+  {name:"Jacqueline",cat:"seafood",cuisine:"Seafood",location:"East Side",note:"Happy hour 5-6pm, $1 oysters",been:false,fav:false,stars:0},
+  {name:"Good Neighbor Cafe",cat:"asian",cuisine:"Vietnamese",location:"Portland",note:"Banh mi",been:false,fav:false,stars:0},
+  {name:"Rough Russian",cat:"food",cuisine:"Specialty",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Podnah's",cat:"american",cuisine:"BBQ",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Fogo de Chao",cat:"finedining",cuisine:"Brazilian",location:"Portland",note:"Steakhouse",been:false,fav:false,stars:0},
+  {name:"Lowfeld Soul Food",cat:"american",cuisine:"Soul Food",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Painted Lady",cat:"american",cuisine:"American",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Rocking Crab",cat:"seafood",cuisine:"Seafood",location:"Portland",note:"Seafood broil",been:false,fav:false,stars:0},
+  {name:"OG Poke PDX",cat:"asian",cuisine:"Hawaiian",location:"Portland",note:"Poke bowls",been:false,fav:false,stars:0},
+  {name:"Pho Van",cat:"asian",cuisine:"Vietnamese",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Annam VI",cat:"asian",cuisine:"Vietnamese",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Providore Fine Foods",cat:"food",cuisine:"Specialty",location:"Portland",note:"Raclette night, Weds from 4:30pm, $15/plate",been:false,fav:false,stars:0},
+  {name:"Constantinople",cat:"food",cuisine:"Turkish",location:"Nob Hill",note:"Turkish door",been:false,fav:false,stars:0},
+  {name:"Bluto's",cat:"greek",cuisine:"Greek",location:"Beaverton",note:"Wood fired Greek food and soft serve",been:false,fav:false,stars:0},
+  {name:"Laverne's",cat:"american",cuisine:"American",location:"NE Portland",note:"Rotisserie chicken specialty",been:false,fav:false,stars:0},
+  {name:"Yours Truly",cat:"coffee",cuisine:"Cafe",location:"Sellwood",note:"Coffee, wine and bites",been:false,fav:false,stars:0},
+  {name:"Good Measure",cat:"coffee",cuisine:"Cafe",location:"Milwaukie",note:"One stop chop deli and cafe",been:false,fav:false,stars:0},
+  {name:"Prost!",cat:"bars",cuisine:"German",location:"East Side",note:"German pub and restaurant",been:false,fav:false,stars:0},
+  {name:"Trela Greek Kitchen",cat:"greek",cuisine:"Greek",location:"East Side",note:"Glisan - east side",been:false,fav:false,stars:0},
+  {name:"Bardo",cat:"coffee",cuisine:"Tea House",location:"NE Portland",note:"Tea house",been:false,fav:false,stars:0},
+  {name:"Tabor Bread",cat:"brunch",cuisine:"Bakery",location:"Belmont",note:"Cute bakery with bagels",been:false,fav:false,stars:0},
+  {name:"Malpractice",cat:"bars",cuisine:"Bar Bites",location:"East Side",note:"Cocktails and bites, near Cargo",been:false,fav:false,stars:0},
+  {name:"Don's",cat:"american",cuisine:"American",location:"Beaverton",note:"",been:false,fav:false,stars:0},
+  {name:"Akadi",cat:"african",cuisine:"African",location:"East Side near OMSI",note:"Where the chefs eat",been:false,fav:false,stars:0},
+  {name:"L'Echelle",cat:"finedining",cuisine:"French",location:"South Side",note:"French bistro near The Turning Peel",been:false,fav:false,stars:0},
+  {name:"Wow the Crab",cat:"seafood",cuisine:"Seafood",location:"Beaverton",note:"Seafood boil",been:false,fav:false,stars:0},
+  {name:"Pan Roast",cat:"seafood",cuisine:"Seafood",location:"Flock Food Market",note:"Seafood in Flock food market",been:false,fav:false,stars:0},
+  {name:"Bubbie's Deli Board",cat:"brunch",cuisine:"Deli",location:"Portland",note:"Traditional Jewish deli at Mother's, weds-fri 9-2",been:false,fav:false,stars:0},
+  {name:"OK Omens",cat:"american",cuisine:"American",location:"Hawthorne",note:"Wine, oysters, fries and salad",been:false,fav:false,stars:0},
+  {name:"Cowbell",cat:"food",cuisine:"Specialty",location:"East Side",note:"Cheese shop near Cargo",been:true,fav:false,stars:0},
+  {name:"Cheese and Crack",cat:"food",cuisine:"Specialty",location:"Burnside East Side",note:"Snack shop",been:true,fav:false,stars:0},
+  {name:"Dan & Louis Oyster Bar",cat:"seafood",cuisine:"Seafood",location:"Downtown",note:"",been:true,fav:false,stars:0},
+  {name:"Oyster Bar Downtown",cat:"seafood",cuisine:"Seafood",location:"Downtown",note:"",been:false,fav:false,stars:0},
+  {name:"Mike's Drive In",cat:"american",cuisine:"American",location:"Portland",note:"Classic drive-in",been:false,fav:false,stars:0},
+  {name:"Tanya's Cafe con Pan",cat:"latino",cuisine:"Mexican",location:"Portland",note:"Mexican bakery",been:false,fav:false,stars:0},
+  {name:"Otto's Sausages",cat:"food",cuisine:"Specialty",location:"Portland",note:"Sausages and meats",been:false,fav:false,stars:0},
+  {name:"Abigail Hall",cat:"coffee",cuisine:"Tea",location:"Portland",note:"High tea",been:false,fav:false,stars:0},
+  {name:"Social Spoon",cat:"food",cuisine:"Specialty",location:"Downtown",note:"Christmas popup, next to bier garden",been:false,fav:false,stars:0},
+
+  // BRUNCH
+  {name:"Keeper's Coffee",cat:"brunch",cuisine:"Cafe",location:"Milwaukie",note:"Shakshuka, comfy breakfast",been:false,fav:false,stars:0},
+  {name:"Sanae Thai",cat:"brunch",cuisine:"Thai",location:"Portland",note:"Thai brunch",been:false,fav:false,stars:0},
+  {name:"Cafe Nell",cat:"brunch",cuisine:"Brunch",location:"NE Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Xiao Ye",cat:"brunch",cuisine:"Asian Fusion",location:"East Side",note:"Close to Cheese and Crack",been:false,fav:false,stars:0},
+  {name:"Cafe Rowan",cat:"brunch",cuisine:"Brunch",location:"Portland",note:"Elevated brunch, Alan and Jeanine tried",been:true,fav:false,stars:0},
+  {name:"Gravy",cat:"brunch",cuisine:"Brunch",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Broder Nord",cat:"brunch",cuisine:"Scandinavian",location:"Portland",note:"Scandinavian brunch",been:false,fav:false,stars:0},
+  {name:"Little Griddle",cat:"brunch",cuisine:"Brunch",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Fried Egg I'm in Love",cat:"brunch",cuisine:"Brunch",location:"Hawthorne",note:"",been:false,fav:false,stars:0},
+  {name:"Happy Sparrow Cafe",cat:"brunch",cuisine:"Cafe",location:"Lake Oswego",note:"",been:false,fav:false,stars:0},
+  {name:"Limelight",cat:"brunch",cuisine:"Bar Brunch",location:"Portland",note:"Chris rec - dive bar with breakfast on weekends",been:true,fav:false,stars:0},
+  {name:"RJ Skillets",cat:"brunch",cuisine:"Brunch",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Memoire Ca Phe",cat:"brunch",cuisine:"Vietnamese",location:"Portland",note:"Vietnamese brunch",been:false,fav:false,stars:0},
+  {name:"The Loveshack",cat:"brunch",cuisine:"Brunch",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"The Rambler",cat:"brunch",cuisine:"Brunch",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Churn Cafe",cat:"brunch",cuisine:"Cafe",location:"Mississippi",note:"East side",been:false,fav:false,stars:0},
+  {name:"Loro Coffee",cat:"brunch",cuisine:"Cafe",location:"Beaverton & Stark",note:"Ranch pizza joint in Beaverton is fire",been:true,fav:false,stars:0},
+  {name:"Miss Delta",cat:"brunch",cuisine:"Southern",location:"Mississippi Ave",note:"Southern-style brunch, fri-sun",been:false,fav:false,stars:0},
+
+  // ITALIAN
+  {name:"Mucca Pizza",cat:"italian",cuisine:"Pizza",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"The Turning Peel",cat:"italian",cuisine:"Pizza",location:"Portland",note:"",been:true,fav:false,stars:0},
+  {name:"Apizza Scholls",cat:"italian",cuisine:"Pizza",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Ken's Artisan Pizza",cat:"italian",cuisine:"Pizza",location:"Portland",note:"Won award for pizza in Naples",been:false,fav:false,stars:0},
+  {name:"Pizza Thief",cat:"italian",cuisine:"Pizza",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Lovely's 50 50",cat:"italian",cuisine:"Pizza",location:"Portland",note:"Pizza and ice cream",been:false,fav:false,stars:0},
+  {name:"Pizzicato",cat:"italian",cuisine:"Pizza",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Nostrana",cat:"italian",cuisine:"Pizza",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Life of Pie Pizza",cat:"italian",cuisine:"Pizza",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Cafe Olli",cat:"italian",cuisine:"Italian",location:"Portland",note:"",been:true,fav:false,stars:0},
+  {name:"Baby Doll Pizza",cat:"italian",cuisine:"Pizza",location:"Portland",note:"Hole in the wall",been:false,fav:false,stars:0},
+  {name:"Mt Hood Brewing Co",cat:"italian",cuisine:"Pizza",location:"Mt Hood",note:"",been:false,fav:false,stars:0},
+  {name:"Dolly Olive Italian",cat:"italian",cuisine:"Italian",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Old Spaghetti Factory",cat:"italian",cuisine:"Italian",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Pastificio D'Oro",cat:"italian",cuisine:"Italian",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Gumba",cat:"italian",cuisine:"Italian",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Montelupo Italian Market",cat:"italian",cuisine:"Italian",location:"Portland",note:"",been:true,fav:false,stars:0},
+  {name:"A Cena",cat:"italian",cuisine:"Italian",location:"Sellwood",note:"Chris rec",been:false,fav:false,stars:0},
+  {name:"Muddy Rudder Public House",cat:"italian",cuisine:"Pizza",location:"Portland",note:"Chris rec",been:false,fav:false,stars:0},
+  {name:"Piazza Italia",cat:"italian",cuisine:"Italian",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"No Saint",cat:"italian",cuisine:"Pizza",location:"Portland",note:"Pistachio pizza",been:false,fav:false,stars:0},
+  {name:"Fontina",cat:"italian",cuisine:"Italian",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Estes Ristorante",cat:"italian",cuisine:"Italian",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Tartuca",cat:"italian",cuisine:"Italian",location:"NE Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Firehouse",cat:"italian",cuisine:"Italian",location:"NE Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Dimos",cat:"italian",cuisine:"Italian",location:"East Side Burnside",note:"Deli by day, restaurant by night",been:false,fav:false,stars:0},
+  {name:"Sunday Sauce",cat:"italian",cuisine:"Italian",location:"NE Portland",note:"Lobster, pasta, cocktails",been:false,fav:false,stars:0},
+  {name:"Eden Pizza",cat:"italian",cuisine:"Pizza",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Feraldi's Italian",cat:"italian",cuisine:"Italian",location:"Portland",note:"",been:false,fav:false,stars:0},
+
+  // ASIAN
+  {name:"Tada Sushi",cat:"asian",cuisine:"Japanese",location:"Lake Oswego",note:"",been:false,fav:false,stars:0},
+  {name:"Yaowarat",cat:"asian",cuisine:"Thai",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"OK Chicken Khao Soi",cat:"asian",cuisine:"Thai",location:"Portland",note:"Khao soi",been:false,fav:false,stars:0},
+  {name:"Eem",cat:"asian",cuisine:"Thai",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Guy View",cat:"asian",cuisine:"Thai",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Langbaan",cat:"asian",cuisine:"Thai",location:"Portland",note:"Upscale Thai",been:false,fav:false,stars:0},
+  {name:"Sanae Thai Eatery",cat:"asian",cuisine:"Thai",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Janken",cat:"asian",cuisine:"Japanese",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Swagat Indian Cuisine",cat:"asian",cuisine:"Indian",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Lung Fung",cat:"asian",cuisine:"Chinese",location:"Lake Oswego",note:"",been:true,fav:false,stars:0},
+  {name:"Rose VL Deli",cat:"asian",cuisine:"Vietnamese",location:"Portland",note:"Vietnamese pho",been:false,fav:false,stars:0},
+  {name:"Rukdiew",cat:"asian",cuisine:"Thai",location:"East Side",note:"",been:true,fav:false,stars:0},
+  {name:"Han Oak",cat:"asian",cuisine:"Korean",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Gen Korean BBQ",cat:"asian",cuisine:"Korean",location:"Washington Square",note:"All you can eat",been:false,fav:false,stars:0},
+  {name:"Afuri",cat:"asian",cuisine:"Japanese",location:"Portland",note:"Tokyo-based",been:false,fav:false,stars:0},
+  {name:"Masu",cat:"asian",cuisine:"Japanese",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Nepali Kitchen + Chai Garden",cat:"asian",cuisine:"Nepali",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Dodo Dumpling",cat:"asian",cuisine:"Chinese",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Seventeen Hot Pot",cat:"asian",cuisine:"Hot Pot",location:"NW Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Ba Mee Noodle House",cat:"asian",cuisine:"Thai",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Kaede",cat:"asian",cuisine:"Japanese",location:"Sellwood",note:"Sushi",been:false,fav:false,stars:0},
+  {name:"Khao Moo Deng",cat:"asian",cuisine:"Thai",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"KyuRamen",cat:"asian",cuisine:"Japanese",location:"Tigard",note:"",been:false,fav:false,stars:0},
+  {name:"Kinboshi Ramen",cat:"asian",cuisine:"Japanese",location:"Portland",note:"Wyatt rec",been:false,fav:false,stars:0},
+  {name:"Jade Teahouse",cat:"asian",cuisine:"Vietnamese",location:"Sellwood",note:"Chris rec",been:true,fav:true,stars:0},
+  {name:"Hotpot Palace",cat:"asian",cuisine:"Hot Pot",location:"Tigard",note:"All you can eat",been:false,fav:false,stars:0},
+  {name:"Magna Kusina",cat:"asian",cuisine:"Filipino",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Ahi Fish Butchery",cat:"asian",cuisine:"Japanese",location:"Portland",note:"Sushi grade fish, hidden gem",been:false,fav:false,stars:0},
+  {name:"Always Spring Korean",cat:"asian",cuisine:"Korean",location:"Portland",note:"Grocery store with restaurant upstairs",been:false,fav:false,stars:0},
+  {name:"Thai Hot Pot Heaven",cat:"asian",cuisine:"Hot Pot",location:"Nob Hill",note:"Next to the Pearl",been:false,fav:false,stars:0},
+  {name:"Paik's Noodle",cat:"asian",cuisine:"Korean",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Toshi Sushi",cat:"asian",cuisine:"Japanese",location:"Beaverton",note:"Hole in the wall",been:false,fav:false,stars:0},
+  {name:"Oyatsupan",cat:"asian",cuisine:"Japanese Bakery",location:"Beaverton",note:"Japanese bakery, go early",been:false,fav:false,stars:0},
+  {name:"Muteki Ramen",cat:"asian",cuisine:"Japanese",location:"Gresham",note:"",been:false,fav:false,stars:0},
+  {name:"Lily Thai Market",cat:"asian",cuisine:"Thai",location:"NE Portland",note:"Thai supermarket and deli",been:false,fav:false,stars:0},
+  {name:"Thai Brasserie",cat:"asian",cuisine:"Thai",location:"Beaverton",note:"",been:false,fav:false,stars:0},
+  {name:"Nikki Sushi & Steak",cat:"asian",cuisine:"Japanese",location:"Beaverton",note:"",been:false,fav:false,stars:0},
+  {name:"Gado Gado",cat:"asian",cuisine:"Indonesian",location:"East Side",note:"Try green curry",been:false,fav:false,stars:0},
+  {name:"Noa Sushi",cat:"asian",cuisine:"Japanese",location:"Beaverton",note:"",been:false,fav:false,stars:0},
+  {name:"Ryoma Ramen",cat:"asian",cuisine:"Japanese",location:"Beaverton",note:"Inside Uwajimaya",been:true,fav:false,stars:0},
+  {name:"Nami Sushi & Ramen",cat:"asian",cuisine:"Japanese",location:"Milwaukie",note:"Boba and sushi drive through",been:false,fav:false,stars:0},
+  {name:"Paadee",cat:"asian",cuisine:"Thai",location:"SE Portland",note:"Northern Thai",been:false,fav:false,stars:0},
+  {name:"Big Hey Hot Pot",cat:"asian",cuisine:"Hot Pot",location:"Portland",note:"Near Zupans on the way to downtown",been:false,fav:false,stars:0},
+  {name:"Matsunoki Ramen",cat:"asian",cuisine:"Japanese",location:"Mississippi",note:"Seasonal flavors",been:false,fav:false,stars:0},
+  {name:"Sushi Mazi",cat:"asian",cuisine:"Japanese",location:"East Side",note:"",been:false,fav:false,stars:0},
+  {name:"Hiyaku Buffet",cat:"asian",cuisine:"Japanese",location:"Beaverton",note:"All you can eat",been:false,fav:false,stars:0},
+  {name:"Fancy Pants",cat:"asian",cuisine:"Filipino",location:"Portland",note:"Lechon restaurant",been:false,fav:false,stars:0},
+  {name:"Indian Food Beaverton",cat:"asian",cuisine:"Indian",location:"Beaverton",note:"Near Target",been:false,fav:false,stars:0},
+  {name:"Steam Rice Roll King",cat:"asian",cuisine:"Chinese",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Khamdee Thai Cookhouse",cat:"asian",cuisine:"Thai",location:"Portland",note:"Underrated",been:false,fav:false,stars:0},
+  {name:"Phaya Thai Express",cat:"asian",cuisine:"Thai",location:"Portland",note:"Underrated",been:false,fav:false,stars:0},
+  {name:"Lanna Thai",cat:"asian",cuisine:"Thai",location:"Portland",note:"Underrated",been:false,fav:false,stars:0},
+
+  // LATINO
+  {name:"Tienda Santa Cruz",cat:"latino",cuisine:"Mexican",location:"Portland",note:"Mexican grocery",been:false,fav:false,stars:0},
+  {name:"La Barbecue",cat:"american",cuisine:"BBQ",location:"Portland",note:"Texas BBQ",been:false,fav:false,stars:0},
+  {name:"Bar Cala",cat:"latino",cuisine:"Mexican",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Por Que No",cat:"latino",cuisine:"Mexican",location:"Hawthorne & Mississippi",note:"",been:false,fav:false,stars:0},
+  {name:"Santa Fe",cat:"latino",cuisine:"Mexican",location:"Portland",note:"Mexican restaurant and cantina",been:false,fav:false,stars:0},
+  {name:"Taqueria Mexa",cat:"latino",cuisine:"Mexican",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Tito's Taquitos",cat:"latino",cuisine:"Mexican",location:"Beaverton",note:"",been:false,fav:false,stars:0},
+  {name:"Sabor Del Rio",cat:"latino",cuisine:"Puerto Rican",location:"Vancouver",note:"Floating cafe on Columbia River",been:false,fav:false,stars:0},
+  {name:"Que Pasa Cantina",cat:"latino",cuisine:"Mexican",location:"East Side",note:"Best nachos",been:false,fav:false,stars:0},
+  {name:"Los Punales",cat:"latino",cuisine:"Mexican",location:"Belmont",note:"",been:false,fav:false,stars:0},
+
+  // AMERICAN
+  {name:"Pleasure Burger",cat:"american",cuisine:"Burgers",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Wolf's Head Burgers",cat:"american",cuisine:"Burgers",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Botto's BBQ",cat:"american",cuisine:"BBQ",location:"Portland",note:"Casual, hole in the wall",been:false,fav:false,stars:0},
+  {name:"Tulip Shop Tavern",cat:"american",cuisine:"Burgers",location:"Portland",note:"Made NYT top 25 list",been:false,fav:false,stars:0},
+  {name:"Grand Fir Brewery",cat:"american",cuisine:"Pub",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Reverends BBQ",cat:"american",cuisine:"BBQ",location:"Portland",note:"Chris rec - smokehouse",been:false,fav:false,stars:0},
+  {name:"Fat Baby Barbecue",cat:"american",cuisine:"BBQ",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Reo's Ribs",cat:"american",cuisine:"BBQ",location:"Portland",note:"Hole in the wall, authentic smoked ribs",been:false,fav:false,stars:0},
+  {name:"Sure Shot Burger",cat:"american",cuisine:"Burgers",location:"East Side near airport",note:"Smash burgers",been:false,fav:false,stars:0},
+  {name:"Bellwether Bar",cat:"american",cuisine:"American",location:"East Side",note:"",been:false,fav:false,stars:0},
+  {name:"Roarke's",cat:"american",cuisine:"American",location:"NE Portland",note:"Chris rec",been:false,fav:false,stars:0},
+  {name:"Lil' Barbecue",cat:"american",cuisine:"BBQ",location:"NE Portland",note:"Austin TX sister restaurant",been:false,fav:false,stars:0},
+  {name:"Scotch Lodge",cat:"bars",cuisine:"Whisky Bar",location:"Portland",note:"Whisky bar and restaurant",been:false,fav:false,stars:0},
+
+  // FUSION
+  {name:"Hapa Pizza",cat:"fusion",cuisine:"Asian Fusion",location:"Portland",note:"Asian fusion pizza",been:false,fav:false,stars:0},
+  {name:"Curry Pizza House",cat:"fusion",cuisine:"Indian Fusion",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Terra Mae",cat:"fusion",cuisine:"Japanese Portuguese",location:"Portland",note:"High end, Japanese and Portuguese",been:true,fav:false,stars:0},
+  {name:"Que Dicee",cat:"fusion",cuisine:"Chinese Portuguese",location:"Old Town",note:"Orange chicken and bulgogi",been:false,fav:false,stars:0},
+  {name:"Sincerely Bagel",cat:"fusion",cuisine:"Korean Fusion",location:"East Side near Glisan",note:"Kimchi bagels",been:false,fav:false,stars:0},
+  {name:"Pan con Queso",cat:"fusion",cuisine:"Mexican Pizza",location:"East Side",note:"Mexican pizzas",been:false,fav:false,stars:0},
+
+  // BARS
+  {name:"Hey Love",cat:"bars",cuisine:"Bar",location:"Portland",note:"Christmas bar",been:false,fav:false,stars:0},
+  {name:"The Uncanny",cat:"bars",cuisine:"Bar",location:"Portland",note:"Cocktails and sandwiches",been:false,fav:false,stars:0},
+  {name:"Bar Loon",cat:"bars",cuisine:"Bar",location:"Belmont",note:"",been:true,fav:false,stars:0},
+  {name:"Below by Botanist",cat:"bars",cuisine:"Bar",location:"Portland",note:"Underground bar and restaurant",been:false,fav:false,stars:0},
+  {name:"Bushwhackers",cat:"bars",cuisine:"Bar",location:"Portland",note:"Line dancing bar with food",been:true,fav:false,stars:0},
+  {name:"The Redwood Room",cat:"bars",cuisine:"Bar",location:"Hillsboro",note:"Tequila bar in the woods",been:false,fav:false,stars:0},
+  {name:"Grandma's Secret",cat:"bars",cuisine:"Bar",location:"Portland",note:"Secret underground bar with Vietnamese food",been:false,fav:false,stars:0},
+  {name:"Bible Club",cat:"bars",cuisine:"Bar",location:"Portland",note:"Chris rec - speakeasy",been:false,fav:false,stars:0},
+  {name:"Nevermind",cat:"bars",cuisine:"Bar",location:"East Side south of OMSI",note:"Baby Jell-O shots and tacos",been:false,fav:false,stars:0},
+
+  // COFFEE
+  {name:"Tov Egyptian Coffee Bar",cat:"coffee",cuisine:"Coffee",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Bastion Coffee Roaster",cat:"coffee",cuisine:"Coffee",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Trung Nguyen",cat:"coffee",cuisine:"Vietnamese Coffee",location:"NE Portland",note:"Vietnamese coffee house",been:false,fav:false,stars:0},
+  {name:"Puff Coffee",cat:"coffee",cuisine:"Coffee",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Floyd's Coffeehouse",cat:"coffee",cuisine:"Coffee",location:"East Side",note:"",been:false,fav:false,stars:0},
+  {name:"Dear Sandy",cat:"coffee",cuisine:"Coffee Cocktails",location:"East Side",note:"Coffee, cocktails, community",been:false,fav:false,stars:0},
+  {name:"Caffe Umbria",cat:"coffee",cuisine:"Coffee",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Bubble N Tea",cat:"coffee",cuisine:"Boba",location:"Beaverton",note:"New boba shop",been:false,fav:false,stars:0},
+
+  // DESSERT
+  {name:"Champagne Poetry",cat:"dessert",cuisine:"Patisserie",location:"Portland",note:"Pink vibes, Christmas pastries",been:true,fav:false,stars:0},
+  {name:"Bon Creme",cat:"dessert",cuisine:"Korean Bakery",location:"Portland",note:"Korean pastry",been:false,fav:false,stars:0},
+  {name:"The Meadow",cat:"dessert",cuisine:"Chocolate",location:"Portland",note:"Chocolate shop",been:false,fav:false,stars:0},
+  {name:"Nico's Ice Cream",cat:"dessert",cuisine:"Ice Cream",location:"Portland",note:"New Zealand style",been:false,fav:false,stars:0},
+  {name:"DD Sweet House",cat:"dessert",cuisine:"Shaved Ice",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Jinju Patisserie",cat:"dessert",cuisine:"Patisserie",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Love Crumble",cat:"dessert",cuisine:"Ice Cream",location:"Portland",note:"Pop up dessert, Jan-Mar at La Floridita",been:false,fav:false,stars:0},
+  {name:"Handel's Ice Cream",cat:"dessert",cuisine:"Ice Cream",location:"Portland",note:"",been:true,fav:false,stars:0},
+  {name:"BingSu",cat:"dessert",cuisine:"Shaved Ice",location:"Milwaukie",note:"",been:false,fav:false,stars:0},
+  {name:"Dot.Sugar",cat:"dessert",cuisine:"Dessert",location:"Beaverton",note:"",been:false,fav:false,stars:0},
+
+  // FOOD CARTS
+  {name:"El Paisanito",cat:"carts",cuisine:"Mexican",location:"Portland",note:"Mexican street food cart",been:false,fav:false,stars:0},
+  {name:"Pica Drip",cat:"carts",cuisine:"Mexican",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"The Heist",cat:"carts",cuisine:"Food Cart Pod",location:"Portland",note:"Food cart pod",been:false,fav:false,stars:0},
+  {name:"Cookie McCakeFace",cat:"carts",cuisine:"Bakery",location:"Burnside near Powell's",note:"Two blocks from Powell's",been:false,fav:false,stars:0},
+  {name:"Hawthorne Asylum Pod",cat:"carts",cuisine:"Food Cart Pod",location:"Hawthorne",note:"",been:false,fav:false,stars:0},
+  {name:"Taco Stand Aloha",cat:"carts",cuisine:"Mexican",location:"Aloha",note:"Proper taco cart",been:false,fav:false,stars:0},
+
+  // FINE DINING
+  {name:"Anthology",cat:"finedining",cuisine:"Fine Dining",location:"Willamette Valley",note:"Fine dining, wine",been:false,fav:false,stars:0},
+  {name:"G-Love",cat:"finedining",cuisine:"Fine Dining",location:"Portland",note:"Mixed cuisine, high end",been:false,fav:false,stars:0},
+  {name:"Bergerac",cat:"finedining",cuisine:"French",location:"Portland",note:"$50-$100pp",been:false,fav:false,stars:0},
+  {name:"Le Pigeon",cat:"finedining",cuisine:"French",location:"Portland",note:"Chef tasting menu $140pp",been:false,fav:false,stars:0},
+  {name:"Hidden Kitchens",cat:"finedining",cuisine:"Fusion",location:"Portland",note:"Relaxed fusion, $50-$100pp",been:false,fav:false,stars:0},
+  {name:"Feral",cat:"finedining",cuisine:"Plant Based",location:"East Side",note:"Wild and foraged, $30-$50pp",been:false,fav:false,stars:0},
+  {name:"Ginza",cat:"finedining",cuisine:"Asian Fusion",location:"Pearl District",note:"Whole tuna cutting",been:false,fav:false,stars:0},
+  {name:"LucidWild Winery",cat:"finedining",cuisine:"Wine Dining",location:"Dundee",note:"Min $75pp",been:false,fav:false,stars:0},
+  {name:"L'Orange",cat:"finedining",cuisine:"French",location:"Portland",note:"Wine, crab, pasta",been:false,fav:false,stars:0},
+  {name:"Ox",cat:"finedining",cuisine:"Fine Dining",location:"Portland",note:"Iconic Portland",been:false,fav:false,stars:0},
+  {name:"Nong's Khao Man Gai",cat:"asian",cuisine:"Thai",location:"Portland",note:"Iconic Portland dish",been:false,fav:false,stars:0},
+
+  // ACTIVITIES
+  {name:"Grotto Light Festival",cat:"activities",cuisine:"Event",location:"NE Portland",note:"Seasonal festival",been:false,fav:false,stars:0},
+  {name:"Escapology",cat:"activities",cuisine:"Escape Room",location:"Portland",note:"Escape room",been:false,fav:false,stars:0},
+  {name:"Top Golf",cat:"activities",cuisine:"Golf",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Birdie Time",cat:"activities",cuisine:"Golf Pub",location:"Portland",note:"Pub and golf",been:false,fav:false,stars:0},
+  {name:"Milwaukee Arcade",cat:"activities",cuisine:"Arcade",location:"Milwaukie",note:"",been:false,fav:false,stars:0},
+  {name:"Cinemark Movie Theater",cat:"activities",cuisine:"Cinema",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Skeleton Key Odditorium",cat:"activities",cuisine:"Museum",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Ice Skating Rink",cat:"activities",cuisine:"Skating",location:"Portland",note:"Open 11/16-1/5",been:false,fav:false,stars:0},
+  {name:"National Sanctuary Our Lady of Sorrows",cat:"activities",cuisine:"Garden",location:"Portland",note:"Catholic shrine, botanical garden with viewpoint",been:false,fav:false,stars:0},
+  {name:"Freakybuttrue Peculiarium",cat:"activities",cuisine:"Museum",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"McMenamin's Baghdad Theater",cat:"activities",cuisine:"Theater Pub",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"McMenamin's Edgefield Spa",cat:"activities",cuisine:"Spa",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Cosmic Tubing",cat:"activities",cuisine:"Snow",location:"Mt Hood",note:"Night tubing, $39pp, book early",been:false,fav:false,stars:0},
+  {name:"Pinball Museum",cat:"activities",cuisine:"Arcade",location:"Hillsboro",note:"",been:false,fav:false,stars:0},
+  {name:"Crystal Hotel Spa",cat:"activities",cuisine:"Spa",location:"Portland",note:"Underground spa",been:false,fav:false,stars:0},
+  {name:"The Wine Spa",cat:"activities",cuisine:"Spa",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Cook Shop",cat:"activities",cuisine:"Cooking Class",location:"Portland",note:"Cooking classes",been:false,fav:false,stars:0},
+  {name:"Outdoor Concert Topaz Farms",cat:"activities",cuisine:"Music",location:"Portland",note:"Summer bucket list",been:false,fav:false,stars:0},
+  {name:"Yacht Tubs Hot Tub Boat",cat:"activities",cuisine:"Unique",location:"Portland",note:"Rent a hot tub boat",been:false,fav:false,stars:0},
+  {name:"Luscher Farms Gardens",cat:"activities",cuisine:"Garden",location:"Lake Oswego",note:"Stroll the gardens",been:false,fav:false,stars:0},
+  {name:"Hoyt Arboretum Redwoods",cat:"activities",cuisine:"Nature",location:"Portland",note:"See redwoods",been:false,fav:false,stars:0},
+  {name:"Kayak Tualatin River",cat:"activities",cuisine:"Outdoor",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Mt Tabor Sunset",cat:"activities",cuisine:"Viewpoint",location:"Portland",note:"Watch the sunset",been:false,fav:false,stars:0},
+  {name:"Mt Hood Rail Bike Tour",cat:"activities",cuisine:"Outdoor",location:"Hood River",note:"",been:false,fav:false,stars:0},
+  {name:"Cathedral Park Picnic",cat:"activities",cuisine:"Park",location:"North Portland",note:"",been:true,fav:false,stars:0},
+  {name:"Sugarpine Drive-in",cat:"activities",cuisine:"Drive-In",location:"Portland",note:"",been:true,fav:false,stars:0},
+  {name:"Crystal Springs Rhododendron Garden",cat:"activities",cuisine:"Garden",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Punchbowl Falls Swim",cat:"activities",cuisine:"Swimming",location:"Columbia Gorge",note:"",been:false,fav:false,stars:0},
+  {name:"E.Z. Orchards Shortcake",cat:"activities",cuisine:"Farm",location:"Salem",note:"Summer",been:false,fav:false,stars:0},
+  {name:"Free Movie in the Park",cat:"activities",cuisine:"Event",location:"Portland",note:"Summer",been:false,fav:false,stars:0},
+  {name:"U-cut Flowers Sauvie Island",cat:"activities",cuisine:"Farm",location:"Sauvie Island",note:"",been:false,fav:false,stars:0},
+  {name:"McMenamin's Edgefield",cat:"activities",cuisine:"Brewery",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Portland Pickles Game",cat:"activities",cuisine:"Baseball",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Wine Tasting Dundee",cat:"activities",cuisine:"Wine",location:"Dundee",note:"Wine and picnic basket",been:false,fav:false,stars:0},
+  {name:"CHO Wines",cat:"activities",cuisine:"Wine",location:"Hillsboro",note:"Wine tasting with a view",been:false,fav:false,stars:0},
+
+  // HIKES
+  {name:"Tamanawas Falls",cat:"hikes",cuisine:"Hike",location:"Mt Hood",note:"",been:false,fav:false,stars:0},
+  {name:"Tunnel Falls",cat:"hikes",cuisine:"Hike",location:"Columbia Gorge",note:"Waterfall hike",been:false,fav:false,stars:0},
+  {name:"Silver Falls Hike",cat:"hikes",cuisine:"Hike",location:"Oregon",note:"7 miles, 10 waterfalls",been:false,fav:false,stars:0},
+  {name:"Historic Columbia River Trail",cat:"hikes",cuisine:"Bike Trail",location:"Columbia Gorge",note:"12 miles along the gorge",been:false,fav:false,stars:0},
+  {name:"Rowena Crest Viewpoint",cat:"hikes",cuisine:"Hike",location:"Columbia Gorge",note:"",been:true,fav:false,stars:0},
+  {name:"Four Ts Loop",cat:"hikes",cuisine:"Urban Hike",location:"Portland",note:"Train, Trail, Tram, Trolley loop",been:false,fav:false,stars:0},
+  {name:"Beacon Rock Trail",cat:"hikes",cuisine:"Hike",location:"Washington",note:"1 hour away",been:false,fav:false,stars:0},
+  {name:"McKenzie River Trail",cat:"hikes",cuisine:"Hike",location:"Oregon",note:"3 hour drive",been:false,fav:false,stars:0},
+  {name:"Tamolitch Falls",cat:"hikes",cuisine:"Hike",location:"Oregon",note:"Blue pool and waterfall, 2.5 hour drive",been:false,fav:false,stars:0},
+  {name:"Lower Lewis Falls",cat:"hikes",cuisine:"Hike",location:"Washington",note:"",been:false,fav:false,stars:0},
+  {name:"Vesper Peak",cat:"hikes",cuisine:"Hike",location:"Washington",note:"4000ft, 5 hour drive",been:false,fav:false,stars:0},
+  {name:"Colchuck Lake Hike",cat:"hikes",cuisine:"Hike",location:"Washington",note:"8.5 mile round trip, swimming lake",been:false,fav:false,stars:0},
+  {name:"Swim at Punchbowl Falls",cat:"hikes",cuisine:"Hike",location:"Columbia Gorge",note:"",been:false,fav:false,stars:0},
+
+  // GETAWAYS
+  {name:"Yachats Day Trip",cat:"getaways",cuisine:"Coast",location:"Oregon Coast",note:"Oregon coast, 2 hour drive",been:false,fav:false,stars:0},
+  {name:"Multnomah Village Day Trip",cat:"getaways",cuisine:"Neighborhood",location:"SW Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Portland Day Itinerary",cat:"getaways",cuisine:"City",location:"Portland",note:"Cascada spa, Nike HQ, Phuket Cafe, thrifting, Powell's",been:false,fav:false,stars:0},
+  {name:"Skamania Lodge",cat:"getaways",cuisine:"Hotel",location:"Columbia Gorge",note:"1 hour from Portland",been:false,fav:false,stars:0},
+  {name:"Florence OR",cat:"getaways",cuisine:"Coast",location:"Oregon",note:"3 hour drive",been:false,fav:false,stars:0},
+  {name:"Aurora OR",cat:"getaways",cuisine:"Town",location:"Oregon",note:"",been:false,fav:false,stars:0},
+  {name:"Joseph OR",cat:"getaways",cuisine:"Mountain Town",location:"Oregon",note:"Near Wallowa Mountains",been:false,fav:false,stars:0},
+  {name:"Whidbey Island",cat:"getaways",cuisine:"Island",location:"Washington",note:"4.5-6 hour drive and ferry",been:false,fav:false,stars:0},
+  {name:"Leavenworth WA",cat:"getaways",cuisine:"Mountain Town",location:"Washington",note:"",been:false,fav:false,stars:0},
+  {name:"Edison WA",cat:"getaways",cuisine:"Foodie Town",location:"Washington",note:"Small foodie town north of Seattle",been:false,fav:false,stars:0},
+  {name:"Brookings OR",cat:"getaways",cuisine:"Coast",location:"Oregon",note:"Natural Bridges, Secret Beach, redwoods trail",been:false,fav:false,stars:0},
+  {name:"Bend OR",cat:"getaways",cuisine:"City",location:"Oregon",note:"Micro road trip",been:false,fav:false,stars:0},
+  {name:"Orcas Island",cat:"getaways",cuisine:"Island",location:"Washington",note:"",been:false,fav:false,stars:0},
+  {name:"Bagby Hot Springs",cat:"getaways",cuisine:"Hot Springs",location:"Oregon",note:"1.5 hour drive",been:false,fav:false,stars:0},
+  {name:"Umpqua Hot Springs",cat:"getaways",cuisine:"Hot Springs",location:"Oregon",note:"",been:false,fav:false,stars:0},
+  {name:"Deadman's Cove Cape Disappointment",cat:"getaways",cuisine:"Coast",location:"Washington",note:"Close to Astoria OR",been:false,fav:false,stars:0},
+  {name:"Headlands Coastal Lodge",cat:"getaways",cuisine:"Hotel Spa",location:"Oregon Coast",note:"",been:false,fav:false,stars:0},
+  {name:"Hot Tub Cabins WA",cat:"getaways",cuisine:"Cabin",location:"Washington",note:"Fire Lodge, Cushman Perch, Earthlight Villas etc",been:false,fav:false,stars:0},
+  {name:"Wallowa Mountains",cat:"getaways",cuisine:"Mountains",location:"Oregon",note:"Stay in Joseph",been:false,fav:false,stars:0},
+  {name:"Maryhill Stonehenge",cat:"getaways",cuisine:"Landmark",location:"Oregon",note:"2 hour drive",been:false,fav:false,stars:0},
+  {name:"Hood River Fruit Loop",cat:"getaways",cuisine:"Road Trip",location:"Hood River",note:"30 stops, 35 miles of scenic roads",been:false,fav:false,stars:0},
+  {name:"Painted Hills",cat:"getaways",cuisine:"Nature",location:"Oregon",note:"",been:false,fav:false,stars:0},
+  {name:"Crater Lake",cat:"getaways",cuisine:"Nature",location:"Oregon",note:"",been:false,fav:false,stars:0},
+  {name:"Owyhee Canyonlands",cat:"getaways",cuisine:"Nature",location:"SE Oregon",note:"Grand Canyon of Oregon, 9 hour drive",been:false,fav:false,stars:0},
+  {name:"Midway UT",cat:"getaways",cuisine:"Town",location:"Utah",note:"Charming town with cenote-style hot spring",been:false,fav:false,stars:0},
+  {name:"Santa Fe NM",cat:"getaways",cuisine:"City",location:"New Mexico",note:"",been:false,fav:false,stars:0},
+
+  // SHOPPING
+  {name:"James Beard Public Market",cat:"shopping",cuisine:"Market",location:"Portland",note:"Fish, cheese and more",been:false,fav:false,stars:0},
+  {name:"Teso Asian Store",cat:"shopping",cuisine:"Asian Grocery",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"World Foods Grocery",cat:"shopping",cuisine:"International Grocery",location:"Portland",note:"International market",been:false,fav:false,stars:0},
+  {name:"Daiso",cat:"shopping",cuisine:"Japanese Store",location:"Portland",note:"Japanese value store",been:false,fav:false,stars:0},
+  {name:"Durant at Red Ridge",cat:"shopping",cuisine:"Farm Shop",location:"Dundee",note:"",been:true,fav:false,stars:0},
+  {name:"Memory Den Vintage Mall",cat:"shopping",cuisine:"Vintage",location:"Portland",note:"",been:true,fav:false,stars:0},
+  {name:"Zig Zag Wanderer",cat:"shopping",cuisine:"Thrift",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Deep Lake Thrift",cat:"shopping",cuisine:"Thrift",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Goodbye Horses",cat:"shopping",cuisine:"Thrift",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Jelly Cup Collective",cat:"shopping",cuisine:"Asian Gift",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Kokoro",cat:"shopping",cuisine:"Asian Gift",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Kiriko",cat:"shopping",cuisine:"Asian Gift",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Powell's Books",cat:"shopping",cuisine:"Bookstore",location:"Downtown Portland",note:"",been:false,fav:false,stars:0},
+
+  // INTERNATIONAL
+  {name:"Koza Cave Hotel Cappadocia",cat:"international",cuisine:"Hotel",location:"Turkey",note:"",been:false,fav:false,stars:0},
+  {name:"Egypt Itinerary",cat:"international",cuisine:"Destination",location:"Egypt",note:"",been:false,fav:false,stars:0},
+  {name:"Paris Hotspots",cat:"international",cuisine:"Destination",location:"France",note:"Fabula, Le Pavillon Alleno, Candelaria etc",been:false,fav:false,stars:0},
+  {name:"Fairmont Banff Hotel",cat:"international",cuisine:"Hotel",location:"Canada",note:"Banff National Park",been:false,fav:false,stars:0},
+  {name:"Museum Voorlinden",cat:"international",cuisine:"Museum",location:"Netherlands",note:"",been:false,fav:false,stars:0},
+  {name:"Galiano Island",cat:"international",cuisine:"Island",location:"Canada",note:"55 min ferry from Vancouver, sandstone caves",been:false,fav:false,stars:0},
+  {name:"Palawan Philippines",cat:"international",cuisine:"Island",location:"Philippines",note:"",been:false,fav:false,stars:0},
+  {name:"Cat Island Japan",cat:"international",cuisine:"Destination",location:"Japan",note:"",been:false,fav:false,stars:0},
+  {name:"Phu Quoc Island",cat:"international",cuisine:"Island",location:"Vietnam",note:"",been:false,fav:false,stars:0},
+  {name:"10 Days in Peru",cat:"international",cuisine:"Destination",location:"Peru",note:"",been:false,fav:false,stars:0},
+  {name:"Japan Sightseeing",cat:"international",cuisine:"Destination",location:"Japan",note:"",been:false,fav:false,stars:0},
+  {name:"Bavaria Germany",cat:"international",cuisine:"Destination",location:"Germany",note:"",been:false,fav:false,stars:0},
+  {name:"Rome",cat:"international",cuisine:"Destination",location:"Italy",note:"",been:false,fav:false,stars:0},
+  {name:"Sao Miguel Island Azores",cat:"international",cuisine:"Island",location:"Portugal",note:"",been:false,fav:false,stars:0},
+  {name:"London Borough Market",cat:"international",cuisine:"Market",location:"England",note:"",been:false,fav:false,stars:0},
+  {name:"Madeira Island",cat:"international",cuisine:"Island",location:"Portugal",note:"",been:false,fav:false,stars:0},
+  {name:"East Nusa Tenggara",cat:"international",cuisine:"Destination",location:"Indonesia",note:"",been:false,fav:false,stars:0},
+  {name:"Socotra Island",cat:"international",cuisine:"Island",location:"Yemen",note:"Off NE African coast",been:false,fav:false,stars:0},
+  {name:"Cape Town",cat:"international",cuisine:"Destination",location:"South Africa",note:"",been:false,fav:false,stars:0},
+  {name:"Zanzibar",cat:"international",cuisine:"Island",location:"Tanzania",note:"",been:false,fav:false,stars:0},
+  {name:"Moab UT",cat:"international",cuisine:"Road Trip",location:"Utah",note:"",been:false,fav:false,stars:0},
+  {name:"Meow Wolf Omega Mart",cat:"international",cuisine:"Entertainment",location:"Las Vegas",note:"",been:false,fav:false,stars:0},
+  {name:"The Wave Arizona",cat:"international",cuisine:"Nature",location:"Arizona",note:"",been:false,fav:false,stars:0},
+  {name:"Mackinac Island",cat:"international",cuisine:"Island",location:"Michigan",note:"Northern Michigan",been:false,fav:false,stars:0},
+  {name:"Amazon Spheres Seattle",cat:"international",cuisine:"Attraction",location:"Seattle",note:"",been:false,fav:false,stars:0},
+];
+
+// Load any custom categories saved previously
+const SUPABASE_URL = 'https://rqmpvdbakzosifmtuvrd.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJxbXB2ZGJha3pvc2lmbXR1dnJkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5ODI5OTksImV4cCI6MjA5MDU1ODk5OX0.wjpMXNi9O_145jCPtvG4wXG2jbZXDNemCB46cPW4frg';
+
+async function sbFetch(method, path, body) {
+  const res = await fetch(SUPABASE_URL + '/rest/v1/' + path, {
+    method,
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': method === 'POST' ? 'return=representation' : 'return=minimal'
+    },
+    body: body ? JSON.stringify(body) : undefined
+  });
+  if (!res.ok) throw new Error(await res.text());
+  const text = await res.text();
+  return text ? JSON.parse(text) : null;
+}
+
+function loadCustomCats() {
+  try {
+    const saved = localStorage.getItem('our-list-cats');
+    if (!saved) return;
+    JSON.parse(saved).forEach(c => {
+      if (!CAT_MAP[c.key]) { CATS.push(c); FOOD_SUBS.push(c.key); CAT_MAP[c.key] = c; }
+    });
+  } catch(e) {}
+}
+
+let db = { spots: [] };
+
+async function loadFromSupabase() {
+  showLoading(true, 'Loading your list...');
+  // Timeout after 12 seconds - Supabase free tier can be slow to wake up
+  const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 12000));
+  try {
+    const rows = await Promise.race([
+      sbFetch('GET', 'spots?select=*&order=name.asc'),
+      timeout
+    ]);
+    if (rows && rows.length > 0) {
+      db.spots = rows;
+    } else {
+      showLoading(true, 'First run - seeding your list...');
+      await seedBaseSpots();
+      const seeded = await sbFetch('GET', 'spots?select=*&order=name.asc');
+      db.spots = seeded || [];
+    }
+    showLoading(false);
+    buildCatPills(); buildTypePills(); render();
+    startRealtime();
+  } catch(e) {
+    console.error('Load error:', e);
+    showLoading(false);
+    // Show retry screen
+    const msg = e.message === 'timeout'
+      ? 'Taking too long - database may be waking up'
+      : 'Connection error';
+    document.getElementById('loadingBar').style.display = 'flex';
+    document.getElementById('loadingBar').innerHTML = `
+      <div style="text-align:center;padding:20px;">
+        <div style="color:#e8b84b;font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:2px;margin-bottom:8px;">Our List</div>
+        <div style="color:#7a776e;font-size:0.82rem;margin-bottom:20px;">${msg}</div>
+        <button onclick="loadFromSupabase()" style="background:#e8b84b;color:#0f0e0d;border:none;padding:12px 28px;border-radius:8px;font-size:0.9rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">Try again</button>
+      </div>`;
+  }
+}
+
+async function seedBaseSpots() {
+  const batch = 50;
+  for (let i = 0; i < BASE.length; i += batch) {
+    const chunk = BASE.slice(i, i + batch).map(s => ({
+      name: s.name, cat: s.cat, cuisine: s.cuisine,
+      location: s.location || '', note: s.note || '',
+      stars: 0, fav: false, been: s.been || false
+    }));
+    await sbFetch('POST', 'spots', chunk);
+  }
+}
+
+function showLoading(on, msg) {
+  const el = document.getElementById('loadingBar');
+  if (!el) return;
+  el.style.display = on ? 'flex' : 'none';
+  if (msg) el.querySelector('span').textContent = msg;
+}
+
+function showStatus(msg, isError) {
+  const el = document.getElementById('statusMsg');
+  if (!el) return;
+  el.textContent = msg;
+  el.style.cssText = 'display:block;text-align:center;padding:6px;font-size:0.8rem;color:' + (isError ? '#e84b4b' : '#4caf78');
+  setTimeout(() => { el.style.display = 'none'; }, 3000);
+}
+
+function startRealtime() {
+  // Poll every 8 seconds for changes from other users - simple and reliable
+  setInterval(async () => {
+    try {
+      const rows = await sbFetch('GET', 'spots?select=id,fav,been,stars&order=name.asc');
+      if (!rows) return;
+      let changed = false;
+      rows.forEach(r => {
+        const s = db.spots.find(x => x.id === r.id);
+        if (s && (s.fav !== r.fav || s.been !== r.been || s.stars !== r.stars)) {
+          Object.assign(s, { fav: r.fav, been: r.been, stars: r.stars });
+          changed = true;
+        }
+      });
+      if (changed) render();
+    } catch(e) {}
+  }, 8000);
+}
+let activeCategory = 'all';
+let activeCuisine  = 'All';
+let activeStar     = 0;
+let favOnly        = false;
+let beenOnly       = false;
+let editingId      = null;
+let modalStars     = 0;
+
+// ---- CATEGORY COLORS ON CARDS ----
+function applyCardColors() {
+  document.querySelectorAll('.card[data-cat]').forEach(card => {
+    const color = catColor(card.dataset.cat);
+    card.style.setProperty('--card-color', color);
+    card.querySelector('::before'); // trigger repaint handled by CSS
+  });
+}
+
+// ---- SCROLL COLLAPSE ----
+let collapseThreshold = 100;
+function measureThreshold() {
+  const topRow = document.getElementById('topRow');
+  const bar = document.getElementById('stickyBar');
+  const barTop = bar.getBoundingClientRect().top + window.scrollY;
+  const rowBottom = topRow.getBoundingClientRect().bottom + window.scrollY;
+  collapseThreshold = Math.max(rowBottom - barTop + 10, 50);
+}
+
+let rafPending = false;
+let lastCollapsed = false;
+const EXPAND_THRESHOLD = 20;
+
+window.addEventListener('scroll', () => {
+  if (rafPending) return;
+  rafPending = true;
+  requestAnimationFrame(() => {
+    rafPending = false;
+    const y = window.scrollY;
+    const collapsed = lastCollapsed ? y > EXPAND_THRESHOLD : y > collapseThreshold;
+    if (collapsed === lastCollapsed) return;
+    lastCollapsed = collapsed;
+    document.getElementById('favBar').classList.toggle('gone', collapsed);
+    document.getElementById('catRow').classList.toggle('gone', collapsed);
+    document.getElementById('subCatRow').classList.toggle('gone', collapsed);
+    document.getElementById('filterRow').classList.toggle('gone', collapsed);
+    document.getElementById('starRow').classList.toggle('gone', collapsed);
+  });
+}, { passive: true });
+
+// ---- BUILD CATEGORY PILLS ----
+// Row 1 = top-level: All, Food, Activities, Hikes, Getaways, Shopping, International, Other
+// Row 2 = food subs (only visible when Food or a sub is active)
+function buildCatPills() {
+  const row = document.getElementById('catRow');
+  const subRow = document.getElementById('subCatRow');
+
+  const foodActive = activeCategory === 'food' || FOOD_SUBS.includes(activeCategory);
+  const topCats = CATS.filter(c => c.parent === null);
+
+  // Top level pills
+  const allBtn = `<button class="cat-pill${activeCategory==='all'?' active':''}" data-cat="all"
+    style="border-color:${activeCategory==='all'?'var(--accent)':'#ffffff22'};${activeCategory==='all'?'background:var(--accent);color:#0f0e0d;font-weight:600;':''}">
+    <span class="dot" style="background:var(--accent)"></span>All
+  </button>`;
+
+  const topPills = topCats.map(c => {
+    const isActive = activeCategory === c.key || (c.key==='food' && FOOD_SUBS.includes(activeCategory));
+    return `<button class="cat-pill${isActive?' active':''}" data-cat="${c.key}"
+      style="border-color:${isActive?c.color:c.color+'44'};${isActive?`background:${c.color};color:#0f0e0d;font-weight:600;`:`color:${c.color}cc;`}">
+      <span class="dot" style="background:${c.color}"></span>${c.label}
+    </button>`;
+  }).join('');
+  row.innerHTML = allBtn + topPills;
+
+  // Sub-category pills (food children) - show only when food or sub is active
+  if (foodActive) {
+    const foodColor = catColor('food');
+    const subPills = FOOD_SUBS.map(key => {
+      const c = CAT_MAP[key];
+      const isActive = activeCategory === key;
+      return `<button class="cat-pill sub-pill${isActive?' active':''}" data-cat="${key}"
+        style="border-color:${isActive?c.color:c.color+'55'};${isActive?`background:${c.color};color:#0f0e0d;font-weight:600;`:`color:${c.color}cc;`}">
+        <span class="dot" style="background:${c.color}"></span>${c.label}
+      </button>`;
+    }).join('');
+    subRow.innerHTML = subPills;
+    subRow.classList.add('visible');
+  } else {
+    subRow.innerHTML = '';
+    subRow.classList.remove('visible');
+  }
+
+  // Single delegation on parent - covers both rows
+  row.onclick = subRow.onclick = e => {
+    const btn = e.target.closest('.cat-pill');
+    if (!btn) return;
+    const newCat = btn.dataset.cat;
+    // If clicking Food parent while a sub is active, go to food-all
+    if (newCat === 'food' && FOOD_SUBS.includes(activeCategory)) {
+      activeCategory = 'food';
+    } else {
+      activeCategory = newCat;
+    }
+    activeCuisine = 'All';
+    buildCatPills();
+    buildTypePills();
+    render();
+  };
+}
+
+function buildTypePills() {
+  const row = document.getElementById('filterRow');
+  // When food parent selected, include all food sub spots
+  let spots;
+  if (activeCategory === 'all') {
+    spots = db.spots;
+  } else if (activeCategory === 'food') {
+    spots = db.spots.filter(s => isFood(s.cat));
+  } else {
+    spots = db.spots.filter(s => s.cat === activeCategory);
+  }
+  const types = ['All', ...Array.from(new Set(spots.map(s => s.cuisine))).sort()];
+  row.innerHTML = types.map(t =>
+    `<button class="pill${t===activeCuisine?' active':''}" data-type="${htmlAttr(t)}">${t}</button>`
+  ).join('');
+  // Show type filter only when a specific sub-category is chosen (not all, not food-parent)
+  // Show type filter only when a specific category is chosen (not All)
+  // This keeps the banner clean on load and prevents the collapse from breaking
+  const showTypes = activeCategory !== 'all';
+  // But cap the filter row height so it never floods the screen
+
+  row.classList.toggle('visible', showTypes);
+  row.onclick = e => {
+    const btn = e.target.closest('.pill');
+    if (!btn) return;
+    activeCuisine = btn.dataset.type;
+    document.querySelectorAll('.pill').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    render();
+  };
+}
+
+function htmlAttr(s) { return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;'); }
+function htmlText(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ---- STAR FILTER ----
+function setStarFilter(n, el) {
+  activeStar = n;
+  document.querySelectorAll('.star-pill').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  render();
+}
+
+function toggleFavOnly() {
+  favOnly = !favOnly;
+  document.getElementById('favOnlyBtn').classList.toggle('active-fav', favOnly);
+  render();
+}
+function toggleBeenOnly() {
+  beenOnly = !beenOnly;
+  document.getElementById('beenOnlyBtn').classList.toggle('active-been', beenOnly);
+  render();
+}
+
+// ---- RANDOM PICKER ----
+function openRandom() {
+  const filtered = getFilteredList();
+  if (!filtered.length) return;
+  document.getElementById('randOverlay').classList.add('open');
+  spinRandom();
+}
+function closeRandom() { document.getElementById('randOverlay').classList.remove('open'); }
+
+function spinRandom() {
+  const filtered = getFilteredList();
+  if (!filtered.length) return;
+  const card = document.getElementById('randCard');
+  card.classList.add('rand-spinning');
+  let ticks = 0;
+  const total = 12 + Math.floor(Math.random() * 8);
+  const tick = () => {
+    const s = filtered[Math.floor(Math.random() * filtered.length)];
+    document.getElementById('randName').textContent = s.name;
+    document.getElementById('randCat').textContent = catLabel(s.cat);
+    document.getElementById('randNote').textContent = s.note || '';
+    document.getElementById('randLoc').textContent = s.location ? '📍 ' + s.location : '';
+    const color = catColor(s.cat);
+    card.style.setProperty('--rand-color', color);
+    card.querySelector('.rand-card')?.style?.setProperty?.('--rand-color', color);
+    // update the ::before color via a style tag trick
+    document.getElementById('randBefore').textContent = `.rand-card::before { background: ${color}; }`;
+    ticks++;
+    if (ticks < total) {
+      setTimeout(tick, 60 + ticks * 15);
+    } else {
+      card.classList.remove('rand-spinning');
+    }
+  };
+  tick();
+}
+
+// ---- MODAL ----
+function openAdd() {
+  editingId = null; modalStars = 0;
+  document.getElementById('modalTitle').textContent = 'Add a spot';
+  hideDeleteConfirm();
+  document.getElementById('mName').value = '';
+  document.getElementById('mCategory').value = '';
+  document.getElementById('mSubCat').value = '';
+  document.getElementById('mCuisine').value = '';
+  document.getElementById('subCatField').style.display = 'none';
+  document.getElementById('mLocation').value = '';
+  document.getElementById('mNote').value = '';
+  document.getElementById('deleteBtn').style.display = 'none';
+  renderStarPicker(0);
+  document.getElementById('modal').classList.add('open');
+  document.getElementById('mName').focus();
+}
+function openEdit(id) {
+  const s = db.spots.find(x => x.id === id);
+  if (!s) return;
+  editingId = id; modalStars = s.stars || 0;
+  hideDeleteConfirm();
+  document.getElementById('modalTitle').textContent = 'Edit spot';
+  document.getElementById('mName').value = s.name;
+  // If spot is a food sub, show Food in category and sub in subcategory
+  const catInfo = CAT_MAP[s.cat];
+  if (catInfo && catInfo.parent === 'food') {
+    document.getElementById('mCategory').value = 'Food';
+    document.getElementById('mSubCat').value = catInfo.label;
+    document.getElementById('subCatField').style.display = '';
+  } else {
+    document.getElementById('mCategory').value = catLabel(s.cat);
+    document.getElementById('mSubCat').value = '';
+    document.getElementById('subCatField').style.display = 'none';
+  }
+  document.getElementById('mCuisine').value = s.cuisine;
+  document.getElementById('mLocation').value = s.location || '';
+  document.getElementById('mNote').value = s.note || '';
+  document.getElementById('deleteBtn').style.display = '';
+  renderStarPicker(modalStars);
+  document.getElementById('modal').classList.add('open');
+  document.getElementById('mName').focus();
+}
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  document.querySelectorAll('.ac-list').forEach(l => l.classList.remove('open'));
+  if (document.activeElement) document.activeElement.blur();
+}
+function pickStar(n) { modalStars = n; renderStarPicker(n); }
+function renderStarPicker(n) {
+  document.querySelectorAll('.sp').forEach((el,i) => el.classList.toggle('lit', i < n));
+}
+function saveSpot() {
+  const name = document.getElementById('mName').value.trim();
+  if (!name) { document.getElementById('mName').focus(); return; }
+  const catInput = document.getElementById('mCategory').value.trim().toLowerCase();
+  const subInput = document.getElementById('mSubCat').value.trim().toLowerCase();
+  // If subcategory is filled, use that as the cat key (it's a food sub)
+  // Otherwise use the category field directly
+  let cat;
+  if (subInput) {
+    let existing = CATS.find(c => c.label.toLowerCase() === subInput && c.parent === 'food');
+    if (existing) {
+      cat = existing.key;
+    } else {
+      // New dynamic subcategory - create it on the fly
+      const newKey = subInput.replace(/[^a-z0-9]/g, '');
+      const newLabel = document.getElementById('mSubCat').value.trim();
+      const EXTRA_COLORS = ['#e84b4b','#4be8b4','#e8784b','#784be8','#4bb4e8','#e8b44b','#b4e84b','#e84b78'];
+      const usedColors = CATS.map(c => c.color);
+      const newColor = EXTRA_COLORS.find(c => !usedColors.includes(c)) || '#aaaaaa';
+      const newCat = { key: newKey, label: newLabel, color: newColor, parent: 'food' };
+      CATS.push(newCat);
+      FOOD_SUBS.push(newKey);
+      CAT_MAP[newKey] = newCat;
+      // Persist new categories to localStorage
+      try { localStorage.setItem('our-list-cats', JSON.stringify(CATS.filter(c => c.parent === 'food' && !['brunch','italian','asian','latino','american','fusion','bars','coffee','dessert','carts','finedining','seafood','greek','african'].includes(c.key)))); } catch(e) {}
+      cat = newKey;
+    }
+  } else {
+    cat = CATS.find(c => c.label.toLowerCase() === catInput || c.key === catInput)?.key || 'other';
+  }
+  const cuisine = document.getElementById('mCuisine').value.trim() || 'Other';
+  const location = document.getElementById('mLocation').value.trim();
+  const note = document.getElementById('mNote').value.trim();
+  closeModal();
+  if (editingId !== null) {
+    const s = db.spots.find(x => x.id === editingId);
+    if (s) {
+      Object.assign(s, { name, cat, cuisine, location, note, stars: modalStars });
+      render();
+      sbFetch('PATCH', 'spots?id=eq.' + editingId, { name, cat, cuisine, location, note, stars: modalStars })
+        .then(() => showStatus('Saved'))
+        .catch(() => showStatus('Save failed', true));
+    }
+  } else {
+    const newSpot = { name, cat, cuisine, location, note, stars: modalStars, fav: false, been: false };
+    sbFetch('POST', 'spots', newSpot)
+      .then(res => {
+        if (res && res[0]) { db.spots.push(res[0]); render(); }
+        showStatus('Added');
+        buildCatPills(); buildTypePills();
+      })
+      .catch(() => showStatus('Add failed', true));
+  }
+  setTimeout(measureThreshold, 150);
+}
+function showDeleteConfirm() {
+  document.getElementById('modalBtnsNormal').style.display = 'none';
+  document.getElementById('modalBtnsConfirm').style.display = '';
+}
+function hideDeleteConfirm() {
+  document.getElementById('modalBtnsNormal').style.display = '';
+  document.getElementById('modalBtnsConfirm').style.display = 'none';
+}
+function deleteSpot() {
+  if (editingId === null) return;
+  const idToDel = editingId;
+  db.spots = db.spots.filter(x => x.id !== idToDel);
+  closeModal(); render();
+  sbFetch('DELETE', 'spots?id=eq.' + idToDel)
+    .then(() => { showStatus('Deleted'); buildCatPills(); buildTypePills(); })
+    .catch(() => showStatus('Delete failed', true));
+  setTimeout(measureThreshold, 150);
+}
+
+// ---- INTERACTIONS ----
+function setSpotStars(id, n) {
+  const s = db.spots.find(x => x.id === id);
+  if (!s) return;
+  s.stars = s.stars === n ? 0 : n; render();
+  sbFetch('PATCH', 'spots?id=eq.' + id, { stars: s.stars }).catch(() => {});
+}
+function toggleFav(id) {
+  const s = db.spots.find(x => x.id === id);
+  if (!s) return;
+  s.fav = !s.fav; render();
+  sbFetch('PATCH', 'spots?id=eq.' + id, { fav: s.fav }).catch(() => {});
+}
+function toggleBeen(id) {
+  const s = db.spots.find(x => x.id === id);
+  if (!s) return;
+  s.been = !s.been; render();
+  sbFetch('PATCH', 'spots?id=eq.' + id, { been: s.been }).catch(() => {});
+}
+function filterByCuisineTag(cuisine) {
+  activeCuisine = cuisine;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  buildTypePills();
+  render();
+}
+
+// ---- RENDER ----
+function getFilteredList() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  return db.spots.filter(s => {
+    if (activeCategory !== 'all') {
+      if (activeCategory === 'food') {
+        if (!isFood(s.cat)) return false;
+      } else if (s.cat !== activeCategory) return false;
+    }
+    if (activeCuisine !== 'All' && s.cuisine !== activeCuisine) return false;
+    if (activeStar === 5 && (s.stars||0) !== 5) return false;
+    if (activeStar > 0 && activeStar < 5 && (s.stars||0) < activeStar) return false;
+    if (favOnly && !s.fav) return false;
+    if (beenOnly && !s.been) return false;
+    if (q) {
+      const hay = `${s.name} ${s.cuisine} ${s.cat} ${s.note||''} ${s.location||''}`.toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+}
+
+function render() {
+  const sort = document.getElementById('sortSelect').value;
+  let list = getFilteredList();
+  if (sort==='alpha')        list.sort((a,b)=>a.name.localeCompare(b.name));
+  else if (sort==='alpha-desc') list.sort((a,b)=>b.name.localeCompare(a.name));
+  else if (sort==='stars-desc') list.sort((a,b)=>(b.stars||0)-(a.stars||0)||a.name.localeCompare(b.name));
+  else if (sort==='stars-asc')  list.sort((a,b)=>(a.stars||0)-(b.stars||0)||a.name.localeCompare(b.name));
+
+  const favs = db.spots.filter(s=>s.fav).length;
+  const beens = db.spots.filter(s=>s.been).length;
+  document.getElementById('totalCount').textContent = `${db.spots.length} spots · ${beens} been · ${favs} ❤`;
+  document.getElementById('countBar').textContent = `Showing ${list.length} spot${list.length!==1?'s':''}`;
+
+  const grid = document.getElementById('grid');
+  if (!list.length) { grid.innerHTML = '<div class="empty">No spots match that filter.</div>'; return; }
+
+  grid.innerHTML = list.map(s => {
+    const color = catColor(s.cat);
+    const stars = [1,2,3,4,5].map(n =>
+      `<span class="s${(s.stars||0)>=n?' lit':''}" data-action="star" data-id="${s.id}" data-n="${n}">★</span>`
+    ).join('');
+    const loc = s.location ? `<div class="card-location">📍 ${htmlText(s.location)}</div>` : '';
+    const note = s.note ? `<div class="card-note">${htmlText(s.note)}</div>` : '';
+    const favStyle = s.fav ? 'opacity:1;color:#e84b4b' : 'opacity:0.3';
+    return `
+    <div class="card" data-cat="${s.cat}" style="--card-color:${color}; border-top: 3px solid ${color}22;">
+      <div class="card-top">
+        <div class="card-name">${htmlText(s.name)}</div>
+        <div class="card-actions">
+          <button class="icon-btn" data-action="edit" data-id="${s.id}" title="Edit">✏️</button>
+          <button class="icon-btn fav-btn-card${s.fav?' on':''}" data-action="fav" data-id="${s.id}" style="${favStyle}">♥</button>
+        </div>
+      </div>
+      ${loc}${note}
+      <div class="card-footer">
+        <div class="card-stars">${stars}</div>
+        <div class="card-badges">
+          <span class="ctag" data-action="filter" data-cuisine="${htmlAttr(s.cuisine)}" style="border-color:${color}44;color:${color}">${htmlText(s.cuisine)}</span>
+          <button class="been-btn${s.been?' on':''}" data-action="been" data-id="${s.id}">${s.been?'✓ Been':'Been?'}</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// grid delegation
+document.getElementById('grid').addEventListener('click', e => {
+  const el = e.target.closest('[data-action]');
+  if (!el) return;
+  const { action, id, n, cuisine } = el.dataset;
+  if (action==='edit')   openEdit(id);
+  else if (action==='fav')    toggleFav(id);
+  else if (action==='been')   toggleBeen(id);
+  else if (action==='star')   setSpotStars(id, parseInt(n));
+  else if (action==='filter') filterByCuisineTag(cuisine);
+});
+
+// ---- AUTOCOMPLETE ----
+const AC_OPTS = {
+  topcategory: CATS.filter(c => c.parent === null).map(c => c.label),  // top-level only for category field
+  subcategory: CATS.filter(c => c.parent === 'food').map(c => c.label), // food subs for subcategory field
+  cuisine: [],
+  location: LOCATION_OPTS
+};
+
+// Called when category input changes - show/hide subcategory field
+function onCategoryInput(input) {
+  acShow(input, 'topcategory');
+  updateSubCatVisibility(input.value);
+}
+
+function updateSubCatVisibility(catValue) {
+  const isFood = catValue.trim().toLowerCase() === 'food';
+  const subField = document.getElementById('subCatField');
+  subField.style.display = isFood ? '' : 'none';
+  if (!isFood) document.getElementById('mSubCat').value = '';
+}
+
+function acShow(input, type) {
+  const q = input.value.toLowerCase().trim();
+  const listId = { topcategory:'acCategory', subcategory:'acSubCat', cuisine:'acCuisine', location:'acLocation' }[type];
+  const list = document.getElementById(listId);
+  if (!list) return;
+  let opts = type==='cuisine'
+    ? Array.from(new Set(db.spots.map(s=>s.cuisine))).sort()
+    : AC_OPTS[type];
+
+  const matches = q ? opts.filter(o => o.toLowerCase().includes(q)) : [];
+  const rest    = q ? opts.filter(o => !o.toLowerCase().includes(q)) : opts;
+  const sorted  = [...matches, ...rest];
+
+  if (!sorted.length) { list.classList.remove('open'); return; }
+  list.innerHTML = sorted.map(o => {
+    const safe = htmlAttr(o);
+    const hi = q && o.toLowerCase().includes(q);
+    return `<div class="ac-item${hi?' highlighted':''}" data-val="${safe}">${htmlText(o)}</div>`;
+  }).join('');
+  list.classList.add('open');
+  list._inputRef = input;
+}
+
+function acBlur() {
+  setTimeout(() => {
+    const focused = document.activeElement;
+    if (!focused || !focused.closest('.ac-wrap')) {
+      document.querySelectorAll('.ac-list').forEach(l => l.classList.remove('open'));
+    }
+  }, 200);
+}
+
+// touch tracking
+let _ty = 0, _tx = 0, _moved = false;
+document.addEventListener('touchstart', e => { _ty=e.touches[0].clientY; _tx=e.touches[0].clientX; _moved=false; }, {passive:true});
+document.addEventListener('touchmove', e => { if(Math.abs(e.touches[0].clientY-_ty)>8||Math.abs(e.touches[0].clientX-_tx)>8) _moved=true; }, {passive:true});
+document.addEventListener('touchend', e => {
+  if (_moved) return;
+  const item = e.target.closest('.ac-item');
+  if (item) {
+    e.preventDefault();
+    const list = item.closest('.ac-list');
+    const inp = list?._inputRef;
+    if (inp) { inp.value = item.dataset.val; inp.dispatchEvent(new Event('input')); }
+    document.querySelectorAll('.ac-list').forEach(l => l.classList.remove('open'));
+    return;
+  }
+  if (!e.target.closest('.ac-wrap')) document.querySelectorAll('.ac-list').forEach(l => l.classList.remove('open'));
+}, {passive:false});
+document.addEventListener('mousedown', e => {
+  const item = e.target.closest('.ac-item');
+  if (item) {
+    e.preventDefault();
+    const list = item.closest('.ac-list');
+    const inp = list?._inputRef;
+    if (inp) inp.value = item.dataset.val;
+    document.querySelectorAll('.ac-list').forEach(l => l.classList.remove('open'));
+    return;
+  }
+  if (!e.target.closest('.ac-wrap')) document.querySelectorAll('.ac-list').forEach(l => l.classList.remove('open'));
+});
+
+document.getElementById('modal').addEventListener('click', function(e) { if(e.target===this) closeModal(); });
+document.getElementById('randOverlay').addEventListener('click', function(e) { if(e.target===this) closeRandom(); });
+</script>
+
+<!-- dynamic style for random card accent line -->
+<style id="randBefore">.rand-card::before { background: var(--accent); }</style>
+
+<script>
+loadCustomCats();
+loadFromSupabase();
+requestAnimationFrame(() => requestAnimationFrame(measureThreshold));
+</script>
+</body>
+</html>
