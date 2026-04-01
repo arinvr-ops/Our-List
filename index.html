@@ -2727,20 +2727,6 @@ document.getElementById('randOverlay').addEventListener('click', function(e) { i
 <!-- dynamic style for random card accent line -->
 <style id="randBefore">.rand-card::before { background: var(--accent); }</style>
 
-<script>
-loadCustomCats();
-loadFromSupabase();
-requestAnimationFrame(() => requestAnimationFrame(measureThreshold));
 
-// Load Google Maps eagerly so place search works immediately in edit modal
-(function() {
-  if (MAPS_KEY === 'YOUR_GOOGLE_MAPS_KEY') return;
-  const script = document.createElement('script');
-  script.id = 'gmaps-script';
-  script.src = 'https://maps.googleapis.com/maps/api/js?key=' + MAPS_KEY + '&libraries=places,marker&loading=async&callback=_mapLoaded';
-  script.async = true;
-  document.head.appendChild(script);
-})();
-</script>
 </body>
 </html>
