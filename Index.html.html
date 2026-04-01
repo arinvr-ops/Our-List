@@ -93,20 +93,52 @@ header .sub { color: var(--muted); font-size: 0.76rem; letter-spacing: 1.5px; te
 #catRow::-webkit-scrollbar { display: none; }
 #catRow.gone { max-height: 0; padding-bottom: 0; opacity: 0; pointer-events: none; }
 
-/* SUB-CATEGORY ROW */
-#subCatRow {
-  display: flex; gap: 6px; align-items: center;
-  padding: 0 14px 0;
-  overflow-x: auto; overflow-y: hidden;
-  scrollbar-width: none; -webkit-overflow-scrolling: touch;
-  max-height: 0; opacity: 0; pointer-events: none;
-  transition: max-height 0.25s ease, opacity 0.22s ease, padding 0.25s ease;
-  white-space: nowrap;
+/* DROPDOWN MENUS for sub-category and type filter */
+.cat-dropdown-wrap {
+  position: relative; display: inline-block;
 }
-#subCatRow::-webkit-scrollbar { display: none; }
-#subCatRow.visible { max-height: 56px; opacity: 1; pointer-events: auto; padding-bottom: 8px; }
-#subCatRow.gone { max-height: 0; padding-bottom: 0; opacity: 0; pointer-events: none; }
-.sub-pill { font-size: 0.68rem !important; padding: 4px 9px !important; }
+.cat-dropdown-menu {
+  display: none;
+  position: absolute; top: calc(100% + 6px); left: 0;
+  background: #1a1916; border: 1px solid var(--border);
+  border-radius: 10px; z-index: 50;
+  min-width: 200px; max-height: 320px; overflow-y: auto;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.6);
+  scrollbar-width: none; -webkit-overflow-scrolling: touch;
+  padding: 6px;
+}
+.cat-dropdown-menu::-webkit-scrollbar { display: none; }
+.cat-dropdown-menu.open { display: block; }
+.cat-dropdown-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 12px; border-radius: 7px;
+  cursor: pointer; font-family: 'DM Sans', sans-serif;
+  font-size: 0.84rem; color: var(--text); font-weight: 300;
+  transition: background 0.12s; white-space: nowrap;
+}
+.cat-dropdown-item:hover { background: #252320; }
+.cat-dropdown-item.active { background: #252320; font-weight: 500; }
+.cat-dropdown-item .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.cat-dropdown-item .check { margin-left: auto; font-size: 0.8rem; color: var(--accent); }
+
+/* type filter dropdown */
+#typeDropdownWrap { position: relative; display: inline-block; }
+#typeDropdownMenu {
+  display: none;
+  position: absolute; top: calc(100% + 6px); left: 0;
+  background: #1a1916; border: 1px solid var(--border);
+  border-radius: 10px; z-index: 50;
+  min-width: 180px; max-height: 280px; overflow-y: auto;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.6);
+  scrollbar-width: none; padding: 6px;
+}
+#typeDropdownMenu::-webkit-scrollbar { display: none; }
+#typeDropdownMenu.open { display: block; }
+
+/* subCatRow hidden - replaced by dropdown */
+#subCatRow { display: none; }
+#filterRow { display: none; }
+#typeRow.gone { max-height: 0; padding-bottom: 0; opacity: 0; pointer-events: none; overflow: hidden; }
 
 /* TYPE + STAR ROW */
 #filterRow {
@@ -182,7 +214,7 @@ input[type="text"] {
 }
 input[type="text"]:focus { border-color: var(--accent); }
 input[type="text"]::placeholder { color: var(--muted); }
-.modal input[type="text"] { padding: 9px 11px; }
+.modal input[type="text"], .modal input[type="url"] { padding: 9px 11px; }
 select {
   background: var(--card); border: 1px solid var(--border); color: var(--text);
   font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
@@ -254,10 +286,101 @@ select {
 }
 .been-btn.on { background: #0f2318; border-color: #2a6644; color: #4caf78; }
 .been-btn:hover { border-color: #4caf78; color: #4caf78; }
+
+.link-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 24px; height: 24px; border-radius: 4px;
+  background: none; border: 1px solid var(--border); color: var(--muted);
+  cursor: pointer; transition: all 0.14s; text-decoration: none; font-size: 0.82rem;
+  flex-shrink: 0;
+}
+.link-btn:hover { border-color: var(--accent); color: var(--accent); background: #1e1c18; }
+
+/* card photo */
+.card-photo {
+  width: 100%; height: 120px; object-fit: cover; object-position: center center;
+  border-radius: 5px; margin-bottom: 8px; display: block;
+}
+
+/* want-to-go fire button */
+.want-btn {
+  background: none; border: none; cursor: pointer;
+  font-size: 1rem; padding: 2px 3px; line-height: 1;
+  opacity: 0.25; transition: opacity 0.14s, transform 0.14s;
+}
+.want-btn.on { opacity: 1; transform: scale(1.15); }
+.want-btn:hover { opacity: 0.8; }
+
+/* collection tags */
+.coll-tag {
+  font-size: 0.62rem; font-weight: 500; letter-spacing: 0.3px;
+  padding: 2px 6px; border-radius: 10px;
+  background: #1e1c18; border: 1px solid #3a3520;
+  color: #a09060; white-space: nowrap;
+}
+
+/* bigger card note */
+.card-note {
+  font-size: 0.84rem !important;
+  color: var(--text) !important;
+  opacity: 0.75;
+  font-style: normal !important;
+  margin-bottom: 9px;
+  line-height: 1.4;
+}
 .fav-btn-card { font-size: 1rem; opacity: 0.3; transition: opacity 0.14s; background: none; border: none; cursor: pointer; line-height: 1; }
 .fav-btn-card.on { opacity: 1; color: #e84b4b; }
 
 .empty { grid-column: 1/-1; text-align: center; padding: 50px 20px; color: var(--muted); font-size: 0.88rem; }
+
+/* MAP VIEW */
+#mapView {
+  display: none; position: fixed; inset: 0; z-index: 150;
+  background: var(--bg); flex-direction: column;
+}
+#mapView.open { display: flex; }
+#mapContainer { flex: 1; width: 100%; }
+#mapHeader {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 16px; background: var(--card);
+  border-bottom: 1px solid var(--border); flex-shrink: 0;
+}
+#mapHeader h2 {
+  font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem;
+  letter-spacing: 2px; color: var(--accent); flex: 1;
+}
+.map-close-btn {
+  background: var(--tag-bg); border: 1px solid var(--border);
+  color: var(--text); font-family: 'DM Sans', sans-serif;
+  font-size: 0.82rem; padding: 7px 14px; border-radius: 6px;
+  cursor: pointer;
+}
+#mapSpotList {
+  max-height: 38vh; overflow-y: auto;
+  background: var(--bg); border-top: 1px solid var(--border);
+  flex-shrink: 0; scrollbar-width: none;
+}
+#mapSpotList::-webkit-scrollbar { display: none; }
+.map-spot-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 16px; border-bottom: 1px solid var(--border);
+  cursor: pointer; transition: background 0.12s;
+}
+.map-spot-item:hover { background: var(--card); }
+.map-spot-item .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.map-spot-item .spot-name { font-size: 0.88rem; font-weight: 500; flex: 1; }
+.map-spot-item .spot-loc { font-size: 0.74rem; color: var(--muted); }
+
+.map-btn {
+  background: none; border: 1px solid var(--border); color: var(--muted);
+  font-family: 'DM Sans', sans-serif; font-size: 0.74rem; font-weight: 500;
+  padding: 7px 12px; border-radius: 6px; cursor: pointer;
+  transition: all 0.15s; white-space: nowrap;
+}
+.map-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+#photoUploadBtn:hover { border-color: var(--accent); color: var(--accent); }
+#photoUploadBtn.uploading { opacity: 0.5; pointer-events: none; }
 
 /* RANDOM OVERLAY */
 .rand-overlay {
@@ -349,7 +472,9 @@ select {
     <span id="totalCount">0 spots</span>
     <button class="toggle-btn" id="favOnlyBtn" onclick="toggleFavOnly()">❤ Favorites</button>
     <button class="toggle-btn" id="beenOnlyBtn" onclick="toggleBeenOnly()">✓ Been here</button>
+    <button class="toggle-btn" id="wantOnlyBtn" onclick="toggleWantOnly()">🔥 Want to go</button>
     <button class="random-btn" id="randBtn" onclick="openRandom()">🎲 Surprise me</button>
+    <button class="map-btn" onclick="openMapView()">🗺 Map</button>
   </div>
 
   <div id="topRow">
@@ -360,6 +485,7 @@ select {
       <input type="text" id="searchInput" placeholder="Search everything..." oninput="render()">
     </div>
     <select id="sortSelect" onchange="render()">
+      <option value="newest">Newest first</option>
       <option value="alpha">A - Z</option>
       <option value="alpha-desc">Z - A</option>
       <option value="stars-desc">Top rated</option>
@@ -368,9 +494,13 @@ select {
     <button class="add-btn" onclick="openAdd()">+ Add</button>
   </div>
 
-  <div id="catRow"></div>
+  <div id="catRow" style="display:flex;gap:6px;align-items:center;padding:0 14px 6px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;transition:max-height 0.3s ease,opacity 0.26s ease,padding 0.3s ease;max-height:60px;opacity:1;white-space:nowrap;"></div>
+  <div id="typeRow" style="display:flex;gap:6px;align-items:center;padding:0 14px 8px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;white-space:nowrap;min-height:0;"></div>
   <div id="subCatRow"></div>
   <div id="filterRow"></div>
+  <!-- Dropdowns rendered outside sticky bar so they overflow correctly -->
+  <div id="subCatDropdown" class="cat-dropdown-menu" style="position:fixed;z-index:200;display:none;"></div>
+  <div id="typeDropdown" class="cat-dropdown-menu" style="position:fixed;z-index:200;display:none;"></div>
   <div id="starRow">
     <button class="star-pill active" onclick="setStarFilter(0,this)">All ratings</button>
     <button class="star-pill" onclick="setStarFilter(1,this)">1+ ★</button>
@@ -384,6 +514,17 @@ select {
 
 <div id="countBar"></div>
 <div class="grid" id="grid"></div>
+
+<!-- MAP VIEW -->
+<div id="mapView">
+  <div id="mapHeader">
+    <h2>Map View</h2>
+    <span id="mapCount" style="color:var(--muted);font-size:0.78rem;"></span>
+    <button class="map-close-btn" onclick="closeMapView()">✕ Close</button>
+  </div>
+  <div id="mapContainer"></div>
+  <div id="mapSpotList"></div>
+</div>
 
 <!-- Random picker overlay -->
 <div class="rand-overlay" id="randOverlay">
@@ -433,7 +574,7 @@ select {
       </div>
     </div>
     <div class="field">
-      <label>Location</label>
+      <label>Location / neighborhood</label>
       <div class="ac-wrap">
         <input type="text" id="mLocation" placeholder="e.g. NE Portland, Lake Oswego..." autocomplete="off" autocorrect="off"
           oninput="acShow(this,'location')" onfocus="acShow(this,'location')" onblur="acBlur()">
@@ -441,8 +582,70 @@ select {
       </div>
     </div>
     <div class="field">
+      <label>Pin on map <span style="color:var(--muted);font-size:0.65rem;text-transform:none;letter-spacing:0">(search for exact location)</span></label>
+      <div style="position:relative;">
+        <input type="text" id="mPlaceSearch" placeholder="Search place name, e.g. Jacqueline Portland..." autocomplete="off" autocorrect="off"
+          style="padding:9px 11px;margin-bottom:6px;" oninput="searchPlace(this.value)">
+        <div id="placeResults" style="display:none;position:absolute;top:calc(100% - 2px);left:0;right:0;background:#222018;border:1px solid var(--accent);border-radius:0 0 8px 8px;z-index:300;max-height:180px;overflow-y:auto;"></div>
+      </div>
+      <div id="miniMapWrap" style="display:none;border-radius:8px;overflow:hidden;height:160px;margin-top:4px;position:relative;">
+        <div id="miniMap" style="width:100%;height:100%;"></div>
+        <div style="position:absolute;bottom:6px;right:6px;background:rgba(15,14,13,0.8);padding:4px 8px;border-radius:4px;font-size:0.7rem;color:var(--muted);" id="miniMapLabel">Drag pin to adjust</div>
+      </div>
+      <input type="hidden" id="mLat">
+      <input type="hidden" id="mLng">
+      <div id="pinStatus" style="font-size:0.74rem;color:#4caf78;margin-top:4px;display:none;">📍 Location pinned</div>
+    </div>
+    <div class="field">
       <label>Note</label>
       <input type="text" id="mNote" placeholder="e.g. happy hour 5-6, cash only...">
+    </div>
+    <div class="field">
+      <label>Link <span style="color:var(--muted);font-size:0.65rem;text-transform:none;letter-spacing:0">(Instagram, Maps, website...)</span></label>
+      <input type="url" id="mLink" placeholder="https://..." autocomplete="off">
+    </div>
+    <div class="field">
+      <label>Photo</label>
+      <div id="photoPreviewWrap" style="display:none;margin-bottom:8px;position:relative;">
+        <img id="photoPreview" style="width:100%;height:140px;object-fit:cover;border-radius:8px;display:block;">
+        <button onclick="removePhoto()" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.7);border:none;color:#fff;border-radius:50%;width:26px;height:26px;cursor:pointer;font-size:0.8rem;line-height:1;">✕</button>
+      </div>
+      <input type="hidden" id="mPhoto">
+      <label for="photoFileInput" id="photoUploadBtn" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:10px;border:1px dashed var(--border);border-radius:8px;cursor:pointer;color:var(--muted);font-size:0.82rem;transition:all 0.15s;">
+        📷 Tap to add photo from camera roll
+      </label>
+      <input type="file" id="photoFileInput" accept="image/*" style="display:none;" onchange="handlePhotoCrop(this)">
+      <div id="photoUploadStatus" style="font-size:0.76rem;color:var(--muted);margin-top:4px;display:none;"></div>
+      <div id="cropWrap" style="display:none;margin-top:8px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+          <div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">Drag · Pinch to zoom</div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span style="font-size:0.7rem;color:var(--muted);">🔍</span>
+            <input type="range" id="zoomSlider" min="1" max="100" value="25"
+              style="width:80px;accent-color:var(--accent);"
+              oninput="sliderZoom(this.value)">
+          </div>
+        </div>
+        <div id="cropFrame" style="width:100%;height:150px;border-radius:8px;overflow:hidden;position:relative;background:#0f0e0d;touch-action:none;user-select:none;">
+          <img id="cropImg" draggable="false" style="position:absolute;top:0;left:0;will-change:transform;">
+        </div>
+        <div style="font-size:0.7rem;color:var(--muted);margin:6px 0 3px;text-transform:uppercase;letter-spacing:1px;">How it looks on the card</div>
+        <div style="width:100%;height:110px;border-radius:8px;overflow:hidden;background:#0f0e0d;">
+          <canvas id="cropPreviewCanvas" style="width:100%;height:100%;display:block;"></canvas>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:10px;">
+          <button onclick="cancelCrop()" style="flex:1;padding:10px;border-radius:7px;background:var(--tag-bg);border:1px solid var(--border);color:var(--muted);font-family:'DM Sans',sans-serif;font-size:0.84rem;cursor:pointer;">Cancel</button>
+          <button onclick="confirmCrop()" id="confirmCropBtn" style="flex:1;padding:10px;border-radius:7px;background:var(--accent);border:none;color:#0f0e0d;font-family:'DM Sans',sans-serif;font-size:0.84rem;font-weight:600;cursor:pointer;">Use photo</button>
+        </div>
+      </div>
+    </div>
+    <div class="field">
+      <label>Collections <span style="color:var(--muted);font-size:0.65rem;text-transform:none;letter-spacing:0">(e.g. Date Night, Quick Lunch)</span></label>
+      <div class="ac-wrap">
+        <input type="text" id="mCollections" placeholder="e.g. Date Night, Special Occasion..." autocomplete="off" autocorrect="off"
+          oninput="acShow(this,'collections')" onfocus="acShow(this,'collections')" onblur="acBlur()">
+        <div class="ac-list" id="acCollections"></div>
+      </div>
     </div>
     <div class="field">
       <label>Rating</label>
@@ -823,7 +1026,7 @@ const BASE = [
   {name:"Deadman's Cove Cape Disappointment",cat:"getaways",cuisine:"Coast",location:"Washington",note:"Close to Astoria OR",been:false,fav:false,stars:0},
   {name:"Headlands Coastal Lodge",cat:"getaways",cuisine:"Hotel Spa",location:"Oregon Coast",note:"",been:false,fav:false,stars:0},
   {name:"Hot Tub Cabins WA",cat:"getaways",cuisine:"Cabin",location:"Washington",note:"Fire Lodge, Cushman Perch, Earthlight Villas etc",been:false,fav:false,stars:0},
-  {name:"Wallowa Mountains",cat:"getaways",cuisine:"Mountains",location:"Oregon",note:"Stay in Joseph",been:false,fav:false,stars:0},
+  {name:"Wallowa Mountains",cat:"getaways",cuisine:"Mountains",location:"Oregon",note:"Stay in Joseph",been:false,fav:false,stars:0,link:"https://www.instagram.com/reel/DEDb55Sy277/?igsh=MWVuODZpeGppbWU2Zg=="},
   {name:"Maryhill Stonehenge",cat:"getaways",cuisine:"Landmark",location:"Oregon",note:"2 hour drive",been:false,fav:false,stars:0},
   {name:"Hood River Fruit Loop",cat:"getaways",cuisine:"Road Trip",location:"Hood River",note:"30 stops, 35 miles of scenic roads",been:false,fav:false,stars:0},
   {name:"Painted Hills",cat:"getaways",cuisine:"Nature",location:"Oregon",note:"",been:false,fav:false,stars:0},
@@ -949,8 +1152,8 @@ async function seedBaseSpots() {
   for (let i = 0; i < BASE.length; i += batch) {
     const chunk = BASE.slice(i, i + batch).map(s => ({
       name: s.name, cat: s.cat, cuisine: s.cuisine,
-      location: s.location || '', note: s.note || '',
-      stars: 0, fav: false, been: s.been || false
+      location: s.location || '', note: s.note || '', link: s.link || '',
+      stars: 0, fav: false, been: s.been || false, want: false, photo: '', collections: ''
     }));
     await sbFetch('POST', 'spots', chunk);
   }
@@ -975,13 +1178,13 @@ function startRealtime() {
   // Poll every 8 seconds for changes from other users - simple and reliable
   setInterval(async () => {
     try {
-      const rows = await sbFetch('GET', 'spots?select=id,fav,been,stars&order=name.asc');
+      const rows = await sbFetch('GET', 'spots?select=id,fav,been,stars,link,lat,lng&order=name.asc');
       if (!rows) return;
       let changed = false;
       rows.forEach(r => {
         const s = db.spots.find(x => x.id === r.id);
-        if (s && (s.fav !== r.fav || s.been !== r.been || s.stars !== r.stars)) {
-          Object.assign(s, { fav: r.fav, been: r.been, stars: r.stars });
+        if (s && (s.fav !== r.fav || s.been !== r.been || s.stars !== r.stars || s.link !== r.link)) {
+          Object.assign(s, { fav: r.fav, been: r.been, stars: r.stars, link: r.link||'', lat: r.lat||null, lng: r.lng||null });
           changed = true;
         }
       });
@@ -994,6 +1197,7 @@ let activeCuisine  = 'All';
 let activeStar     = 0;
 let favOnly        = false;
 let beenOnly       = false;
+let wantOnly       = false;
 let editingId      = null;
 let modalStars     = 0;
 
@@ -1031,66 +1235,52 @@ window.addEventListener('scroll', () => {
     lastCollapsed = collapsed;
     document.getElementById('favBar').classList.toggle('gone', collapsed);
     document.getElementById('catRow').classList.toggle('gone', collapsed);
-    document.getElementById('subCatRow').classList.toggle('gone', collapsed);
-    document.getElementById('filterRow').classList.toggle('gone', collapsed);
+    document.getElementById('typeRow').classList.toggle('gone', collapsed);
+
     document.getElementById('starRow').classList.toggle('gone', collapsed);
   });
 }, { passive: true });
 
 // ---- BUILD CATEGORY PILLS ----
-// Row 1 = top-level: All, Food, Activities, Hikes, Getaways, Shopping, International, Other
-// Row 2 = food subs (only visible when Food or a sub is active)
+// Top-level pills. Food pill opens a dropdown of subcategories.
+// Non-food cats that have multiple cuisine types also get a type dropdown.
+
+let _subDropdownAnchor = null; // stores the Food pill element for positioning
+
 function buildCatPills() {
   const row = document.getElementById('catRow');
-  const subRow = document.getElementById('subCatRow');
-
-  const foodActive = activeCategory === 'food' || FOOD_SUBS.includes(activeCategory);
   const topCats = CATS.filter(c => c.parent === null);
+  const foodActive = activeCategory === 'food' || FOOD_SUBS.includes(activeCategory);
 
-  // Top level pills
   const allBtn = `<button class="cat-pill${activeCategory==='all'?' active':''}" data-cat="all"
     style="border-color:${activeCategory==='all'?'var(--accent)':'#ffffff22'};${activeCategory==='all'?'background:var(--accent);color:#0f0e0d;font-weight:600;':''}">
     <span class="dot" style="background:var(--accent)"></span>All
   </button>`;
 
   const topPills = topCats.map(c => {
-    const isActive = activeCategory === c.key || (c.key==='food' && FOOD_SUBS.includes(activeCategory));
+    const isActive = activeCategory === c.key || (c.key==='food' && foodActive);
+    const hasSubs = c.key === 'food';
+    const activeSub = hasSubs && foodActive && activeCategory !== 'food'
+      ? ' · ' + catLabel(activeCategory) : '';
     return `<button class="cat-pill${isActive?' active':''}" data-cat="${c.key}"
       style="border-color:${isActive?c.color:c.color+'44'};${isActive?`background:${c.color};color:#0f0e0d;font-weight:600;`:`color:${c.color}cc;`}">
-      <span class="dot" style="background:${c.color}"></span>${c.label}
+      <span class="dot" style="background:${c.color}"></span>${c.label}${activeSub}${hasSubs?' ▾':''}
     </button>`;
   }).join('');
+
   row.innerHTML = allBtn + topPills;
 
-  // Sub-category pills (food children) - show only when food or sub is active
-  if (foodActive) {
-    const foodColor = catColor('food');
-    const subPills = FOOD_SUBS.map(key => {
-      const c = CAT_MAP[key];
-      const isActive = activeCategory === key;
-      return `<button class="cat-pill sub-pill${isActive?' active':''}" data-cat="${key}"
-        style="border-color:${isActive?c.color:c.color+'55'};${isActive?`background:${c.color};color:#0f0e0d;font-weight:600;`:`color:${c.color}cc;`}">
-        <span class="dot" style="background:${c.color}"></span>${c.label}
-      </button>`;
-    }).join('');
-    subRow.innerHTML = subPills;
-    subRow.classList.add('visible');
-  } else {
-    subRow.innerHTML = '';
-    subRow.classList.remove('visible');
-  }
-
-  // Single delegation on parent - covers both rows
-  row.onclick = subRow.onclick = e => {
+  row.onclick = e => {
     const btn = e.target.closest('.cat-pill');
     if (!btn) return;
     const newCat = btn.dataset.cat;
-    // If clicking Food parent while a sub is active, go to food-all
-    if (newCat === 'food' && FOOD_SUBS.includes(activeCategory)) {
-      activeCategory = 'food';
-    } else {
-      activeCategory = newCat;
+    closeAllDropdowns();
+    if (newCat === 'food') {
+      // Open sub-category dropdown instead of setting category directly
+      openSubCatDropdown(btn);
+      return;
     }
+    activeCategory = newCat;
     activeCuisine = 'All';
     buildCatPills();
     buildTypePills();
@@ -1098,36 +1288,132 @@ function buildCatPills() {
   };
 }
 
+function openSubCatDropdown(anchorBtn) {
+  const menu = document.getElementById('subCatDropdown');
+  const rect = anchorBtn.getBoundingClientRect();
+  // Use viewport-relative positioning with fixed position
+  menu.style.top = (rect.bottom + 4) + 'px';
+  menu.style.left = Math.min(rect.left, window.innerWidth - 210) + 'px';
+  menu.style.maxHeight = (window.innerHeight - rect.bottom - 20) + 'px';
+
+  const foodActive = activeCategory === 'food' || FOOD_SUBS.includes(activeCategory);
+  const items = [
+    { key: 'food', label: 'All Food', color: catColor('food') },
+    ...FOOD_SUBS.map(k => ({ key: k, label: catLabel(k), color: catColor(k) }))
+  ];
+
+  menu.innerHTML = items.map(item => {
+    const isActive = (item.key === 'food' && activeCategory === 'food') || activeCategory === item.key;
+    return `<div class="cat-dropdown-item${isActive?' active':''}" data-cat="${item.key}">
+      <span class="dot" style="background:${item.color}"></span>
+      ${item.label}
+      ${isActive ? '<span class="check">✓</span>' : ''}
+    </div>`;
+  }).join('');
+
+  menu.style.display = 'block';
+  requestAnimationFrame(() => menu.classList.add('open'));
+
+  menu.onclick = e => {
+    const item = e.target.closest('.cat-dropdown-item');
+    if (!item) return;
+    activeCategory = item.dataset.cat;
+    activeCuisine = 'All';
+    closeAllDropdowns();
+    buildCatPills();
+    buildTypePills();
+    render();
+  };
+}
+
 function buildTypePills() {
-  const row = document.getElementById('filterRow');
-  // When food parent selected, include all food sub spots
+  const typeRow = document.getElementById('typeRow');
+  typeRow.innerHTML = '';
+
+  if (activeCategory === 'all') return;
+
   let spots;
-  if (activeCategory === 'all') {
-    spots = db.spots;
-  } else if (activeCategory === 'food') {
+  if (activeCategory === 'food') {
     spots = db.spots.filter(s => isFood(s.cat));
   } else {
     spots = db.spots.filter(s => s.cat === activeCategory);
   }
-  const types = ['All', ...Array.from(new Set(spots.map(s => s.cuisine))).sort()];
-  row.innerHTML = types.map(t =>
-    `<button class="pill${t===activeCuisine?' active':''}" data-type="${htmlAttr(t)}">${t}</button>`
-  ).join('');
-  // Show type filter only when a specific sub-category is chosen (not all, not food-parent)
-  // Show type filter only when a specific category is chosen (not All)
-  // This keeps the banner clean on load and prevents the collapse from breaking
-  const showTypes = activeCategory !== 'all';
-  // But cap the filter row height so it never floods the screen
+  const types = Array.from(new Set(spots.map(s => s.cuisine))).sort();
+  if (!types.length) return;
 
-  row.classList.toggle('visible', showTypes);
-  row.onclick = e => {
-    const btn = e.target.closest('.pill');
-    if (!btn) return;
-    activeCuisine = btn.dataset.type;
-    document.querySelectorAll('.pill').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
+  // Always show type dropdown for any non-all category
+  const activeColor = catColor(activeCategory === 'food' ? 'food' : activeCategory);
+  const label = activeCuisine === 'All' ? 'All types ▾' : activeCuisine + ' ▾';
+  const btn = document.createElement('button');
+  btn.id = 'typeFilterBtn';
+  btn.className = 'cat-pill';
+  if (activeCuisine !== 'All') {
+    btn.style.cssText = `background:${activeColor}33;border-color:${activeColor};color:${activeColor};font-weight:500;flex-shrink:0;`;
+  } else {
+    btn.style.cssText = 'border-color:#ffffff22;flex-shrink:0;color:var(--muted);';
+  }
+  btn.textContent = label;
+  typeRow.appendChild(btn);
+
+  // Also add a "Been? filter" and "Want?" quick pills in this row
+  const beenPill = document.createElement('button');
+  beenPill.className = 'cat-pill' + (beenOnly ? ' active' : '');
+  beenPill.style.cssText = beenOnly
+    ? 'background:#0f2318;border-color:#2a6644;color:#4caf78;flex-shrink:0;'
+    : 'border-color:#ffffff22;flex-shrink:0;color:var(--muted);';
+  beenPill.textContent = '✓ Been';
+  beenPill.onclick = e => { e.stopPropagation(); toggleBeenOnly(); };
+  typeRow.appendChild(beenPill);
+
+  const wantPill = document.createElement('button');
+  wantPill.className = 'cat-pill' + (wantOnly ? ' active' : '');
+  wantPill.style.cssText = wantOnly
+    ? 'background:#2a1500;border-color:#e8784b;color:#e8784b;flex-shrink:0;'
+    : 'border-color:#ffffff22;flex-shrink:0;color:var(--muted);';
+  wantPill.textContent = '🔥 Want';
+  wantPill.onclick = e => { e.stopPropagation(); toggleWantOnly(); };
+  typeRow.appendChild(wantPill);
+
+  btn.onclick = e => {
+    e.stopPropagation();
+    closeAllDropdowns();
+    openTypeDropdown(btn, types);
+  };
+}
+
+function openTypeDropdown(anchorBtn, types) {
+  const menu = document.getElementById('typeDropdown');
+  const rect = anchorBtn.getBoundingClientRect();
+  menu.style.top = (rect.bottom + 4) + 'px';
+  menu.style.left = Math.min(rect.left, window.innerWidth - 190) + 'px';
+  menu.style.maxHeight = (window.innerHeight - rect.bottom - 20) + 'px';
+
+  const allTypes = ['All', ...types];
+  menu.innerHTML = allTypes.map(t => {
+    const isActive = activeCuisine === t;
+    return `<div class="cat-dropdown-item${isActive?' active':''}" data-type="${htmlAttr(t)}">
+      ${t}${isActive ? '<span class="check">✓</span>' : ''}
+    </div>`;
+  }).join('');
+
+  menu.style.display = 'block';
+  requestAnimationFrame(() => menu.classList.add('open'));
+
+  menu.onclick = e => {
+    const item = e.target.closest('.cat-dropdown-item');
+    if (!item) return;
+    activeCuisine = item.dataset.type;
+    closeAllDropdowns();
+    buildTypePills();
     render();
   };
+}
+
+function closeAllDropdowns() {
+  ['subCatDropdown','typeDropdown'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.classList.remove('open'); el.style.display = 'none'; }
+  });
 }
 
 function htmlAttr(s) { return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;'); }
@@ -1151,18 +1437,30 @@ function toggleBeenOnly() {
   document.getElementById('beenOnlyBtn').classList.toggle('active-been', beenOnly);
   render();
 }
+function toggleWantOnly() {
+  wantOnly = !wantOnly;
+  document.getElementById('wantOnlyBtn').classList.toggle('active-been', wantOnly);
+  render();
+}
 
 // ---- RANDOM PICKER ----
 function openRandom() {
+  // Default to spots not been to yet - more useful
   const filtered = getFilteredList();
   if (!filtered.length) return;
   document.getElementById('randOverlay').classList.add('open');
   spinRandom();
 }
+function getRandomPool() {
+  const filtered = getFilteredList();
+  const notBeen = filtered.filter(s => !s.been);
+  // If all have been visited fall back to full list
+  return notBeen.length > 0 ? notBeen : filtered;
+}
 function closeRandom() { document.getElementById('randOverlay').classList.remove('open'); }
 
 function spinRandom() {
-  const filtered = getFilteredList();
+  const filtered = getRandomPool();
   if (!filtered.length) return;
   const card = document.getElementById('randCard');
   card.classList.add('rand-spinning');
@@ -1190,11 +1488,23 @@ function spinRandom() {
 }
 
 // ---- MODAL ----
+function ensureMapsLoaded() {
+  // Maps loads eagerly on startup - this is just a safety check
+  if (window.google || MAPS_KEY === 'YOUR_GOOGLE_MAPS_KEY') return;
+  if (document.getElementById('gmaps-script')) return;
+  const script = document.createElement('script');
+  script.id = 'gmaps-script';
+  script.src = 'https://maps.googleapis.com/maps/api/js?key=' + MAPS_KEY + '&libraries=places&callback=_mapLoaded';
+  script.async = true;
+  document.head.appendChild(script);
+}
+
 function openAdd() {
   editingId = null; modalStars = 0;
   document.getElementById('modalTitle').textContent = 'Add a spot';
   hideDeleteConfirm();
   document.getElementById('mName').value = '';
+  clearPin();
   document.getElementById('mCategory').value = '';
   document.getElementById('mSubCat').value = '';
   document.getElementById('mCuisine').value = '';
@@ -1203,6 +1513,7 @@ function openAdd() {
   document.getElementById('mNote').value = '';
   document.getElementById('deleteBtn').style.display = 'none';
   renderStarPicker(0);
+  ensureMapsLoaded();
   document.getElementById('modal').classList.add('open');
   document.getElementById('mName').focus();
 }
@@ -1226,7 +1537,29 @@ function openEdit(id) {
   }
   document.getElementById('mCuisine').value = s.cuisine;
   document.getElementById('mLocation').value = s.location || '';
+  document.getElementById('mPlaceSearch').value = s.lat && s.lng ? (s.location || s.name) : '';
+  document.getElementById('mLat').value = s.lat || '';
+  document.getElementById('mLng').value = s.lng || '';
+  if (s.lat && s.lng) {
+    if (window.google) {
+      setPinFromCoords(s.lat, s.lng, s.name);
+    } else {
+      // Maps not loaded yet - show status only
+      document.getElementById('pinStatus').style.display = 'block';
+      document.getElementById('miniMapWrap').style.display = 'none';
+    }
+  } else {
+    clearPin();
+  }
   document.getElementById('mNote').value = s.note || '';
+  document.getElementById('mLink').value = s.link || '';
+  document.getElementById('mPhoto').value = s.photo || '';
+  if (s.photo) {
+    showPhotoPreview(s.photo);
+  } else {
+    removePhoto();
+  }
+  document.getElementById('mCollections').value = s.collections || '';
   document.getElementById('deleteBtn').style.display = '';
   renderStarPicker(modalStars);
   document.getElementById('modal').classList.add('open');
@@ -1271,21 +1604,27 @@ function saveSpot() {
   } else {
     cat = CATS.find(c => c.label.toLowerCase() === catInput || c.key === catInput)?.key || 'other';
   }
-  const cuisine = document.getElementById('mCuisine').value.trim() || 'Other';
-  const location = document.getElementById('mLocation').value.trim();
-  const note = document.getElementById('mNote').value.trim();
+  const cuisine     = document.getElementById('mCuisine').value.trim() || 'Other';
+  const location    = document.getElementById('mLocation').value.trim();
+  const lat         = parseFloat(document.getElementById('mLat').value) || null;
+  const lng         = parseFloat(document.getElementById('mLng').value) || null;
+  const note        = document.getElementById('mNote').value.trim();
+  const link        = document.getElementById('mLink').value.trim();
+  const photo       = document.getElementById('mPhoto').value.trim();
+  const collections = document.getElementById('mCollections').value.trim();
+  // Read ALL values before closing modal - closing can wipe DOM on iOS
   closeModal();
   if (editingId !== null) {
     const s = db.spots.find(x => x.id === editingId);
     if (s) {
-      Object.assign(s, { name, cat, cuisine, location, note, stars: modalStars });
+      Object.assign(s, { name, cat, cuisine, location, note, link: link||'', photo: photo||'', collections: collections||'', stars: modalStars, lat: lat||null, lng: lng||null });
       render();
-      sbFetch('PATCH', 'spots?id=eq.' + editingId, { name, cat, cuisine, location, note, stars: modalStars })
+      sbFetch('PATCH', 'spots?id=eq.' + editingId, { name, cat, cuisine, location, note, link: link||'', photo: photo||'', collections: collections||'', stars: modalStars, lat: lat||null, lng: lng||null })
         .then(() => showStatus('Saved'))
         .catch(() => showStatus('Save failed', true));
     }
   } else {
-    const newSpot = { name, cat, cuisine, location, note, stars: modalStars, fav: false, been: false };
+    const newSpot = { name, cat, cuisine, location, note, link: link||'', photo: photo||'', collections: collections||'', stars: modalStars, fav: false, been: false, want: false, lat, lng };
     sbFetch('POST', 'spots', newSpot)
       .then(res => {
         if (res && res[0]) { db.spots.push(res[0]); render(); }
@@ -1334,6 +1673,12 @@ function toggleBeen(id) {
   s.been = !s.been; render();
   sbFetch('PATCH', 'spots?id=eq.' + id, { been: s.been }).catch(() => {});
 }
+function toggleWant(id) {
+  const s = db.spots.find(x => x.id === id);
+  if (!s) return;
+  s.want = !s.want; render();
+  sbFetch('PATCH', 'spots?id=eq.' + id, { want: s.want }).catch(() => {});
+}
 function filterByCuisineTag(cuisine) {
   activeCuisine = cuisine;
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1355,6 +1700,7 @@ function getFilteredList() {
     if (activeStar > 0 && activeStar < 5 && (s.stars||0) < activeStar) return false;
     if (favOnly && !s.fav) return false;
     if (beenOnly && !s.been) return false;
+    if (wantOnly && !s.want) return false;
     if (q) {
       const hay = `${s.name} ${s.cuisine} ${s.cat} ${s.note||''} ${s.location||''}`.toLowerCase();
       if (!hay.includes(q)) return false;
@@ -1366,7 +1712,8 @@ function getFilteredList() {
 function render() {
   const sort = document.getElementById('sortSelect').value;
   let list = getFilteredList();
-  if (sort==='alpha')        list.sort((a,b)=>a.name.localeCompare(b.name));
+  if (sort==='newest')       list.sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0));
+  else if (sort==='alpha')        list.sort((a,b)=>a.name.localeCompare(b.name));
   else if (sort==='alpha-desc') list.sort((a,b)=>b.name.localeCompare(a.name));
   else if (sort==='stars-desc') list.sort((a,b)=>(b.stars||0)-(a.stars||0)||a.name.localeCompare(b.name));
   else if (sort==='stars-asc')  list.sort((a,b)=>(a.stars||0)-(b.stars||0)||a.name.localeCompare(b.name));
@@ -1384,28 +1731,643 @@ function render() {
     const stars = [1,2,3,4,5].map(n =>
       `<span class="s${(s.stars||0)>=n?' lit':''}" data-action="star" data-id="${s.id}" data-n="${n}">★</span>`
     ).join('');
-    const loc = s.location ? `<div class="card-location">📍 ${htmlText(s.location)}</div>` : '';
+        const mapsUrl = s.lat && s.lng
+      ? `https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}`
+      : s.location
+        ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(s.location)}`
+        : null;
+    const locText = s.location || '';
+    const loc = locText
+      ? `<div class="card-location">${mapsUrl
+          ? `<a href="${mapsUrl}" target="_blank" rel="noopener"
+              style="color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:4px;"
+              onclick="event.stopPropagation()">📍 ${htmlText(locText)}</a>`
+          : `📍 ${htmlText(locText)}`
+        }</div>`
+      : s.lat && s.lng
+        ? `<div class="card-location"><a href="${mapsUrl}" target="_blank" rel="noopener"
+            style="color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:4px;"
+            onclick="event.stopPropagation()">📍 View on map</a></div>`
+        : '';
     const note = s.note ? `<div class="card-note">${htmlText(s.note)}</div>` : '';
     const favStyle = s.fav ? 'opacity:1;color:#e84b4b' : 'opacity:0.3';
+    const photo = s.photo ? `<img class="card-photo" src="${htmlAttr(s.photo)}" alt="" loading="lazy" onerror="this.style.display='none'">` : '';
+    const colls = s.collections ? s.collections.split(',').map(c => c.trim()).filter(Boolean).map(c => `<span class="coll-tag">${htmlText(c)}</span>`).join('') : '';
     return `
     <div class="card" data-cat="${s.cat}" style="--card-color:${color}; border-top: 3px solid ${color}22;">
+      ${photo}
       <div class="card-top">
         <div class="card-name">${htmlText(s.name)}</div>
         <div class="card-actions">
+          <button class="want-btn${s.want?' on':''}" data-action="want" data-id="${s.id}" title="Want to go">🔥</button>
           <button class="icon-btn" data-action="edit" data-id="${s.id}" title="Edit">✏️</button>
           <button class="icon-btn fav-btn-card${s.fav?' on':''}" data-action="fav" data-id="${s.id}" style="${favStyle}">♥</button>
         </div>
       </div>
       ${loc}${note}
+      ${colls ? `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;">${colls}</div>` : ''}
       <div class="card-footer">
         <div class="card-stars">${stars}</div>
         <div class="card-badges">
           <span class="ctag" data-action="filter" data-cuisine="${htmlAttr(s.cuisine)}" style="border-color:${color}44;color:${color}">${htmlText(s.cuisine)}</span>
           <button class="been-btn${s.been?' on':''}" data-action="been" data-id="${s.id}">${s.been?'✓ Been':'Been?'}</button>
+          ${s.link ? `<a class="link-btn" href="${htmlAttr(s.link)}" target="_blank" rel="noopener" title="Open link">🔗</a>` : ''}
         </div>
       </div>
     </div>`;
   }).join('');
+}
+
+// ---- PLACE SEARCH + MINI MAP ----
+let miniMapInstance = null;
+let miniMapMarker = null;
+let placesService = null;
+let autocompleteService = null;
+
+function initPlacesServices() {
+  if (!window.google || autocompleteService) return;
+  autocompleteService = new google.maps.places.AutocompleteService();
+  placesService = new google.maps.places.PlacesService(document.createElement('div'));
+}
+
+function searchPlace(query) {
+  if (!query || query.length < 3) {
+    document.getElementById('placeResults').style.display = 'none';
+    return;
+  }
+  initPlacesServices();
+  if (!autocompleteService) return;
+
+  autocompleteService.getPlacePredictions({
+    input: query,
+    locationBias: { center: { lat: 45.5051, lng: -122.6750 }, radius: 80000 },
+    types: ['establishment','geocode']
+  }, (predictions, status) => {
+    const res = document.getElementById('placeResults');
+    if (status !== google.maps.places.PlacesServiceStatus.OK || !predictions) {
+      res.style.display = 'none';
+      return;
+    }
+    res.innerHTML = predictions.slice(0,5).map(p =>
+      `<div onclick="selectPlace('${p.place_id.replace(/'/g,"\\'")}','${p.description.replace(/'/g,"\\'").replace(/"/g,'&quot;')}')"
+        style="padding:10px 14px;cursor:pointer;font-size:0.84rem;color:var(--text);border-bottom:1px solid var(--border);transition:background 0.1s;"
+        onmouseover="this.style.background='#2a2820'" onmouseout="this.style.background=''">${p.description}</div>`
+    ).join('');
+    res.style.display = 'block';
+  });
+}
+
+function selectPlace(placeId, description) {
+  document.getElementById('placeResults').style.display = 'none';
+  document.getElementById('mPlaceSearch').value = description;
+  initPlacesServices();
+  if (!placesService) return;
+
+  placesService.getDetails({ placeId, fields: ['geometry','name','formatted_address'] }, (place, status) => {
+    if (status !== google.maps.places.PlacesServiceStatus.OK) return;
+    const lat = place.geometry.location.lat();
+    const lng = place.geometry.location.lng();
+    setPinFromCoords(lat, lng, place.name);
+    // Always update location with the real formatted address from Google
+    if (place.formatted_address) {
+      document.getElementById('mLocation').value = place.formatted_address;
+    }
+  });
+}
+
+function setPinFromCoords(lat, lng, name) {
+  document.getElementById('mLat').value = lat;
+  document.getElementById('mLng').value = lng;
+  document.getElementById('pinStatus').style.display = 'block';
+  document.getElementById('miniMapWrap').style.display = 'block';
+
+  if (!window.google) return;
+  initPlacesServices();
+
+  const mapDiv = document.getElementById('miniMap');
+  const pos = { lat: parseFloat(lat), lng: parseFloat(lng) };
+
+  if (!miniMapInstance) {
+    miniMapInstance = new google.maps.Map(mapDiv, {
+      zoom: 15, center: pos,
+      styles: [
+        {elementType:'geometry',stylers:[{color:'#1a1916'}]},
+        {elementType:'labels.text.fill',stylers:[{color:'#f0ede6'}]},
+        {featureType:'road',elementType:'geometry',stylers:[{color:'#2e2c28'}]},
+        {featureType:'water',elementType:'geometry',stylers:[{color:'#0d1b2a'}]},
+        {featureType:'poi',stylers:[{visibility:'off'}]},
+      ],
+      mapTypeControl:false, streetViewControl:false, fullscreenControl:false, zoomControl:false
+    });
+  } else {
+    miniMapInstance.setCenter(pos);
+  }
+
+  if (miniMapMarker) miniMapMarker.setMap(null);
+  miniMapMarker = new google.maps.Marker({
+    position: pos, map: miniMapInstance, draggable: true, title: name,
+    icon: { path: google.maps.SymbolPath.CIRCLE, scale: 10,
+      fillColor: '#e8b84b', fillOpacity: 1, strokeColor: '#0f0e0d', strokeWeight: 2 }
+  });
+
+  // Update coords if pin is dragged
+  miniMapMarker.addListener('dragend', () => {
+    const p = miniMapMarker.getPosition();
+    document.getElementById('mLat').value = p.lat();
+    document.getElementById('mLng').value = p.lng();
+  });
+}
+
+function clearPin() {
+  document.getElementById('mLat').value = '';
+  document.getElementById('mLng').value = '';
+  document.getElementById('mPlaceSearch').value = '';
+  document.getElementById('pinStatus').style.display = 'none';
+  document.getElementById('miniMapWrap').style.display = 'none';
+  document.getElementById('placeResults').style.display = 'none';
+  if (miniMapMarker) { miniMapMarker.setMap(null); miniMapMarker = null; }
+  miniMapInstance = null;
+}
+
+// ---- PHOTO UPLOAD + CROP ----
+let _cropImg = null;   // the loaded Image object
+let _cropSrc = '';     // base64 data URL
+let _cropFile = null;
+let _cx = 0, _cy = 0, _cScale = 1;
+let _dragging = false, _lastX = 0, _lastY = 0;
+
+function handlePhotoCrop(input) {
+  const file = input.files[0];
+  if (!file) return;
+  _cropFile = file;
+  input.value = '';
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    _cropSrc = e.target.result;
+    const img = new Image();
+    img.onload = () => {
+      _cropImg = img;
+      // Fill frame completely (no black bars) - centered so you can drag to reposition
+      const frame = document.getElementById('cropFrame');
+      const fw = frame.offsetWidth || 300;
+      const fh = 150;
+      _cScale = Math.max(fw / img.width, fh / img.height);
+      // Center the image
+      _cx = (fw - img.width * _cScale) / 2;
+      _cy = (fh - img.height * _cScale) / 2;
+      // Set slider to match initial fill scale
+      setTimeout(() => {
+        const slider = document.getElementById('zoomSlider');
+        if (slider) {
+          const minS = Math.min(fw / img.width, fh / img.height);
+          const fillS = Math.max(fw / img.width, fh / img.height);
+          const maxS = fillS * 3;
+          slider.value = Math.round(((fillS - minS) / (maxS - minS)) * 100);
+        }
+      }, 50);
+
+      // Show the img element
+      const cropImgEl = document.getElementById('cropImg');
+      cropImgEl.src = _cropSrc;
+      cropImgEl.style.width = (img.width * _cScale) + 'px';
+      cropImgEl.style.height = (img.height * _cScale) + 'px';
+      cropImgEl.style.transform = `translate(${_cx}px, ${_cy}px)`;
+
+      document.getElementById('cropWrap').style.display = 'block';
+      document.getElementById('photoUploadBtn').style.display = 'none';
+      document.getElementById('photoPreviewWrap').style.display = 'none';
+      drawPreview();
+      attachCropEvents();
+    };
+    img.src = _cropSrc;
+  };
+  reader.readAsDataURL(file);
+}
+
+function attachCropEvents() {
+  const frame = document.getElementById('cropFrame');
+  // Remove old listeners by cloning
+  const newFrame = frame.cloneNode(true);
+  frame.parentNode.replaceChild(newFrame, frame);
+  // Re-attach img ref
+  document.getElementById('cropImg').src = _cropSrc;
+  updateCropImgStyle();
+
+  // Touch
+  let _pinchDist = 0;
+
+  newFrame.addEventListener('touchstart', e => {
+    if (e.touches.length === 1) {
+      _dragging = true;
+      _lastX = e.touches[0].clientX;
+      _lastY = e.touches[0].clientY;
+    } else if (e.touches.length === 2) {
+      _dragging = false;
+      _pinchDist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+    }
+  }, { passive: true });
+
+  newFrame.addEventListener('touchmove', e => {
+    e.preventDefault();
+    if (e.touches.length === 1 && _dragging) {
+      const dx = e.touches[0].clientX - _lastX;
+      const dy = e.touches[0].clientY - _lastY;
+      _lastX = e.touches[0].clientX;
+      _lastY = e.touches[0].clientY;
+      moveCrop(dx, dy);
+    } else if (e.touches.length === 2) {
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      if (_pinchDist > 0) {
+        zoomCrop(dist / _pinchDist);
+      }
+      _pinchDist = dist;
+    }
+  }, { passive: false });
+
+  newFrame.addEventListener('touchend', e => {
+    _pinchDist = 0;
+    // If one finger still on screen after pinch, prep for drag immediately
+    if (e.touches.length === 1) {
+      _dragging = true;
+      _lastX = e.touches[0].clientX;
+      _lastY = e.touches[0].clientY;
+    } else {
+      _dragging = false;
+    }
+  });
+
+  // Mouse
+  newFrame.addEventListener('mousedown', e => {
+    _dragging = true; _lastX = e.clientX; _lastY = e.clientY;
+    newFrame.style.cursor = 'grabbing';
+  });
+  document.addEventListener('mousemove', e => {
+    if (!_dragging) return;
+    moveCrop(e.clientX - _lastX, e.clientY - _lastY);
+    _lastX = e.clientX; _lastY = e.clientY;
+  });
+  document.addEventListener('mouseup', () => {
+    _dragging = false;
+    const f = document.getElementById('cropFrame');
+    if (f) f.style.cursor = 'grab';
+  });
+}
+
+function moveCrop(dx, dy) {
+  if (!_cropImg) return;
+  const frame = document.getElementById('cropFrame');
+  const fw = frame.offsetWidth, fh = 150;
+  const iw = _cropImg.width * _cScale, ih = _cropImg.height * _cScale;
+  _cx = Math.min(0, Math.max(fw - iw, _cx + dx));
+  _cy = Math.min(0, Math.max(fh - ih, _cy + dy));
+  updateCropImgStyle();
+  drawPreview();
+}
+
+function zoomCrop(ratio) {
+  if (!_cropImg) return;
+  const frame = document.getElementById('cropFrame');
+  const fw = frame.offsetWidth, fh = 150;
+  const minScale = Math.min(fw / _cropImg.width, fh / _cropImg.height); // allow full zoom out to see whole image
+  const newScale = Math.max(minScale, Math.min(_cScale * ratio, minScale * 4));
+  // Zoom toward center of frame
+  const centerX = fw / 2, centerY = fh / 2;
+  _cx = centerX - (centerX - _cx) * (newScale / _cScale);
+  _cy = centerY - (centerY - _cy) * (newScale / _cScale);
+  _cScale = newScale;
+  // Clamp after zoom
+  const iw = _cropImg.width * _cScale, ih = _cropImg.height * _cScale;
+  _cx = Math.min(0, Math.max(fw - iw, _cx));
+  _cy = Math.min(0, Math.max(fh - ih, _cy));
+  updateCropImgStyle();
+  drawPreview();
+  // Sync slider position to current scale
+  const slider = document.getElementById('zoomSlider');
+  if (slider && _cropImg) {
+    const minS = Math.min(fw / _cropImg.width, fh / _cropImg.height);
+    const fillS = Math.max(fw / _cropImg.width, fh / _cropImg.height);
+    const maxS = fillS * 3;
+    slider.value = Math.round(Math.max(0, Math.min(100, ((_cScale - minS) / (maxS - minS)) * 100)));
+  }
+}
+
+function updateCropImgStyle() {
+  const el = document.getElementById('cropImg');
+  if (!el || !_cropImg) return;
+  el.style.width  = (_cropImg.width  * _cScale) + 'px';
+  el.style.height = (_cropImg.height * _cScale) + 'px';
+  el.style.transform = `translate(${_cx}px, ${_cy}px)`;
+}
+
+function drawPreview() {
+  if (!_cropImg) return;
+  const canvas = document.getElementById('cropPreviewCanvas');
+  if (!canvas) return;
+  const frame = document.getElementById('cropFrame');
+  const fw = frame.offsetWidth || 300;
+  const fh = 150;
+  canvas.width  = fw * 2;
+  canvas.height = fh * 2;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  // Source: what's visible in the crop frame mapped back to original image coords
+  const srcX = -_cx / _cScale;
+  const srcY = -_cy / _cScale;
+  const srcW =  fw  / _cScale;
+  const srcH =  fh  / _cScale;
+  ctx.drawImage(_cropImg, srcX, srcY, srcW, srcH, 0, 0, canvas.width, canvas.height);
+}
+
+function sliderZoom(val) {
+  if (!_cropImg) return;
+  const frame = document.getElementById('cropFrame');
+  const fw = frame.offsetWidth, fh = 150;
+  const minScale = Math.min(fw / _cropImg.width, fh / _cropImg.height); // fully zoomed out
+  const fillScale = Math.max(fw / _cropImg.width, fh / _cropImg.height); // fills frame
+  const maxScale = fillScale * 3; // max zoom
+  // Slider 0 = fully out, 50 = fills frame, 100 = max zoom
+  const t = val / 100;
+  const targetScale = minScale + t * (maxScale - minScale);
+  zoomCrop(targetScale / _cScale);
+}
+
+function cancelCrop() {
+  _cropFile = null; _cropImg = null;
+  document.getElementById('cropWrap').style.display = 'none';
+  document.getElementById('photoUploadBtn').style.display = 'flex';
+}
+
+async function confirmCrop() {
+  if (!_cropImg) return;
+  const btn = document.getElementById('confirmCropBtn');
+  btn.textContent = 'Uploading...'; btn.style.opacity = '0.6';
+
+  try {
+    const frame = document.getElementById('cropFrame');
+    const fw = frame.offsetWidth || 300;
+    const fh = 150;
+    const canvas = document.createElement('canvas');
+    canvas.width = fw * 2; canvas.height = fh * 2;
+    const ctx = canvas.getContext('2d');
+    const srcX = -_cx / _cScale;
+    const srcY = -_cy / _cScale;
+    const srcW =  fw  / _cScale;
+    const srcH =  fh  / _cScale;
+    ctx.drawImage(_cropImg, srcX, srcY, srcW, srcH, 0, 0, canvas.width, canvas.height);
+    const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.88));
+    const filename = 'photo-' + Date.now() + '.jpg';
+
+    const res = await fetch(SUPABASE_URL + '/storage/v1/object/spot-photos/' + filename, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'Content-Type': 'image/jpeg',
+        'x-upsert': 'true'
+      },
+      body: blob
+    });
+
+    if (!res.ok) throw new Error(await res.text());
+
+    const publicUrl = SUPABASE_URL + '/storage/v1/object/public/spot-photos/' + filename;
+    document.getElementById('mPhoto').value = publicUrl;
+    document.getElementById('cropWrap').style.display = 'none';
+    showPhotoPreview(publicUrl);
+    const status = document.getElementById('photoUploadStatus');
+    status.style.display = 'block';
+    status.textContent = '✓ Photo saved';
+    status.style.color = '#4caf78';
+  } catch(e) {
+    console.error(e);
+    const status = document.getElementById('photoUploadStatus');
+    status.style.display = 'block';
+    status.textContent = 'Upload failed - try again';
+    status.style.color = '#e84b4b';
+  }
+  btn.textContent = 'Use photo'; btn.style.opacity = '1';
+  _cropFile = null; _cropImg = null;
+}
+
+function compressImage(file, maxWidth, quality) {
+  return new Promise(resolve => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let w = img.width, h = img.height;
+        if (w > maxWidth) { h = h * maxWidth / w; w = maxWidth; }
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        canvas.toBlob(resolve, 'image/jpeg', quality);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function compressImage(file, maxWidth, quality) {
+  return new Promise(resolve => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let w = img.width, h = img.height;
+        if (w > maxWidth) { h = h * maxWidth / w; w = maxWidth; }
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        canvas.toBlob(resolve, 'image/jpeg', quality);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function showPhotoPreview(url) {
+  document.getElementById('photoPreview').src = url;
+  document.getElementById('photoPreviewWrap').style.display = 'block';
+  document.getElementById('photoUploadBtn').style.display = 'none';
+}
+
+function removePhoto() {
+  document.getElementById('mPhoto').value = '';
+  document.getElementById('photoPreviewWrap').style.display = 'none';
+  document.getElementById('photoUploadBtn').style.display = 'flex';
+  document.getElementById('photoUploadStatus').style.display = 'none';
+}
+
+// ---- MAP VIEW ----
+const MAPS_KEY = 'AIzaSyAn2Bpv623J3Q7M8wAkG4i73MKltg4levY'; // Replace with your key
+let mapInstance = null;
+let mapMarkers = [];
+
+function openMapView() {
+  const spots = getFilteredList();
+  document.getElementById('mapView').classList.add('open');
+  const pinned = spots.filter(s => s.lat && s.lng);
+  document.getElementById('mapCount').textContent = pinned.length + ' pinned';
+  initMap(spots);
+}
+
+function closeMapView() {
+  document.getElementById('mapView').classList.remove('open');
+}
+
+function renderMapSpotList(pinned, unpinned) {
+  const list = document.getElementById('mapSpotList');
+  let html = '';
+
+  if (pinned.length) {
+    html += `<div style="padding:8px 16px 4px;font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">📍 Pinned (${pinned.length})</div>`;
+    html += pinned.map((s,i) => `
+      <div class="map-spot-item" onclick="focusMarker(${i})">
+        <span class="dot" style="background:${catColor(s.cat)}"></span>
+        <div>
+          <div class="spot-name">${htmlText(s.name)}</div>
+          <div class="spot-loc">${htmlText(s.location||'')}</div>
+        </div>
+      </div>`).join('');
+  }
+
+  if (unpinned.length) {
+    html += `<div style="padding:8px 16px 4px;font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;border-top:1px solid var(--border);">Not pinned yet (${unpinned.length}) - edit to add location</div>`;
+    html += unpinned.map(s => `
+      <div class="map-spot-item" style="opacity:0.45;">
+        <span class="dot" style="background:${catColor(s.cat)}"></span>
+        <div>
+          <div class="spot-name">${htmlText(s.name)}</div>
+          <div class="spot-loc">${s.location ? htmlText(s.location) : 'No location set'}</div>
+        </div>
+      </div>`).join('');
+  }
+
+  if (!pinned.length && !unpinned.length) {
+    html = '<div style="padding:20px;color:var(--muted);font-size:0.84rem;text-align:center;">No spots in this filter</div>';
+  }
+
+  list.innerHTML = html;
+}
+
+function initMap(spots) {
+  const container = document.getElementById('mapContainer');
+  if (MAPS_KEY === 'YOUR_GOOGLE_MAPS_KEY') {
+    container.innerHTML = `
+      <div style="height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;padding:30px;text-align:center;">
+        <div style="font-size:3rem;">🗺️</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:2px;color:var(--accent);">Map coming soon</div>
+        <div style="color:var(--muted);font-size:0.84rem;line-height:1.6;">Add your Google Maps API key to enable.<br>Pin spots via the edit modal to show them here.</div>
+      </div>`;
+    return;
+  }
+  if (!window.google) {
+    const script = document.createElement('script');
+    script.src = 'https://maps.googleapis.com/maps/api/js?key=' + MAPS_KEY + '&libraries=places&callback=_mapLoaded';
+    script.async = true;
+    window._mapPendingSpots = spots;
+    document.head.appendChild(script);
+    return;
+  }
+  _renderGoogleMap(spots);
+}
+
+window._mapLoaded = function() {
+  // Init places services immediately so edit modal search works
+  initPlacesServices();
+  if (window._mapPendingSpots) _renderGoogleMap(window._mapPendingSpots);
+};
+
+function _renderGoogleMap(spots) {
+  mapMarkers = [];
+  const container = document.getElementById('mapContainer');
+
+  // Only show spots with pinned coordinates
+  const pinned = spots.filter(s => s.lat && s.lng);
+  const unpinned = spots.filter(s => !s.lat || !s.lng);
+
+  const map = new google.maps.Map(container, {
+    zoom: pinned.length ? 12 : 11,
+    center: pinned.length
+      ? { lat: pinned[0].lat, lng: pinned[0].lng }
+      : { lat: 45.5051, lng: -122.6750 },
+    styles: [
+      {elementType:'geometry',stylers:[{color:'#1a1916'}]},
+      {elementType:'labels.text.fill',stylers:[{color:'#f0ede6'}]},
+      {elementType:'labels.text.stroke',stylers:[{color:'#0f0e0d'}]},
+      {featureType:'road',elementType:'geometry',stylers:[{color:'#2e2c28'}]},
+      {featureType:'road',elementType:'labels.text.fill',stylers:[{color:'#7a776e'}]},
+      {featureType:'water',elementType:'geometry',stylers:[{color:'#0d1b2a'}]},
+      {featureType:'poi',stylers:[{visibility:'off'}]},
+      {featureType:'transit',stylers:[{visibility:'off'}]},
+    ],
+    mapTypeControl: false, streetViewControl: false, fullscreenControl: false,
+  });
+  mapInstance = map;
+
+  if (pinned.length === 0) {
+    // Show message overlay on map
+    const div = document.createElement('div');
+    div.style.cssText = 'position:absolute;bottom:0;left:0;right:0;background:rgba(15,14,13,0.88);padding:14px 18px;text-align:center;font-size:0.82rem;color:#7a776e;';
+    div.innerHTML = 'Pin spots by searching their location in the edit modal to show them here.';
+    container.style.position = 'relative';
+    container.appendChild(div);
+  }
+
+  // Fit map to all pinned spots
+  if (pinned.length > 1) {
+    const bounds = new google.maps.LatLngBounds();
+    pinned.forEach(s => bounds.extend({ lat: s.lat, lng: s.lng }));
+    map.fitBounds(bounds, { top: 40, right: 40, bottom: 40, left: 40 });
+  }
+
+  pinned.forEach((s, i) => {
+    const marker = new google.maps.Marker({
+      position: { lat: s.lat, lng: s.lng },
+      map, title: s.name,
+      icon: {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: 9,
+        fillColor: catColor(s.cat),
+        fillOpacity: 1,
+        strokeColor: '#0f0e0d',
+        strokeWeight: 2
+      }
+    });
+    const infoContent = `
+      <div style="background:#1a1916;padding:10px 12px;border-radius:8px;color:#f0ede6;font-family:'DM Sans',sans-serif;max-width:200px;">
+        <div style="font-weight:500;font-size:0.92rem;margin-bottom:3px;">${s.name}</div>
+        ${s.location ? `<div style="font-size:0.76rem;color:#7a776e;margin-bottom:3px;">📍 ${s.location}</div>` : ''}
+        ${s.note ? `<div style="font-size:0.78rem;margin-bottom:4px;">${s.note}</div>` : ''}
+        ${s.link ? `<a href="${s.link}" target="_blank" style="font-size:0.74rem;color:#e8b84b;">Open link 🔗</a>` : ''}
+      </div>`;
+    const info = new google.maps.InfoWindow({ content: infoContent });
+    marker.addListener('click', () => {
+      mapMarkers.forEach(m => m && m.info.close());
+      info.open(map, marker);
+    });
+    mapMarkers[i] = { marker, info };
+  });
+
+  // Update spot list to show pinned vs unpinned
+  renderMapSpotList(pinned, unpinned);
+}
+
+function focusMarker(i) {
+  if (!mapInstance || !mapMarkers[i]) return;
+  const { marker, info } = mapMarkers[i];
+  mapInstance.panTo(marker.getPosition());
+  mapInstance.setZoom(15);
+  info.open(mapInstance, marker);
 }
 
 // grid delegation
@@ -1416,16 +2378,18 @@ document.getElementById('grid').addEventListener('click', e => {
   if (action==='edit')   openEdit(id);
   else if (action==='fav')    toggleFav(id);
   else if (action==='been')   toggleBeen(id);
+  else if (action==='want')   toggleWant(id);
   else if (action==='star')   setSpotStars(id, parseInt(n));
   else if (action==='filter') filterByCuisineTag(cuisine);
 });
 
 // ---- AUTOCOMPLETE ----
 const AC_OPTS = {
-  topcategory: CATS.filter(c => c.parent === null).map(c => c.label),  // top-level only for category field
-  subcategory: CATS.filter(c => c.parent === 'food').map(c => c.label), // food subs for subcategory field
+  topcategory: CATS.filter(c => c.parent === null).map(c => c.label),
+  subcategory: CATS.filter(c => c.parent === 'food').map(c => c.label),
   cuisine: [],
-  location: LOCATION_OPTS
+  location: LOCATION_OPTS,
+  collections: ['Date Night','Quick Lunch','Special Occasion','Weekend Vibes','Brunch Club','Happy Hour','Bucket List','With Friends','Just Us','Rainy Day']
 };
 
 // Called when category input changes - show/hide subcategory field
@@ -1443,7 +2407,7 @@ function updateSubCatVisibility(catValue) {
 
 function acShow(input, type) {
   const q = input.value.toLowerCase().trim();
-  const listId = { topcategory:'acCategory', subcategory:'acSubCat', cuisine:'acCuisine', location:'acLocation' }[type];
+  const listId = { topcategory:'acCategory', subcategory:'acSubCat', cuisine:'acCuisine', location:'acLocation', collections:'acCollections' }[type];
   const list = document.getElementById(listId);
   if (!list) return;
   let opts = type==='cuisine'
@@ -1504,6 +2468,11 @@ document.addEventListener('mousedown', e => {
 });
 
 document.getElementById('modal').addEventListener('click', function(e) { if(e.target===this) closeModal(); });
+document.addEventListener('click', e => {
+  if (!e.target.closest('.cat-pill') && !e.target.closest('.cat-dropdown-menu')) {
+    closeAllDropdowns();
+  }
+});
 document.getElementById('randOverlay').addEventListener('click', function(e) { if(e.target===this) closeRandom(); });
 </script>
 
@@ -1514,6 +2483,16 @@ document.getElementById('randOverlay').addEventListener('click', function(e) { i
 loadCustomCats();
 loadFromSupabase();
 requestAnimationFrame(() => requestAnimationFrame(measureThreshold));
+
+// Load Google Maps eagerly so place search works immediately in edit modal
+(function() {
+  if (MAPS_KEY === 'YOUR_GOOGLE_MAPS_KEY') return;
+  const script = document.createElement('script');
+  script.id = 'gmaps-script';
+  script.src = 'https://maps.googleapis.com/maps/api/js?key=' + MAPS_KEY + '&libraries=places&callback=_mapLoaded';
+  script.async = true;
+  document.head.appendChild(script);
+})();
 </script>
 </body>
 </html>
