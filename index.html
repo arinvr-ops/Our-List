@@ -79,7 +79,7 @@ header .sub { color: var(--muted); font-size: 0.76rem; letter-spacing: 1.5px; te
   scrollbar-width: none; -webkit-overflow-scrolling: touch;
 }
 #topRow::-webkit-scrollbar { display: none; }
-#topRow.gone { max-height: 0; opacity: 0; pointer-events: none; padding-top: 0; padding-bottom: 0; overflow: hidden; }
+#topRow.gone { max-height: 0 !important; padding: 0 !important; opacity: 0; pointer-events: none; overflow: hidden; }
 #topRow > * { flex-shrink: 0; }
 .search-wrap { flex: 1; min-width: 120px; flex-shrink: 1 !important; }
 
@@ -93,7 +93,7 @@ header .sub { color: var(--muted); font-size: 0.76rem; letter-spacing: 1.5px; te
   max-height: 60px; opacity: 1; white-space: nowrap;
 }
 #catRow::-webkit-scrollbar { display: none; }
-#catRow.gone { max-height: 0; padding-bottom: 0; opacity: 0; pointer-events: none; }
+#catRow.gone { max-height: 0 !important; padding: 0 !important; opacity: 0; pointer-events: none; overflow: hidden; }
 
 /* DROPDOWN MENUS for sub-category and type filter */
 .cat-dropdown-wrap {
@@ -364,7 +364,7 @@ select {
 }
 .view-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
 #viewTabs { transition: max-height 0.3s ease, opacity 0.25s ease, padding 0.3s ease; }
-#viewTabs.gone { max-height: 0; opacity: 0; pointer-events: none; overflow: hidden; border-bottom: none !important; }
+#viewTabs.gone { max-height: 0 !important; padding: 0 !important; opacity: 0; pointer-events: none; overflow: hidden; border-bottom: none !important; }
 .view-tab:hover { color: var(--text); }
 
 /* archived card dim */
