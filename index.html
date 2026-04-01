@@ -2037,7 +2037,12 @@ async function searchPlace(query) {
     document.getElementById('placeResults').style.display = 'none';
     return;
   }
-  if (!window.google) return;
+  ensureMapsLoaded();
+  if (!window.google) {
+    // Maps not loaded yet - try again in 1 second
+    setTimeout(() => searchPlace(query), 1000);
+    return;
+  }
   try {
     const { AutocompleteSuggestion } = await google.maps.importLibrary('places');
     const { suggestions } = await AutocompleteSuggestion.fetchAutocompleteSuggestions({
