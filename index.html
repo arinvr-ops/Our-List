@@ -297,6 +297,11 @@ select {
 .goback-btn.yes { background: #0d1e2e; border-color: #2a5a8a; color: #4a9ee8; }
 .goback-btn.no  { background: #2a0f0f; border-color: #8a2a2a; color: #e87a4a; }
 .goback-btn:hover { opacity: 0.8; }
+/* Show been decision label */
+.been-decision {
+  font-size: 0.62rem; color: var(--muted); letter-spacing: 0.3px;
+  text-transform: uppercase; align-self: center;
+}
 
 .link-btn {
   display: inline-flex; align-items: center; justify-content: center;
@@ -1761,17 +1766,18 @@ function toggleFav(id) {
 function gobackYes(id) {
   const s = db.spots.find(x => x.id === id);
   if (!s) return;
-  s.goback = s.goback === true ? null : true; // toggle on/off
+  s.goback = s.goback === true ? null : true;
   render();
   sbFetch('PATCH', 'spots?id=eq.' + id, { goback: s.goback }).catch(() => {});
 }
 function gobackNo(id) {
   const s = db.spots.find(x => x.id === id);
   if (!s) return;
-  s.goback = s.goback === false ? null : false; // toggle on/off
+  s.goback = s.goback === false ? null : false;
   render();
   sbFetch('PATCH', 'spots?id=eq.' + id, { goback: s.goback }).catch(() => {});
 }
+
 
 function toggleBeen(id) {
   const s = db.spots.find(x => x.id === id);
@@ -1798,14 +1804,15 @@ function getFilteredList() {
   return db.spots.filter(s => {
     // VIEW FILTER - this is the primary filter
     if (activeView === 'archive') {
-      // Archive: been + once was enough (goback=false)
+      // Archive: been + once was enough
       if (!s.been || s.goback !== false) return false;
     } else if (activeView === 'repeats') {
       // Repeats: been + would go back (goback=true)
       if (!s.been || s.goback !== true) return false;
     } else {
-      // Active list: not archived (exclude been + goback=false)
-      if (s.been && s.goback === false) return false;
+      // Active list: unvisited + been but no decision yet (goback===null/undefined)
+      if (s.been && s.goback === true) return false;  // decided go back -> repeats
+      if (s.been && s.goback === false) return false;  // decided once was enough -> archive
     }
 
     if (activeCategory !== 'all') {
@@ -1869,11 +1876,9 @@ function render() {
         : '';
     const note = s.note ? `<div class="card-note">${htmlText(s.note)}</div>` : '';
     const favStyle = s.fav ? 'opacity:1;color:#e84b4b' : 'opacity:0.3';
-    const viewBadge = activeView === 'archive'
-      ? '<span class="archive-badge">📦 Archived</span>'
-      : activeView === 'repeats'
-        ? '<span class="repeat-badge">↩ Repeat</span>'
-        : '';
+    const viewBadge = activeView === 'repeats' && s.goback === true
+      ? '<span class="repeat-badge">↩ Go back</span>'
+      : '';
     const photo = s.photo ? `<img class="card-photo" src="${htmlAttr(s.photo)}" alt="" loading="lazy" onerror="this.style.display='none'">` : '';
     const colls = s.collections ? s.collections.split(',').map(c => c.trim()).filter(Boolean).map(c => `<span class="coll-tag">${htmlText(c)}</span>`).join('') : '';
     return `
@@ -2509,6 +2514,7 @@ document.getElementById('grid').addEventListener('click', e => {
   else if (action==='want')   toggleWant(id);
   else if (action==='goback-yes') gobackYes(id);
   else if (action==='goback-no')  gobackNo(id);
+
   else if (action==='star')   setSpotStars(id, parseInt(n));
   else if (action==='filter') filterByCuisineTag(cuisine);
 });
