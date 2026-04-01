@@ -1890,12 +1890,7 @@ function setBeenDecision(goback) {
   const s = db.spots.find(x => x.id === _beenPopupId);
   if (s) {
     s.goback = goback;
-    // Switch to the right tab
-    const view = goback === true ? 'repeats' : goback === false ? 'noback' : 'archive';
-    activeView = view;
-    document.querySelectorAll('.view-tab').forEach(b => {
-      b.classList.toggle('active', b.dataset.view === view);
-    });
+    // Stay on current view - no tab switching
     render();
     sbFetch('PATCH', 'spots?id=eq.' + _beenPopupId, { goback }).catch(() => {});
   }
