@@ -539,7 +539,7 @@ select {
       <optgroup label="View">
         <option value="view-active">Our List</option>
         <option value="view-repeats">👍 Worth it</option>
-        <option value="view-noback">👎 Not for us</option>
+        <option value="view-noback">One &amp; Done</option>
         <option value="view-archive">Decide Later</option>
       </optgroup>
     </select>
@@ -568,7 +568,7 @@ select {
 <div class="view-tabs" id="viewTabs">
   <button class="view-tab active" data-view="active" onclick="setView('active',this)">Our List</button>
   <button class="view-tab" data-view="repeats" onclick="setView('repeats',this)">👍 Worth it</button>
-  <button class="view-tab" data-view="noback" onclick="setView('noback',this)">👎 Not for us</button>
+  <button class="view-tab" data-view="noback" onclick="setView('noback',this)">One &amp; Done</button>
   <button class="view-tab" data-view="archive" onclick="setView('archive',this)">Decide Later</button>
 </div>
 <div class="grid" id="grid"></div>
@@ -593,7 +593,7 @@ select {
     <div style="font-size:0.82rem;color:var(--muted);margin-bottom:20px;">Would you go back?</div>
     <div style="display:flex;gap:10px;margin-bottom:10px;">
       <button onclick="setBeenDecision(true)" style="flex:1;padding:12px;border-radius:8px;background:#0d1e2e;border:1px solid #2a5a8a;color:#4a9ee8;font-family:'DM Sans',sans-serif;font-size:0.88rem;font-weight:600;cursor:pointer;">👍 Worth it</button>
-      <button onclick="setBeenDecision(false)" style="flex:1;padding:12px;border-radius:8px;background:#2a0f0f;border:1px solid #8a2a2a;color:#e87a4a;font-family:'DM Sans',sans-serif;font-size:0.88rem;font-weight:600;cursor:pointer;">👎 Not for us</button>
+      <button onclick="setBeenDecision(false)" style="flex:1;padding:12px;border-radius:8px;background:#2a0f0f;border:1px solid #8a2a2a;color:#e87a4a;font-family:'DM Sans',sans-serif;font-size:0.88rem;font-weight:600;cursor:pointer;">One &amp; Done</button>
     </div>
     <button onclick="setBeenDecision(null)" style="width:100%;padding:9px;border-radius:8px;background:none;border:1px solid var(--border);color:var(--muted);font-family:'DM Sans',sans-serif;font-size:0.82rem;cursor:pointer;">Decide later</button>
   </div>
@@ -1659,6 +1659,7 @@ function openAdd() {
 function openEdit(id) {
   const s = db.spots.find(x => x.id === id);
   if (!s) return;
+  ensureMapsLoaded();
   editingId = id; modalStars = s.stars || 0;
   hideDeleteConfirm();
   document.getElementById('modalTitle').textContent = 'Edit spot';
@@ -1679,17 +1680,15 @@ function openEdit(id) {
   document.getElementById('mPlaceSearch').value = s.lat && s.lng ? (s.location || s.name) : '';
   document.getElementById('mLat').value = s.lat || '';
   document.getElementById('mLng').value = s.lng || '';
-  if (s.lat && s.lng) {
-    if (window.google) {
-      setPinFromCoords(s.lat, s.lng, s.name);
-    } else {
-      // Maps not loaded yet - show status only
+  try {
+    if (s.lat && s.lng) {
       document.getElementById('pinStatus').style.display = 'block';
-      document.getElementById('miniMapWrap').style.display = 'none';
+      if (window.google) setPinFromCoords(s.lat, s.lng, s.name);
+      else document.getElementById('miniMapWrap').style.display = 'none';
+    } else {
+      clearPin();
     }
-  } else {
-    clearPin();
-  }
+  } catch(e) { console.warn('Pin restore error:', e); clearPin(); }
   document.getElementById('mNote').value = s.note || '';
   document.getElementById('mLink').value = s.link || '';
   document.getElementById('mPhoto').value = s.photo || '';
@@ -2118,14 +2117,15 @@ function setPinFromCoords(lat, lng, name) {
 }
 
 function clearPin() {
-  document.getElementById('mLat').value = '';
-  document.getElementById('mLng').value = '';
-  document.getElementById('mPlaceSearch').value = '';
-  document.getElementById('pinStatus').style.display = 'none';
-  document.getElementById('miniMapWrap').style.display = 'none';
-  document.getElementById('placeResults').style.display = 'none';
-  if (miniMapMarker) { miniMapMarker.setMap(null); miniMapMarker = null; }
-  miniMapInstance = null;
+  try {
+    const ids = ['mLat','mLng','mPlaceSearch'];
+    ids.forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+    ['pinStatus','miniMapWrap','placeResults'].forEach(id => {
+      const el = document.getElementById(id); if(el) el.style.display = 'none';
+    });
+    if (miniMapMarker) { try { miniMapMarker.setMap(null); } catch(e){} miniMapMarker = null; }
+    miniMapInstance = null;
+  } catch(e) { console.warn('clearPin:', e); }
 }
 
 // ---- PHOTO UPLOAD + CROP ----
