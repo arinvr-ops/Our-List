@@ -2019,6 +2019,14 @@ function render() {
 }
 
 // ---- PLACE SEARCH + MINI MAP ----
+let autocompleteService = null;
+let placesService = null;
+
+function initPlacesServices() {
+  if (!window.google || autocompleteService) return;
+  autocompleteService = new google.maps.places.AutocompleteService();
+  placesService = new google.maps.places.PlacesService(document.createElement('div'));
+}
 let miniMapInstance = null;
 let miniMapMarker = null;
 
