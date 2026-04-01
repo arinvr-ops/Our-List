@@ -532,7 +532,7 @@ select {
     <div class="rand-cat" id="randCat"></div>
     <div class="rand-name" id="randName"></div>
     <div class="rand-note" id="randNote"></div>
-    <div class="rand-loc" id="randLoc"></div>
+    <div class="rand-loc" id="randLoc" onclick="openRandMaps()" style="cursor:pointer;"></div>
   </div>
   <div class="rand-btns">
     <button class="rand-btn rand-shuffle" onclick="spinRandom()">🎲 Again</button>
@@ -1480,13 +1480,16 @@ function closeRandom() { document.getElementById('randOverlay').classList.remove
 let _currentRandSpot = null;
 
 function openRandMaps() {
-  if (!_currentRandSpot) return;
-  const s = _currentRandSpot;
-  const url = s.lat && s.lng
-    ? `https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}`
-    : s.location
-      ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(s.location)}`
-      : null;
+  const locEl = document.getElementById('randLoc');
+  const locText = locEl ? locEl.textContent.replace('📍 ','').trim() : '';
+  if (!locText) return;
+
+  let url;
+  if (_currentRandSpot && _currentRandSpot.lat && _currentRandSpot.lng) {
+    url = `https://www.google.com/maps/dir/?api=1&destination=${_currentRandSpot.lat},${_currentRandSpot.lng}`;
+  } else if (locText) {
+    url = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(locText)}`;
+  }
   if (url) window.open(url, '_blank');
 }
 
