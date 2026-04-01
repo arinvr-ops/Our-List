@@ -1338,12 +1338,12 @@ window.addEventListener('scroll', () => {
         fullyCollapsed = false; tabsVisible = false;
         setCollapse(false, false);
       }
-    } else if (scrollingDown && !fullyCollapsed) {
-      // Scrolling down - collapse everything
+    } else if (scrollingDown && y > 50 && !fullyCollapsed) {
+      // Scrolling down past 50px - collapse everything
       fullyCollapsed = true; tabsVisible = false;
       setCollapse(true, true);
     } else if (!scrollingDown && fullyCollapsed) {
-      // Pulling up - show tabs only
+      // Any upward pull - show tabs
       tabsVisible = true;
       setCollapse(true, false);
     }
