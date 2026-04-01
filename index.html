@@ -538,6 +538,12 @@ select {
     <button class="rand-btn rand-shuffle" onclick="spinRandom()">🎲 Again</button>
     <button class="rand-btn rand-close" onclick="closeRandom()">Done</button>
   </div>
+  <div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
+    <button id="includBeenBtn" onclick="toggleIncludeBeen()"
+      style="background:none;border:1px solid var(--border);color:var(--muted);font-family:'DM Sans',sans-serif;font-size:0.72rem;padding:5px 12px;border-radius:20px;cursor:pointer;transition:all 0.14s;text-transform:uppercase;letter-spacing:0.4px;">
+      Include places we've been
+    </button>
+  </div>
 </div>
 
 <!-- Add/Edit modal -->
@@ -1198,6 +1204,7 @@ let activeStar     = 0;
 let favOnly        = false;
 let beenOnly       = false;
 let wantOnly       = false;
+let randIncludeBeen = false;
 let editingId      = null;
 let modalStars     = 0;
 
@@ -1437,6 +1444,17 @@ function toggleBeenOnly() {
   document.getElementById('beenOnlyBtn').classList.toggle('active-been', beenOnly);
   render();
 }
+function toggleIncludeBeen() {
+  randIncludeBeen = !randIncludeBeen;
+  const btn = document.getElementById('includBeenBtn');
+  if (randIncludeBeen) {
+    btn.style.cssText = 'background:#0f2318;border:1px solid #2a6644;color:#4caf78;font-family:DM Sans,sans-serif;font-size:0.72rem;padding:5px 12px;border-radius:20px;cursor:pointer;text-transform:uppercase;letter-spacing:0.4px;';
+  } else {
+    btn.style.cssText = 'background:none;border:1px solid var(--border);color:var(--muted);font-family:DM Sans,sans-serif;font-size:0.72rem;padding:5px 12px;border-radius:20px;cursor:pointer;text-transform:uppercase;letter-spacing:0.4px;';
+  }
+  spinRandom();
+}
+
 function toggleWantOnly() {
   wantOnly = !wantOnly;
   document.getElementById('wantOnlyBtn').classList.toggle('active-been', wantOnly);
@@ -1453,11 +1471,24 @@ function openRandom() {
 }
 function getRandomPool() {
   const filtered = getFilteredList();
+  if (randIncludeBeen) return filtered;
   const notBeen = filtered.filter(s => !s.been);
-  // If all have been visited fall back to full list
   return notBeen.length > 0 ? notBeen : filtered;
 }
 function closeRandom() { document.getElementById('randOverlay').classList.remove('open'); }
+
+let _currentRandSpot = null;
+
+function openRandMaps() {
+  if (!_currentRandSpot) return;
+  const s = _currentRandSpot;
+  const url = s.lat && s.lng
+    ? `https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}`
+    : s.location
+      ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(s.location)}`
+      : null;
+  if (url) window.open(url, '_blank');
+}
 
 function spinRandom() {
   const filtered = getRandomPool();
@@ -1471,17 +1502,22 @@ function spinRandom() {
     document.getElementById('randName').textContent = s.name;
     document.getElementById('randCat').textContent = catLabel(s.cat);
     document.getElementById('randNote').textContent = s.note || '';
-    document.getElementById('randLoc').textContent = s.location ? '📍 ' + s.location : '';
+    const locEl = document.getElementById('randLoc');
+    if (s.location) {
+      locEl.textContent = '📍 ' + s.location;
+      locEl.style.textDecoration = (s.lat && s.lng) || s.location ? 'underline' : 'none';
+      locEl.style.color = (s.lat && s.lng) || s.location ? 'var(--accent)' : 'var(--muted)';
+    } else {
+      locEl.textContent = '';
+    }
     const color = catColor(s.cat);
-    card.style.setProperty('--rand-color', color);
-    card.querySelector('.rand-card')?.style?.setProperty?.('--rand-color', color);
-    // update the ::before color via a style tag trick
     document.getElementById('randBefore').textContent = `.rand-card::before { background: ${color}; }`;
     ticks++;
     if (ticks < total) {
       setTimeout(tick, 60 + ticks * 15);
     } else {
       card.classList.remove('rand-spinning');
+      _currentRandSpot = s; // store final spot for maps link
     }
   };
   tick();
