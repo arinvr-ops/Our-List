@@ -287,6 +287,17 @@ select {
 .been-btn.on { background: #0f2318; border-color: #2a6644; color: #4caf78; }
 .been-btn:hover { border-color: #4caf78; color: #4caf78; }
 
+.goback-btn {
+  font-size: 0.64rem; font-weight: 500; letter-spacing: 0.3px; text-transform: uppercase;
+  padding: 2px 7px; border-radius: 3px; cursor: pointer; white-space: nowrap;
+  background: none; border: 1px solid var(--border); color: var(--muted);
+  font-family: 'DM Sans', sans-serif; transition: all 0.14s; display: none;
+}
+.been-btn.on ~ .goback-btn { display: inline-block; }
+.goback-btn.yes { background: #0d1e2e; border-color: #2a5a8a; color: #4a9ee8; }
+.goback-btn.no  { background: #2a0f0f; border-color: #8a2a2a; color: #e87a4a; }
+.goback-btn:hover { opacity: 0.8; }
+
 .link-btn {
   display: inline-flex; align-items: center; justify-content: center;
   width: 24px; height: 24px; border-radius: 4px;
@@ -332,6 +343,34 @@ select {
 .fav-btn-card.on { opacity: 1; color: #e84b4b; }
 
 .empty { grid-column: 1/-1; text-align: center; padding: 50px 20px; color: var(--muted); font-size: 0.88rem; }
+
+/* VIEW TABS */
+.view-tabs {
+  display: flex; gap: 0; border-bottom: 1px solid var(--border);
+  padding: 0 14px; background: var(--bg);
+}
+.view-tab {
+  padding: 9px 16px; font-family: 'DM Sans', sans-serif; font-size: 0.78rem;
+  font-weight: 500; letter-spacing: 0.5px; text-transform: uppercase;
+  color: var(--muted); cursor: pointer; border: none; background: none;
+  border-bottom: 2px solid transparent; transition: all 0.14s; white-space: nowrap;
+}
+.view-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+.view-tab:hover { color: var(--text); }
+
+/* archived card dim */
+.card.archived { opacity: 0.6; }
+.card.archived:hover { opacity: 1; }
+.archive-badge {
+  font-size: 0.62rem; font-weight: 500; letter-spacing: 0.3px; text-transform: uppercase;
+  padding: 2px 6px; border-radius: 3px; background: #2a2010; border: 1px solid #4a3820;
+  color: #a07840; white-space: nowrap;
+}
+.repeat-badge {
+  font-size: 0.62rem; font-weight: 500; letter-spacing: 0.3px; text-transform: uppercase;
+  padding: 2px 6px; border-radius: 3px; background: #0d1e2e; border: 1px solid #2a5a8a;
+  color: #4a9ee8; white-space: nowrap;
+}
 
 /* MAP VIEW */
 #mapView {
@@ -513,6 +552,11 @@ select {
 </div>
 
 <div id="countBar"></div>
+<div class="view-tabs" id="viewTabs">
+  <button class="view-tab active" data-view="active" onclick="setView('active',this)">Our List</button>
+  <button class="view-tab" data-view="archive" onclick="setView('archive',this)">Archive</button>
+  <button class="view-tab" data-view="repeats" onclick="setView('repeats',this)">Repeats ↩</button>
+</div>
 <div class="grid" id="grid"></div>
 
 <!-- MAP VIEW -->
@@ -1159,7 +1203,7 @@ async function seedBaseSpots() {
     const chunk = BASE.slice(i, i + batch).map(s => ({
       name: s.name, cat: s.cat, cuisine: s.cuisine,
       location: s.location || '', note: s.note || '', link: s.link || '',
-      stars: 0, fav: false, been: s.been || false, want: false, photo: '', collections: ''
+      stars: 0, fav: false, been: s.been || false, want: false, photo: '', collections: '', goback: null
     }));
     await sbFetch('POST', 'spots', chunk);
   }
@@ -1184,13 +1228,13 @@ function startRealtime() {
   // Poll every 8 seconds for changes from other users - simple and reliable
   setInterval(async () => {
     try {
-      const rows = await sbFetch('GET', 'spots?select=id,fav,been,stars,link,lat,lng&order=name.asc');
+      const rows = await sbFetch('GET', 'spots?select=id,fav,been,stars,link,lat,lng,goback&order=name.asc');
       if (!rows) return;
       let changed = false;
       rows.forEach(r => {
         const s = db.spots.find(x => x.id === r.id);
         if (s && (s.fav !== r.fav || s.been !== r.been || s.stars !== r.stars || s.link !== r.link)) {
-          Object.assign(s, { fav: r.fav, been: r.been, stars: r.stars, link: r.link||'', lat: r.lat||null, lng: r.lng||null });
+          Object.assign(s, { fav: r.fav, been: r.been, stars: r.stars, link: r.link||'', lat: r.lat||null, lng: r.lng||null, goback: r.goback !== undefined ? r.goback : null });
           changed = true;
         }
       });
@@ -1205,6 +1249,7 @@ let favOnly        = false;
 let beenOnly       = false;
 let wantOnly       = false;
 let randIncludeBeen = false;
+let activeView = 'active'; // active | archive | repeats
 let editingId      = null;
 let modalStars     = 0;
 
@@ -1444,6 +1489,13 @@ function toggleBeenOnly() {
   document.getElementById('beenOnlyBtn').classList.toggle('active-been', beenOnly);
   render();
 }
+function setView(view, el) {
+  activeView = view;
+  document.querySelectorAll('.view-tab').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  render();
+}
+
 function toggleIncludeBeen() {
   randIncludeBeen = !randIncludeBeen;
   const btn = document.getElementById('includBeenBtn');
@@ -1658,12 +1710,12 @@ function saveSpot() {
     if (s) {
       Object.assign(s, { name, cat, cuisine, location, note, link: link||'', photo: photo||'', collections: collections||'', stars: modalStars, lat: lat||null, lng: lng||null });
       render();
-      sbFetch('PATCH', 'spots?id=eq.' + editingId, { name, cat, cuisine, location, note, link: link||'', photo: photo||'', collections: collections||'', stars: modalStars, lat: lat||null, lng: lng||null })
+      sbFetch('PATCH', 'spots?id=eq.' + editingId, { name, cat, cuisine, location, note, link: link||'', photo: photo||'', collections: collections||'', stars: modalStars, lat: lat||null, lng: lng||null, goback: s.goback||null })
         .then(() => showStatus('Saved'))
         .catch(() => showStatus('Save failed', true));
     }
   } else {
-    const newSpot = { name, cat, cuisine, location, note, link: link||'', photo: photo||'', collections: collections||'', stars: modalStars, fav: false, been: false, want: false, lat, lng };
+    const newSpot = { name, cat, cuisine, location, note, link: link||'', photo: photo||'', collections: collections||'', stars: modalStars, fav: false, been: false, want: false, lat, lng, goback: null };
     sbFetch('POST', 'spots', newSpot)
       .then(res => {
         if (res && res[0]) { db.spots.push(res[0]); render(); }
@@ -1706,6 +1758,17 @@ function toggleFav(id) {
   s.fav = !s.fav; render();
   sbFetch('PATCH', 'spots?id=eq.' + id, { fav: s.fav }).catch(() => {});
 }
+function toggleGoBack(id) {
+  const s = db.spots.find(x => x.id === id);
+  if (!s) return;
+  // Cycle: null -> true (go back) -> false (once was enough) -> null
+  s.goback = s.goback === null || s.goback === undefined ? true
+           : s.goback === true ? false
+           : null;
+  render();
+  sbFetch('PATCH', 'spots?id=eq.' + id, { goback: s.goback }).catch(() => {});
+}
+
 function toggleBeen(id) {
   const s = db.spots.find(x => x.id === id);
   if (!s) return;
@@ -1729,6 +1792,18 @@ function filterByCuisineTag(cuisine) {
 function getFilteredList() {
   const q = document.getElementById('searchInput').value.toLowerCase();
   return db.spots.filter(s => {
+    // VIEW FILTER - this is the primary filter
+    if (activeView === 'archive') {
+      // Archive: been + once was enough (goback=false)
+      if (!s.been || s.goback !== false) return false;
+    } else if (activeView === 'repeats') {
+      // Repeats: been + would go back (goback=true)
+      if (!s.been || s.goback !== true) return false;
+    } else {
+      // Active list: not archived (exclude been + goback=false)
+      if (s.been && s.goback === false) return false;
+    }
+
     if (activeCategory !== 'all') {
       if (activeCategory === 'food') {
         if (!isFood(s.cat)) return false;
@@ -1790,13 +1865,18 @@ function render() {
         : '';
     const note = s.note ? `<div class="card-note">${htmlText(s.note)}</div>` : '';
     const favStyle = s.fav ? 'opacity:1;color:#e84b4b' : 'opacity:0.3';
+    const viewBadge = activeView === 'archive'
+      ? '<span class="archive-badge">📦 Archived</span>'
+      : activeView === 'repeats'
+        ? '<span class="repeat-badge">↩ Repeat</span>'
+        : '';
     const photo = s.photo ? `<img class="card-photo" src="${htmlAttr(s.photo)}" alt="" loading="lazy" onerror="this.style.display='none'">` : '';
     const colls = s.collections ? s.collections.split(',').map(c => c.trim()).filter(Boolean).map(c => `<span class="coll-tag">${htmlText(c)}</span>`).join('') : '';
     return `
     <div class="card" data-cat="${s.cat}" style="--card-color:${color}; border-top: 3px solid ${color}22;">
       ${photo}
       <div class="card-top">
-        <div class="card-name">${htmlText(s.name)}</div>
+        <div style="flex:1;padding-right:6px;"><div class="card-name">${htmlText(s.name)}</div>${viewBadge}</div>
         <div class="card-actions">
           <button class="want-btn${s.want?' on':''}" data-action="want" data-id="${s.id}" title="Want to go">🔥</button>
           <button class="icon-btn" data-action="edit" data-id="${s.id}" title="Edit">✏️</button>
@@ -1810,6 +1890,7 @@ function render() {
         <div class="card-badges">
           <span class="ctag" data-action="filter" data-cuisine="${htmlAttr(s.cuisine)}" style="border-color:${color}44;color:${color}">${htmlText(s.cuisine)}</span>
           <button class="been-btn${s.been?' on':''}" data-action="been" data-id="${s.id}">${s.been?'✓ Been':'Been?'}</button>
+          ${s.been ? `<button class="goback-btn${s.goback===true?' yes':s.goback===false?' no':''}" data-action="goback" data-id="${s.id}" title="Would you go back?">${s.goback===true?'↩ Again':s.goback===false?'✗ Once was enough':'↩ Go back?'}</button>` : ''}
           ${s.link ? `<a class="link-btn" href="${htmlAttr(s.link)}" target="_blank" rel="noopener" title="Open link">🔗</a>` : ''}
         </div>
       </div>
@@ -2419,6 +2500,7 @@ document.getElementById('grid').addEventListener('click', e => {
   else if (action==='fav')    toggleFav(id);
   else if (action==='been')   toggleBeen(id);
   else if (action==='want')   toggleWant(id);
+  else if (action==='goback')  toggleGoBack(id);
   else if (action==='star')   setSpotStars(id, parseInt(n));
   else if (action==='filter') filterByCuisineTag(cuisine);
 });
