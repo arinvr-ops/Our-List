@@ -528,12 +528,20 @@ select {
       </svg>
       <input type="text" id="searchInput" placeholder="Search everything..." oninput="render()">
     </div>
-    <select id="sortSelect" onchange="render()">
-      <option value="newest">Newest first</option>
-      <option value="alpha">A - Z</option>
-      <option value="alpha-desc">Z - A</option>
-      <option value="stars-desc">Top rated</option>
-      <option value="stars-asc">Lowest rated</option>
+    <select id="sortSelect" onchange="handleSortChange(this)">
+      <optgroup label="Sort">
+        <option value="newest">Newest first</option>
+        <option value="alpha">A - Z</option>
+        <option value="alpha-desc">Z - A</option>
+        <option value="stars-desc">Top rated</option>
+        <option value="stars-asc">Lowest rated</option>
+      </optgroup>
+      <optgroup label="View">
+        <option value="view-active">Our List</option>
+        <option value="view-archive">Archive</option>
+        <option value="view-repeats">↩ Go Back</option>
+        <option value="view-noback">✗ No Thanks</option>
+      </optgroup>
     </select>
     <button class="add-btn" onclick="openAdd()">+ Add</button>
   </div>
@@ -560,7 +568,8 @@ select {
 <div class="view-tabs" id="viewTabs">
   <button class="view-tab active" data-view="active" onclick="setView('active',this)">Our List</button>
   <button class="view-tab" data-view="archive" onclick="setView('archive',this)">Archive</button>
-  <button class="view-tab" data-view="repeats" onclick="setView('repeats',this)">Repeats ↩</button>
+  <button class="view-tab" data-view="repeats" onclick="setView('repeats',this)">↩ Go Back</button>
+  <button class="view-tab" data-view="noback" onclick="setView('noback',this)">✗ No Thanks</button>
 </div>
 <div class="grid" id="grid"></div>
 
@@ -1494,10 +1503,29 @@ function toggleBeenOnly() {
   document.getElementById('beenOnlyBtn').classList.toggle('active-been', beenOnly);
   render();
 }
+function handleSortChange(sel) {
+  const val = sel.value;
+  if (val.startsWith('view-')) {
+    const view = val.replace('view-', '');
+    // Sync the tab UI
+    document.querySelectorAll('.view-tab').forEach(b => {
+      b.classList.toggle('active', b.dataset.view === view);
+    });
+    activeView = view;
+    render();
+  } else {
+    render();
+  }
+}
+
 function setView(view, el) {
   activeView = view;
   document.querySelectorAll('.view-tab').forEach(b => b.classList.remove('active'));
   el.classList.add('active');
+  // Sync dropdown if it has a matching view option
+  const sel = document.getElementById('sortSelect');
+  const opt = sel.querySelector(`option[value="view-${view}"]`);
+  if (!opt) sel.value = sel.querySelector('option').value; // reset to first sort
   render();
 }
 
@@ -1763,6 +1791,14 @@ function toggleFav(id) {
   s.fav = !s.fav; render();
   sbFetch('PATCH', 'spots?id=eq.' + id, { fav: s.fav }).catch(() => {});
 }
+function gobackNo(id) {
+  const s = db.spots.find(x => x.id === id);
+  if (!s) return;
+  s.goback = s.goback === false ? null : false;
+  render();
+  sbFetch('PATCH', 'spots?id=eq.' + id, { goback: s.goback }).catch(() => {});
+}
+
 function gobackYes(id) {
   const s = db.spots.find(x => x.id === id);
   if (!s) return;
@@ -1802,19 +1838,16 @@ function filterByCuisineTag(cuisine) {
 function getFilteredList() {
   const q = document.getElementById('searchInput').value.toLowerCase();
   return db.spots.filter(s => {
-    // VIEW FILTER - this is the primary filter
+    // VIEW FILTER
     if (activeView === 'archive') {
-      // Archive: been + once was enough
-      if (!s.been || s.goback !== false) return false;
+      if (!s.been) return false; // archive = all been spots
     } else if (activeView === 'repeats') {
-      // Repeats: been + would go back (goback=true)
       if (!s.been || s.goback !== true) return false;
+    } else if (activeView === 'noback') {
+      if (!s.been || s.goback !== false) return false;
     } else {
-      // Active list: unvisited + been but no decision yet (goback===null/undefined)
-      if (s.been && s.goback === true) return false;  // decided go back -> repeats
-      if (s.been && s.goback === false) return false;  // decided once was enough -> archive
+      if (s.been) return false; // active list = unvisited only
     }
-
     if (activeCategory !== 'all') {
       if (activeCategory === 'food') {
         if (!isFood(s.cat)) return false;
@@ -1835,7 +1868,8 @@ function getFilteredList() {
 }
 
 function render() {
-  const sort = document.getElementById('sortSelect').value;
+  const sortVal = document.getElementById('sortSelect').value;
+  const sort = sortVal.startsWith('view-') ? 'newest' : sortVal;
   let list = getFilteredList();
   if (sort==='newest')       list.sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0));
   else if (sort==='alpha')        list.sort((a,b)=>a.name.localeCompare(b.name));
@@ -2513,6 +2547,7 @@ document.getElementById('grid').addEventListener('click', e => {
   else if (action==='been')   toggleBeen(id);
   else if (action==='want')   toggleWant(id);
   else if (action==='goback-yes') gobackYes(id);
+  else if (action==='goback-no')  gobackNo(id);
   else if (action==='goback-no')  gobackNo(id);
 
   else if (action==='star')   setSpotStars(id, parseInt(n));
