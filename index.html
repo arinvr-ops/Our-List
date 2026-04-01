@@ -538,9 +538,9 @@ select {
       </optgroup>
       <optgroup label="View">
         <option value="view-active">Our List</option>
-        <option value="view-archive">Archive</option>
         <option value="view-repeats">👍 Worth it</option>
         <option value="view-noback">👎 Not for us</option>
+        <option value="view-archive">Archive</option>
       </optgroup>
     </select>
     <button class="add-btn" onclick="openAdd()">+ Add</button>
@@ -567,9 +567,9 @@ select {
 <div id="countBar"></div>
 <div class="view-tabs" id="viewTabs">
   <button class="view-tab active" data-view="active" onclick="setView('active',this)">Our List</button>
-  <button class="view-tab" data-view="archive" onclick="setView('archive',this)">Archive</button>
   <button class="view-tab" data-view="repeats" onclick="setView('repeats',this)">👍 Worth it</button>
   <button class="view-tab" data-view="noback" onclick="setView('noback',this)">👎 Not for us</button>
+  <button class="view-tab" data-view="archive" onclick="setView('archive',this)">Archive</button>
 </div>
 <div class="grid" id="grid"></div>
 
