@@ -361,6 +361,8 @@ select {
   border-bottom: 2px solid transparent; transition: all 0.14s; white-space: nowrap;
 }
 .view-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+#viewTabs { transition: max-height 0.3s ease, opacity 0.25s ease, padding 0.3s ease; }
+#viewTabs.gone { max-height: 0; opacity: 0; pointer-events: none; overflow: hidden; border-bottom: none !important; }
 .view-tab:hover { color: var(--text); }
 
 /* archived card dim */
@@ -561,16 +563,16 @@ select {
     <button class="star-pill" onclick="setStarFilter(4,this)">4+ ★</button>
     <button class="star-pill" onclick="setStarFilter(5,this)">5 ★</button>
   </div>
+  <div class="view-tabs" id="viewTabs" style="border-bottom:1px solid var(--border);">
+    <button class="view-tab active" data-view="active" onclick="setView('active',this)">Our List</button>
+    <button class="view-tab" data-view="repeats" onclick="setView('repeats',this)">👍 Worth it</button>
+    <button class="view-tab" data-view="noback" onclick="setView('noback',this)">One &amp; Done</button>
+    <button class="view-tab" data-view="archive" onclick="setView('archive',this)">Decide Later</button>
+  </div>
   <div id="stickyBorder"></div>
 </div>
 
 <div id="countBar"></div>
-<div class="view-tabs" id="viewTabs">
-  <button class="view-tab active" data-view="active" onclick="setView('active',this)">Our List</button>
-  <button class="view-tab" data-view="repeats" onclick="setView('repeats',this)">👍 Worth it</button>
-  <button class="view-tab" data-view="noback" onclick="setView('noback',this)">One &amp; Done</button>
-  <button class="view-tab" data-view="archive" onclick="setView('archive',this)">Decide Later</button>
-</div>
 <div class="grid" id="grid"></div>
 
 <!-- MAP VIEW -->
@@ -1316,6 +1318,7 @@ window.addEventListener('scroll', () => {
     if (collapsed === lastCollapsed) return;
     lastCollapsed = collapsed;
     document.getElementById('favBar').classList.toggle('gone', collapsed);
+    document.getElementById('viewTabs').classList.toggle('gone', collapsed);
     document.getElementById('catRow').classList.toggle('gone', collapsed);
     document.getElementById('typeRow').classList.toggle('gone', collapsed);
 
