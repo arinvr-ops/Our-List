@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
 <title>Our List</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
 <style>
@@ -500,6 +500,7 @@ select {
   .grid { padding: 8px 14px 48px; }
   header h1 { font-size: 2rem; }
 }
+.field input, .field select, .field textarea, input[type="text"], input[type="url"] { font-size: 16px !important; }
 </style>
 </head>
 <body>
@@ -509,7 +510,8 @@ select {
   <span style="color:#7a776e;font-size:0.82rem;letter-spacing:1px;text-transform:uppercase;">Loading your list...</span>
 </div>
 <div id="statusMsg" style="display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1a1916;border:1px solid #2e2c28;border-radius:8px;padding:8px 18px;font-size:0.8rem;z-index:500;white-space:nowrap;"></div>
-<style>@keyframes spin { to { transform: rotate(360deg); } }</style>
+<style>@keyframes spin { to { transform: rotate(360deg); } }.field input, .field select, .field textarea, input[type="text"], input[type="url"] { font-size: 16px !important; }
+</style>
 
 <header>
   <h1>Our List</h1>
@@ -2764,7 +2766,8 @@ requestAnimationFrame(() => requestAnimationFrame(measureThreshold));
 </script>
 
 <!-- dynamic style for random card accent line -->
-<style id="randBefore">.rand-card::before { background: var(--accent); }</style>
+<style id="randBefore">.rand-card::before { background: var(--accent); }.field input, .field select, .field textarea, input[type="text"], input[type="url"] { font-size: 16px !important; }
+</style>
 
 
 </body>
