@@ -1985,16 +1985,14 @@ function render() {
         : '';
     const note = s.note ? `<div class="card-note">${htmlText(s.note)}</div>` : '';
     const favStyle = s.fav ? 'opacity:1;color:#e84b4b' : 'opacity:0.3';
-    const viewBadge = activeView === 'repeats' && s.goback === true
-      ? '<span class="repeat-badge">↩ Go back</span>'
-      : '';
+    const viewBadge = '';
     const photo = s.photo ? `<img class="card-photo" src="${htmlAttr(s.photo)}" alt="" loading="lazy" onerror="this.style.display='none'">` : '';
     const colls = s.collections ? s.collections.split(',').map(c => c.trim()).filter(Boolean).map(c => `<span class="coll-tag">${htmlText(c)}</span>`).join('') : '';
     return `
     <div class="card" data-cat="${s.cat}" style="--card-color:${color}; border-top: 3px solid ${color}22;">
       ${photo}
       <div class="card-top">
-        <div style="flex:1;padding-right:6px;"><div class="card-name">${htmlText(s.name)}</div>${viewBadge}</div>
+        <div class="card-name">${htmlText(s.name)}</div>
         <div class="card-actions">
           <button class="want-btn${s.want?' on':''}" data-action="want" data-id="${s.id}" title="Want to go">🔥</button>
           <button class="icon-btn" data-action="edit" data-id="${s.id}" title="Edit">✏️</button>
