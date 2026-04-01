@@ -584,6 +584,20 @@ select {
   <div id="mapSpotList"></div>
 </div>
 
+<!-- Been? popup -->
+<div id="beenPopup" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;width:100%;max-width:340px;text-align:center;">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:2px;color:var(--accent);margin-bottom:6px;">Been there!</div>
+    <div id="beenPopupName" style="font-size:1rem;font-weight:500;color:var(--text);margin-bottom:6px;"></div>
+    <div style="font-size:0.82rem;color:var(--muted);margin-bottom:20px;">Would you go back?</div>
+    <div style="display:flex;gap:10px;">
+      <button onclick="setBeenDecision(true)" style="flex:1;padding:12px;border-radius:8px;background:#0d1e2e;border:1px solid #2a5a8a;color:#4a9ee8;font-family:'DM Sans',sans-serif;font-size:0.88rem;font-weight:600;cursor:pointer;">↩ Go Back</button>
+      <button onclick="setBeenDecision(false)" style="flex:1;padding:12px;border-radius:8px;background:#2a0f0f;border:1px solid #8a2a2a;color:#e87a4a;font-family:'DM Sans',sans-serif;font-size:0.88rem;font-weight:600;cursor:pointer;">✗ No Thanks</button>
+    </div>
+    <button onclick="setBeenDecision(null)" style="margin-top:10px;width:100%;padding:9px;border-radius:8px;background:none;border:1px solid var(--border);color:var(--muted);font-family:'DM Sans',sans-serif;font-size:0.82rem;cursor:pointer;">Decide later</button>
+  </div>
+</div>
+
 <!-- Random picker overlay -->
 <div class="rand-overlay" id="randOverlay">
   <div class="rand-card" id="randCard">
@@ -1815,11 +1829,44 @@ function gobackNo(id) {
 }
 
 
+let _beenPopupId = null;
+
 function toggleBeen(id) {
   const s = db.spots.find(x => x.id === id);
   if (!s) return;
-  s.been = !s.been; render();
-  sbFetch('PATCH', 'spots?id=eq.' + id, { been: s.been }).catch(() => {});
+  s.been = !s.been;
+  if (s.been) {
+    // Show popup asking go back or no thanks
+    _beenPopupId = id;
+    document.getElementById('beenPopupName').textContent = s.name;
+    document.getElementById('beenPopup').style.display = 'flex';
+  } else {
+    s.goback = null;
+    activeView = 'active';
+    document.querySelectorAll('.view-tab').forEach(b => {
+      b.classList.toggle('active', b.dataset.view === 'active');
+    });
+  }
+  render();
+  sbFetch('PATCH', 'spots?id=eq.' + id, { been: s.been, goback: s.goback || null }).catch(() => {});
+}
+
+function setBeenDecision(goback) {
+  document.getElementById('beenPopup').style.display = 'none';
+  if (_beenPopupId === null) return;
+  const s = db.spots.find(x => x.id === _beenPopupId);
+  if (s) {
+    s.goback = goback;
+    // Switch to the right tab
+    const view = goback === true ? 'repeats' : goback === false ? 'noback' : 'archive';
+    activeView = view;
+    document.querySelectorAll('.view-tab').forEach(b => {
+      b.classList.toggle('active', b.dataset.view === view);
+    });
+    render();
+    sbFetch('PATCH', 'spots?id=eq.' + _beenPopupId, { goback }).catch(() => {});
+  }
+  _beenPopupId = null;
 }
 function toggleWant(id) {
   const s = db.spots.find(x => x.id === id);
