@@ -1997,7 +1997,7 @@ function render() {
         <div class="card-name">${htmlText(s.name)}</div>
         <div class="card-actions">
           <button class="want-btn${s.want?' on':''}" data-action="want" data-id="${s.id}" title="Want to go">🔥</button>
-          <button class="icon-btn" data-action="edit" data-id="${s.id}" title="Edit">✏️</button>
+          <button class="icon-btn" onclick="event.stopPropagation();openEdit('${s.id}')" title="Edit">✏️</button>
           <button class="icon-btn fav-btn-card${s.fav?' on':''}" data-action="fav" data-id="${s.id}" style="${favStyle}">♥</button>
         </div>
       </div>
