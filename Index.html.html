@@ -2025,8 +2025,9 @@ function moveCrop(dx, dy) {
   const frame = document.getElementById('cropFrame');
   const fw = frame.offsetWidth, fh = 150;
   const iw = _cropImg.width * _cScale, ih = _cropImg.height * _cScale;
-  _cx = Math.min(0, Math.max(fw - iw, _cx + dx));
-  _cy = Math.min(0, Math.max(fh - ih, _cy + dy));
+  // When image smaller than frame allow free movement, when larger clamp to edges
+  _cx = iw >= fw ? Math.min(0, Math.max(fw - iw, _cx + dx)) : Math.max(0, Math.min(fw - iw, _cx + dx));
+  _cy = ih >= fh ? Math.min(0, Math.max(fh - ih, _cy + dy)) : Math.max(0, Math.min(fh - ih, _cy + dy));
   updateCropImgStyle();
   drawPreview();
 }
