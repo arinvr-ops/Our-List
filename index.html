@@ -2047,7 +2047,7 @@ async function searchPlace(query) {
     const { AutocompleteSuggestion } = await google.maps.importLibrary('places');
     const { suggestions } = await AutocompleteSuggestion.fetchAutocompleteSuggestions({
       input: query,
-      locationBias: new google.maps.Circle({ center: { lat: 45.5051, lng: -122.6750 }, radius: 80000 }),
+      locationBias: new google.maps.Circle({ center: { lat: 45.5051, lng: -122.6750 }, radius: 50000 }),
     });
     const res = document.getElementById('placeResults');
     if (!suggestions || !suggestions.length) { res.style.display = 'none'; return; }
