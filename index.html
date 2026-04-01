@@ -585,7 +585,7 @@ select {
 </div>
 
 <!-- Been? popup -->
-<div<div id="beenPopup" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;align-items:center;justify-content:center;padding:20px;">
+<div id="beenPopup" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;align-items:center;justify-content:center;padding:20px;">
   <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;width:100%;max-width:340px;text-align:center;position:relative;">
     <button onclick="undoBeen()" style="position:absolute;top:12px;right:14px;background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;line-height:1;">✕</button>
     <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:2px;color:var(--accent);margin-bottom:6px;">Been there!</div>
@@ -1997,7 +1997,7 @@ function render() {
         <div class="card-name">${htmlText(s.name)}</div>
         <div class="card-actions">
           <button class="want-btn${s.want?' on':''}" data-action="want" data-id="${s.id}" title="Want to go">🔥</button>
-          <button class="icon-btn" onclick="event.stopPropagation();openEdit('${s.id}')" title="Edit">✏️</button>
+          <button class="icon-btn" data-action="edit" data-id="${s.id}" title="Edit">✏️</button>
           <button class="icon-btn fav-btn-card${s.fav?' on':''}" data-action="fav" data-id="${s.id}" style="${favStyle}">♥</button>
         </div>
       </div>
