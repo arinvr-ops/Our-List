@@ -288,12 +288,12 @@ select {
 .been-btn:hover { border-color: #4caf78; color: #4caf78; }
 
 .goback-btn {
-  font-size: 0.64rem; font-weight: 500; letter-spacing: 0.3px; text-transform: uppercase;
-  padding: 2px 7px; border-radius: 3px; cursor: pointer; white-space: nowrap;
+  font-size: 0.78rem; font-weight: 600;
+  width: 24px; height: 24px; border-radius: 4px; cursor: pointer; white-space: nowrap;
   background: none; border: 1px solid var(--border); color: var(--muted);
-  font-family: 'DM Sans', sans-serif; transition: all 0.14s; display: none;
+  font-family: 'DM Sans', sans-serif; transition: all 0.14s;
+  display: inline-flex; align-items: center; justify-content: center;
 }
-.been-btn.on ~ .goback-btn { display: inline-block; }
 .goback-btn.yes { background: #0d1e2e; border-color: #2a5a8a; color: #4a9ee8; }
 .goback-btn.no  { background: #2a0f0f; border-color: #8a2a2a; color: #e87a4a; }
 .goback-btn:hover { opacity: 0.8; }
@@ -1758,13 +1758,17 @@ function toggleFav(id) {
   s.fav = !s.fav; render();
   sbFetch('PATCH', 'spots?id=eq.' + id, { fav: s.fav }).catch(() => {});
 }
-function toggleGoBack(id) {
+function gobackYes(id) {
   const s = db.spots.find(x => x.id === id);
   if (!s) return;
-  // Cycle: null -> true (go back) -> false (once was enough) -> null
-  s.goback = s.goback === null || s.goback === undefined ? true
-           : s.goback === true ? false
-           : null;
+  s.goback = s.goback === true ? null : true; // toggle on/off
+  render();
+  sbFetch('PATCH', 'spots?id=eq.' + id, { goback: s.goback }).catch(() => {});
+}
+function gobackNo(id) {
+  const s = db.spots.find(x => x.id === id);
+  if (!s) return;
+  s.goback = s.goback === false ? null : false; // toggle on/off
   render();
   sbFetch('PATCH', 'spots?id=eq.' + id, { goback: s.goback }).catch(() => {});
 }
@@ -1890,7 +1894,10 @@ function render() {
         <div class="card-badges">
           <span class="ctag" data-action="filter" data-cuisine="${htmlAttr(s.cuisine)}" style="border-color:${color}44;color:${color}">${htmlText(s.cuisine)}</span>
           <button class="been-btn${s.been?' on':''}" data-action="been" data-id="${s.id}">${s.been?'✓ Been':'Been?'}</button>
-          ${s.been ? `<button class="goback-btn${s.goback===true?' yes':s.goback===false?' no':''}" data-action="goback" data-id="${s.id}" title="Would you go back?">${s.goback===true?'↩ Again':s.goback===false?'✗ Once was enough':'↩ Go back?'}</button>` : ''}
+          ${s.been ? `
+            <button class="goback-btn${s.goback===true?' yes':''}" data-action="goback-yes" data-id="${s.id}" title="Would go back">↩</button>
+            <button class="goback-btn${s.goback===false?' no':''}" data-action="goback-no" data-id="${s.id}" title="Once was enough">✗</button>
+          ` : ''}
           ${s.link ? `<a class="link-btn" href="${htmlAttr(s.link)}" target="_blank" rel="noopener" title="Open link">🔗</a>` : ''}
         </div>
       </div>
@@ -2500,7 +2507,8 @@ document.getElementById('grid').addEventListener('click', e => {
   else if (action==='fav')    toggleFav(id);
   else if (action==='been')   toggleBeen(id);
   else if (action==='want')   toggleWant(id);
-  else if (action==='goback')  toggleGoBack(id);
+  else if (action==='goback-yes') gobackYes(id);
+  else if (action==='goback-no')  gobackNo(id);
   else if (action==='star')   setSpotStars(id, parseInt(n));
   else if (action==='filter') filterByCuisineTag(cuisine);
 });
