@@ -216,7 +216,7 @@ input[type="text"] {
 }
 input[type="text"]:focus { border-color: var(--accent); }
 input[type="text"]::placeholder { color: var(--muted); }
-.modal input[type="text"], .modal input[type="url"] { padding: 9px 11px; }
+.modal input[type="text"], .modal input[type="url"] { padding: 9px 11px; width: 100%; max-width: 100%; box-sizing: border-box; }
 select {
   background: var(--card); border: 1px solid var(--border); color: var(--text);
   font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
