@@ -539,8 +539,8 @@ select {
       <optgroup label="View">
         <option value="view-active">Our List</option>
         <option value="view-archive">Archive</option>
-        <option value="view-repeats">↩ Go Back</option>
-        <option value="view-noback">✗ No Thanks</option>
+        <option value="view-repeats">👍 Worth it</option>
+        <option value="view-noback">👎 Not for us</option>
       </optgroup>
     </select>
     <button class="add-btn" onclick="openAdd()">+ Add</button>
@@ -568,8 +568,8 @@ select {
 <div class="view-tabs" id="viewTabs">
   <button class="view-tab active" data-view="active" onclick="setView('active',this)">Our List</button>
   <button class="view-tab" data-view="archive" onclick="setView('archive',this)">Archive</button>
-  <button class="view-tab" data-view="repeats" onclick="setView('repeats',this)">↩ Go Back</button>
-  <button class="view-tab" data-view="noback" onclick="setView('noback',this)">✗ No Thanks</button>
+  <button class="view-tab" data-view="repeats" onclick="setView('repeats',this)">👍 Worth it</button>
+  <button class="view-tab" data-view="noback" onclick="setView('noback',this)">👎 Not for us</button>
 </div>
 <div class="grid" id="grid"></div>
 
@@ -592,8 +592,8 @@ select {
     <div id="beenPopupName" style="font-size:1rem;font-weight:500;color:var(--text);margin-bottom:6px;"></div>
     <div style="font-size:0.82rem;color:var(--muted);margin-bottom:20px;">Would you go back?</div>
     <div style="display:flex;gap:10px;margin-bottom:10px;">
-      <button onclick="setBeenDecision(true)" style="flex:1;padding:12px;border-radius:8px;background:#0d1e2e;border:1px solid #2a5a8a;color:#4a9ee8;font-family:'DM Sans',sans-serif;font-size:0.88rem;font-weight:600;cursor:pointer;">↩ Go Back</button>
-      <button onclick="setBeenDecision(false)" style="flex:1;padding:12px;border-radius:8px;background:#2a0f0f;border:1px solid #8a2a2a;color:#e87a4a;font-family:'DM Sans',sans-serif;font-size:0.88rem;font-weight:600;cursor:pointer;">No Thanks</button>
+      <button onclick="setBeenDecision(true)" style="flex:1;padding:12px;border-radius:8px;background:#0d1e2e;border:1px solid #2a5a8a;color:#4a9ee8;font-family:'DM Sans',sans-serif;font-size:0.88rem;font-weight:600;cursor:pointer;">👍 Worth it</button>
+      <button onclick="setBeenDecision(false)" style="flex:1;padding:12px;border-radius:8px;background:#2a0f0f;border:1px solid #8a2a2a;color:#e87a4a;font-family:'DM Sans',sans-serif;font-size:0.88rem;font-weight:600;cursor:pointer;">👎 Not for us</button>
     </div>
     <button onclick="setBeenDecision(null)" style="width:100%;padding:9px;border-radius:8px;background:none;border:1px solid var(--border);color:var(--muted);font-family:'DM Sans',sans-serif;font-size:0.82rem;cursor:pointer;">Decide later</button>
   </div>
@@ -2009,7 +2009,7 @@ function render() {
           <span class="ctag" data-action="filter" data-cuisine="${htmlAttr(s.cuisine)}" style="border-color:${color}44;color:${color}">${htmlText(s.cuisine)}</span>
           <button class="been-btn${s.been?' on':''}" data-action="been" data-id="${s.id}">${s.been?'✓ Been':'Been?'}</button>
           ${s.been ? `
-            <button class="goback-btn${s.goback===true?' yes':''}" data-action="goback-yes" data-id="${s.id}" title="Would go back">↩</button>
+            <button class="goback-btn${s.goback===true?' yes':''}" data-action="goback-yes" data-id="${s.id}" title="Worth it">👍</button>
             <button class="goback-btn${s.goback===false?' no':''}" data-action="goback-no" data-id="${s.id}" title="Once was enough">✗</button>
           ` : ''}
           ${s.link ? `<a class="link-btn" href="${htmlAttr(s.link)}" target="_blank" rel="noopener" title="Open link">🔗</a>` : ''}
