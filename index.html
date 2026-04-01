@@ -71,6 +71,7 @@ header .sub { color: var(--muted); font-size: 0.76rem; letter-spacing: 1.5px; te
 #favBar > * { flex-shrink: 0; }
 
 #topRow {
+  transition: max-height 0.3s ease, opacity 0.25s ease, padding 0.3s ease;
   display: flex; gap: 8px; align-items: center;
   padding: 9px 14px;
   border-bottom: 1px solid var(--border);
@@ -78,6 +79,7 @@ header .sub { color: var(--muted); font-size: 0.76rem; letter-spacing: 1.5px; te
   scrollbar-width: none; -webkit-overflow-scrolling: touch;
 }
 #topRow::-webkit-scrollbar { display: none; }
+#topRow.gone { max-height: 0; opacity: 0; pointer-events: none; padding-top: 0; padding-bottom: 0; overflow: hidden; }
 #topRow > * { flex-shrink: 0; }
 .search-wrap { flex: 1; min-width: 120px; flex-shrink: 1 !important; }
 
@@ -1304,9 +1306,22 @@ function measureThreshold() {
   collapseThreshold = Math.max(rowBottom - barTop + 10, 50);
 }
 
-let rafPending = false;
-let lastCollapsed = false;
 const EXPAND_THRESHOLD = 20;
+
+let rafPending = false;
+let lastY = 0;
+let fullyCollapsed = false;
+let tabsVisible = false;
+
+function setCollapse(hideAll, hideTabs) {
+  document.getElementById('favBar').classList.toggle('gone', hideAll);
+  const topRow = document.getElementById('topRow');
+  if (topRow) topRow.classList.toggle('gone', hideAll);
+  document.getElementById('catRow').classList.toggle('gone', hideAll);
+  document.getElementById('filterRow').classList.toggle('gone', hideAll);
+  document.getElementById('starRow').classList.toggle('gone', hideAll);
+  document.getElementById('viewTabs').classList.toggle('gone', hideTabs);
+}
 
 window.addEventListener('scroll', () => {
   if (rafPending) return;
@@ -1314,15 +1329,24 @@ window.addEventListener('scroll', () => {
   requestAnimationFrame(() => {
     rafPending = false;
     const y = window.scrollY;
-    const collapsed = lastCollapsed ? y > EXPAND_THRESHOLD : y > collapseThreshold;
-    if (collapsed === lastCollapsed) return;
-    lastCollapsed = collapsed;
-    document.getElementById('favBar').classList.toggle('gone', collapsed);
-    document.getElementById('viewTabs').classList.toggle('gone', collapsed);
-    document.getElementById('catRow').classList.toggle('gone', collapsed);
-    document.getElementById('typeRow').classList.toggle('gone', collapsed);
+    const scrollingDown = y > lastY;
+    lastY = y;
 
-    document.getElementById('starRow').classList.toggle('gone', collapsed);
+    if (y <= 10) {
+      // At top - show everything
+      if (fullyCollapsed || tabsVisible) {
+        fullyCollapsed = false; tabsVisible = false;
+        setCollapse(false, false);
+      }
+    } else if (scrollingDown && !fullyCollapsed) {
+      // Scrolling down - collapse everything
+      fullyCollapsed = true; tabsVisible = false;
+      setCollapse(true, true);
+    } else if (!scrollingDown && fullyCollapsed) {
+      // Pulling up - show tabs only
+      tabsVisible = true;
+      setCollapse(true, false);
+    }
   });
 }, { passive: true });
 
