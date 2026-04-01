@@ -1633,7 +1633,7 @@ function ensureMapsLoaded() {
   if (document.getElementById('gmaps-script')) return;
   const script = document.createElement('script');
   script.id = 'gmaps-script';
-  script.src = 'https://maps.googleapis.com/maps/api/js?key=' + MAPS_KEY + '&libraries=places&callback=_mapLoaded';
+  script.src = 'https://maps.googleapis.com/maps/api/js?key=' + MAPS_KEY + '&libraries=places,marker&loading=async&callback=_mapLoaded';
   script.async = true;
   document.head.appendChild(script);
 }
@@ -1653,6 +1653,7 @@ function openAdd() {
   document.getElementById('deleteBtn').style.display = 'none';
   renderStarPicker(0);
   ensureMapsLoaded();
+  setTimeout(initAcWidget, 300);
   document.getElementById('modal').classList.add('open');
   document.getElementById('mName').focus();
 }
@@ -1704,6 +1705,7 @@ function openEdit(id) {
   document.getElementById('mName').focus();
 }
 function closeModal() {
+  _acWidget = null;
   document.getElementById('modal').classList.remove('open');
   document.querySelectorAll('.ac-list').forEach(l => l.classList.remove('open'));
   if (document.activeElement) document.activeElement.blur();
@@ -2019,59 +2021,53 @@ function render() {
 // ---- PLACE SEARCH + MINI MAP ----
 let miniMapInstance = null;
 let miniMapMarker = null;
-let placesService = null;
-let autocompleteService = null;
 
-function initPlacesServices() {
-  if (!window.google || autocompleteService) return;
-  autocompleteService = new google.maps.places.AutocompleteService();
-  placesService = new google.maps.places.PlacesService(document.createElement('div'));
-}
 
-function searchPlace(query) {
+async function searchPlace(query) {
   if (!query || query.length < 3) {
     document.getElementById('placeResults').style.display = 'none';
     return;
   }
-  initPlacesServices();
-  if (!autocompleteService) return;
-
-  autocompleteService.getPlacePredictions({
-    input: query,
-    locationBias: { center: { lat: 45.5051, lng: -122.6750 }, radius: 80000 },
-    types: ['establishment','geocode']
-  }, (predictions, status) => {
+  if (!window.google) return;
+  try {
+    const { AutocompleteSuggestion } = await google.maps.importLibrary('places');
+    const { suggestions } = await AutocompleteSuggestion.fetchAutocompleteSuggestions({
+      input: query,
+      locationBias: new google.maps.Circle({ center: { lat: 45.5051, lng: -122.6750 }, radius: 80000 }),
+    });
     const res = document.getElementById('placeResults');
-    if (status !== google.maps.places.PlacesServiceStatus.OK || !predictions) {
-      res.style.display = 'none';
-      return;
-    }
-    res.innerHTML = predictions.slice(0,5).map(p =>
-      `<div onclick="selectPlace('${p.place_id.replace(/'/g,"\\'")}','${p.description.replace(/'/g,"\\'").replace(/"/g,'&quot;')}')"
-        style="padding:10px 14px;cursor:pointer;font-size:0.84rem;color:var(--text);border-bottom:1px solid var(--border);transition:background 0.1s;"
-        onmouseover="this.style.background='#2a2820'" onmouseout="this.style.background=''">${p.description}</div>`
-    ).join('');
+    if (!suggestions || !suggestions.length) { res.style.display = 'none'; return; }
+    res.innerHTML = suggestions.slice(0,5).map(s => {
+      const text = s.placePrediction.text.toString();
+      const pid = s.placePrediction.placeId;
+      return `<div onclick="selectPlace('${pid}','${text.replace(/'/g,"\'").replace(/"/g,'&quot;')}')"
+        style="padding:10px 14px;cursor:pointer;font-size:0.84rem;color:var(--text);border-bottom:1px solid var(--border);"
+        onmouseover="this.style.background='#2a2820'" onmouseout="this.style.background=''">${text}</div>`;
+    }).join('');
     res.style.display = 'block';
-  });
+  } catch(e) {
+    console.warn('Search error:', e);
+    document.getElementById('placeResults').style.display = 'none';
+  }
 }
 
-function selectPlace(placeId, description) {
+async function selectPlace(placeId, description) {
   document.getElementById('placeResults').style.display = 'none';
   document.getElementById('mPlaceSearch').value = description;
-  initPlacesServices();
-  if (!placesService) return;
-
-  placesService.getDetails({ placeId, fields: ['geometry','name','formatted_address'] }, (place, status) => {
-    if (status !== google.maps.places.PlacesServiceStatus.OK) return;
-    const lat = place.geometry.location.lat();
-    const lng = place.geometry.location.lng();
-    setPinFromCoords(lat, lng, place.name);
-    // Always update location with the real formatted address from Google
-    if (place.formatted_address) {
-      document.getElementById('mLocation').value = place.formatted_address;
+  if (!window.google) return;
+  try {
+    const { Place } = await google.maps.importLibrary('places');
+    const place = new Place({ id: placeId });
+    await place.fetchFields({ fields: ['location','displayName','formattedAddress'] });
+    const lat = place.location.lat();
+    const lng = place.location.lng();
+    setPinFromCoords(lat, lng, place.displayName);
+    if (place.formattedAddress) {
+      document.getElementById('mLocation').value = place.formattedAddress;
     }
-  });
+  } catch(e) { console.warn('Place error:', e); }
 }
+
 
 function setPinFromCoords(lat, lng, name) {
   document.getElementById('mLat').value = lat;
@@ -2512,7 +2508,7 @@ function initMap(spots) {
   }
   if (!window.google) {
     const script = document.createElement('script');
-    script.src = 'https://maps.googleapis.com/maps/api/js?key=' + MAPS_KEY + '&libraries=places&callback=_mapLoaded';
+    script.src = 'https://maps.googleapis.com/maps/api/js?key=' + MAPS_KEY + '&libraries=places,marker&loading=async&callback=_mapLoaded';
     script.async = true;
     window._mapPendingSpots = spots;
     document.head.appendChild(script);
@@ -2733,7 +2729,7 @@ requestAnimationFrame(() => requestAnimationFrame(measureThreshold));
   if (MAPS_KEY === 'YOUR_GOOGLE_MAPS_KEY') return;
   const script = document.createElement('script');
   script.id = 'gmaps-script';
-  script.src = 'https://maps.googleapis.com/maps/api/js?key=' + MAPS_KEY + '&libraries=places&callback=_mapLoaded';
+  script.src = 'https://maps.googleapis.com/maps/api/js?key=' + MAPS_KEY + '&libraries=places,marker&loading=async&callback=_mapLoaded';
   script.async = true;
   document.head.appendChild(script);
 })();
