@@ -1192,7 +1192,7 @@ let db = { spots: [] };
 async function loadFromSupabase() {
   showLoading(true, 'Loading your list...');
   // Timeout after 12 seconds - Supabase free tier can be slow to wake up
-  const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 12000));
+  const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 30000));
   try {
     const rows = await Promise.race([
       sbFetch('GET', 'spots?select=*&order=name.asc'),
@@ -1222,6 +1222,7 @@ async function loadFromSupabase() {
         <div style="color:#e8b84b;font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:2px;margin-bottom:8px;">Our List</div>
         <div style="color:#7a776e;font-size:0.82rem;margin-bottom:20px;">${msg}</div>
         <button onclick="loadFromSupabase()" style="background:#e8b84b;color:#0f0e0d;border:none;padding:12px 28px;border-radius:8px;font-size:0.9rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">Try again</button>
+        <div style="color:#5a5750;font-size:0.74rem;margin-top:12px;">Supabase free tier sleeps after inactivity.<br>First load can take 10-20 seconds.</div>
       </div>`;
   }
 }
@@ -2722,6 +2723,11 @@ document.addEventListener('click', e => {
   }
 });
 document.getElementById('randOverlay').addEventListener('click', function(e) { if(e.target===this) closeRandom(); });
+
+// Init
+loadCustomCats();
+loadFromSupabase();
+requestAnimationFrame(() => requestAnimationFrame(measureThreshold));
 </script>
 
 <!-- dynamic style for random card accent line -->
