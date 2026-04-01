@@ -540,7 +540,7 @@ select {
         <option value="view-active">Our List</option>
         <option value="view-repeats">👍 Worth it</option>
         <option value="view-noback">👎 Not for us</option>
-        <option value="view-archive">Archive</option>
+        <option value="view-archive">Decide Later</option>
       </optgroup>
     </select>
     <button class="add-btn" onclick="openAdd()">+ Add</button>
@@ -569,7 +569,7 @@ select {
   <button class="view-tab active" data-view="active" onclick="setView('active',this)">Our List</button>
   <button class="view-tab" data-view="repeats" onclick="setView('repeats',this)">👍 Worth it</button>
   <button class="view-tab" data-view="noback" onclick="setView('noback',this)">👎 Not for us</button>
-  <button class="view-tab" data-view="archive" onclick="setView('archive',this)">Archive</button>
+  <button class="view-tab" data-view="archive" onclick="setView('archive',this)">Decide Later</button>
 </div>
 <div class="grid" id="grid"></div>
 
@@ -1915,7 +1915,7 @@ function getFilteredList() {
   return db.spots.filter(s => {
     // VIEW FILTER
     if (activeView === 'archive') {
-      if (!s.been) return false; // archive = all been spots
+      if (!s.been || s.goback !== null) return false; // archive = been + no decision yet (decide later)
     } else if (activeView === 'repeats') {
       if (!s.been || s.goback !== true) return false;
     } else if (activeView === 'noback') {
