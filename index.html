@@ -501,6 +501,12 @@ select {
   header h1 { font-size: 2rem; }
 }
 .field input, .field select, .field textarea, input[type="text"], input[type="url"] { font-size: 16px !important; }
+
+/* Prevent iOS auto-zoom - inputs must be >= 16px */
+.modal input, .modal textarea, .modal select,
+.field input, .field textarea, .field select {
+  font-size: 16px !important;
+}
 </style>
 </head>
 <body>
@@ -511,6 +517,12 @@ select {
 </div>
 <div id="statusMsg" style="display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1a1916;border:1px solid #2e2c28;border-radius:8px;padding:8px 18px;font-size:0.8rem;z-index:500;white-space:nowrap;"></div>
 <style>@keyframes spin { to { transform: rotate(360deg); } }.field input, .field select, .field textarea, input[type="text"], input[type="url"] { font-size: 16px !important; }
+
+/* Prevent iOS auto-zoom - inputs must be >= 16px */
+.modal input, .modal textarea, .modal select,
+.field input, .field textarea, .field select {
+  font-size: 16px !important;
+}
 </style>
 
 <header>
@@ -1682,12 +1694,18 @@ function openAdd() {
   document.getElementById('subCatField').style.display = 'none';
   document.getElementById('mLocation').value = '';
   document.getElementById('mNote').value = '';
+  document.getElementById('mLink').value = '';
+  document.getElementById('mCollections').value = '';
+  removePhoto();
+  document.getElementById('photoUploadStatus').style.display = 'none';
   document.getElementById('deleteBtn').style.display = 'none';
   renderStarPicker(0);
   ensureMapsLoaded();
-  setTimeout(initAcWidget, 300);
   document.getElementById('modal').classList.add('open');
-  document.getElementById('mName').focus();
+  // Prevent iOS zoom on input focus by briefly setting font-size to 16px
+  setTimeout(() => {
+    document.getElementById('mName').focus();
+  }, 100);
 }
 function openEdit(id) {
   const s = db.spots.find(x => x.id === id);
@@ -1734,7 +1752,10 @@ function openEdit(id) {
   document.getElementById('deleteBtn').style.display = '';
   renderStarPicker(modalStars);
   document.getElementById('modal').classList.add('open');
-  document.getElementById('mName').focus();
+  // Prevent iOS zoom on input focus by briefly setting font-size to 16px
+  setTimeout(() => {
+    document.getElementById('mName').focus();
+  }, 100);
 }
 function closeModal() {
   _acWidget = null;
@@ -2768,6 +2789,12 @@ requestAnimationFrame(() => requestAnimationFrame(measureThreshold));
 
 <!-- dynamic style for random card accent line -->
 <style id="randBefore">.rand-card::before { background: var(--accent); }.field input, .field select, .field textarea, input[type="text"], input[type="url"] { font-size: 16px !important; }
+
+/* Prevent iOS auto-zoom - inputs must be >= 16px */
+.modal input, .modal textarea, .modal select,
+.field input, .field textarea, .field select {
+  font-size: 16px !important;
+}
 </style>
 
 
