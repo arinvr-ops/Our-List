@@ -604,7 +604,7 @@ select {
 </div>
 
 <!-- Been? popup -->
-<div id="beenPopup" style="display:none;pointer-events:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;align-items:center;justify-content:center;padding:20px;">
+<div id="beenPopup" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;align-items:center;justify-content:center;padding:20px;">
   <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;width:100%;max-width:340px;text-align:center;position:relative;">
     <button onclick="undoBeen()" style="position:absolute;top:12px;right:14px;background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;line-height:1;">✕</button>
     <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:2px;color:var(--accent);margin-bottom:6px;">Been there!</div>
@@ -1702,11 +1702,11 @@ function openAdd() {
   renderStarPicker(0);
   ensureMapsLoaded();
   document.getElementById('modal').classList.add('open');
-  // Prevent iOS zoom on input focus by briefly setting font-size to 16px
-  setTimeout(() => {
-    document.getElementById('mName').focus();
-  }, 100);
+  // Reset any iOS viewport zoom
+  document.body.style.transform = 'scale(1)';
+  setTimeout(() => { document.body.style.transform = ''; }, 100);
 }
+
 function openEdit(id) {
   const s = db.spots.find(x => x.id === id);
   if (!s) return;
@@ -1752,11 +1752,8 @@ function openEdit(id) {
   document.getElementById('deleteBtn').style.display = '';
   renderStarPicker(modalStars);
   document.getElementById('modal').classList.add('open');
-  // Prevent iOS zoom on input focus by briefly setting font-size to 16px
-  setTimeout(() => {
-    document.getElementById('mName').focus();
-  }, 100);
 }
+
 function closeModal() {
   _acWidget = null;
   document.getElementById('modal').classList.remove('open');
@@ -1894,7 +1891,9 @@ function toggleBeen(id) {
     // Show popup asking go back or no thanks
     _beenPopupId = id;
     document.getElementById('beenPopupName').textContent = s.name;
-    document.getElementById('beenPopup').style.display = 'flex';
+    const bp = document.getElementById('beenPopup');
+    bp.style.display = 'flex';
+    bp.style.pointerEvents = 'auto';
   } else {
     s.goback = null;
     activeView = 'active';
@@ -1908,7 +1907,8 @@ function toggleBeen(id) {
 
 function cancelBeen() {
   // Undo the been mark entirely
-  document.getElementById('beenPopup').style.display = 'none';
+  const bpEl2 = document.getElementById('beenPopup');
+  bpEl2.style.display = 'none'; bpEl2.style.pointerEvents = 'none';
   if (_beenPopupId === null) return;
   const s = db.spots.find(x => x.id === _beenPopupId);
   if (s) {
@@ -1926,7 +1926,8 @@ function cancelBeen() {
 
 function undoBeen() {
   // X - accidental tap, revert been to false, close popup, stay on current list
-  document.getElementById('beenPopup').style.display = 'none';
+  const bpEl2 = document.getElementById('beenPopup');
+  bpEl2.style.display = 'none'; bpEl2.style.pointerEvents = 'none';
   if (_beenPopupId === null) return;
   const s = db.spots.find(x => x.id === _beenPopupId);
   if (s) {
@@ -1939,12 +1940,12 @@ function undoBeen() {
 }
 
 function setBeenDecision(goback) {
-  document.getElementById('beenPopup').style.display = 'none';
+  const bpEl = document.getElementById('beenPopup');
+  bpEl.style.display = 'none'; bpEl.style.pointerEvents = 'none';
   if (_beenPopupId === null) return;
   const s = db.spots.find(x => x.id === _beenPopupId);
   if (s) {
     s.goback = goback;
-    // Stay on current view - no tab switching
     render();
     sbFetch('PATCH', 'spots?id=eq.' + _beenPopupId, { goback }).catch(() => {});
   }
