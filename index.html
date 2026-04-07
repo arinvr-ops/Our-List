@@ -508,6 +508,11 @@ select {
 .field input, .field textarea, .field select {
   font-size: 16px !important;
 }
+/* Nuclear iOS zoom prevention */
+input, textarea, select {
+  font-size: 16px !important;
+  -webkit-text-size-adjust: 100%;
+}
 </style>
 </head>
 <body>
@@ -523,6 +528,11 @@ select {
 .modal input, .modal textarea, .modal select,
 .field input, .field textarea, .field select {
   font-size: 16px !important;
+}
+/* Nuclear iOS zoom prevention */
+input, textarea, select {
+  font-size: 16px !important;
+  -webkit-text-size-adjust: 100%;
 }
 </style>
 
@@ -1703,9 +1713,6 @@ function openAdd() {
   renderStarPicker(0);
   ensureMapsLoaded();
   document.getElementById('modal').classList.add('open');
-  // Reset any iOS viewport zoom
-  document.body.style.transform = 'scale(1)';
-  setTimeout(() => { document.body.style.transform = ''; }, 100);
 }
 
 function openEdit(id) {
@@ -2796,6 +2803,11 @@ requestAnimationFrame(() => requestAnimationFrame(measureThreshold));
 .modal input, .modal textarea, .modal select,
 .field input, .field textarea, .field select {
   font-size: 16px !important;
+}
+/* Nuclear iOS zoom prevention */
+input, textarea, select {
+  font-size: 16px !important;
+  -webkit-text-size-adjust: 100%;
 }
 </style>
 
