@@ -394,7 +394,7 @@ select {
   background: var(--bg); flex-direction: column;
 }
 #mapView.open { display: flex; }
-#mapView.open { display: flex; }
+
 #mapContainer { flex: 1; width: 100%; min-height: 0; position: relative; }
 #mapHeader {
   display: flex; align-items: center; gap: 10px;
@@ -1901,6 +1901,7 @@ function saveSpot() {
   const link        = document.getElementById('mLink').value.trim();
   const photo       = document.getElementById('mPhoto').value.trim();
   const collections = document.getElementById('mCollections').value.trim();
+  const area        = document.getElementById('mArea') ? document.getElementById('mArea').value.trim() : '';
   // Read ALL values before closing modal - closing can wipe DOM on iOS
   closeModal();
   if (editingId !== null) {
@@ -1978,7 +1979,6 @@ function gobackNo(id) {
   render();
   sbFetch('PATCH', 'spots?id=eq.' + id, { goback: s.goback }).catch(() => {});
 }
-
 
 let _beenPopupId = null;
 
@@ -2184,7 +2184,6 @@ function initPlacesServices() {
 let miniMapInstance = null;
 let miniMapMarker = null;
 
-
 async function searchPlace(query) {
   if (!query || query.length < 3) {
     document.getElementById('placeResults').style.display = 'none';
@@ -2309,7 +2308,6 @@ async function selectPlace(placeId, description) {
     showStatus('Location pinned - fields auto-filled');
   } catch(e) { console.warn('Place error:', e); }
 }
-
 
 function setPinFromCoords(lat, lng, name) {
   document.getElementById('mLat').value = lat;
@@ -2771,13 +2769,14 @@ function initMap(spots) {
   }
   if (!window.google) {
     const script = document.createElement('script');
-    script.src = 'https://maps.googleapis.com/maps/api/js?key=' + MAPS_KEY + '&libraries=places,marker&loading=async&callback=_mapLoaded';
+    script.src = 'https://maps.googleapis.com/maps/api/js?key=' + MAPS_KEY + '&libraries=places&callback=_mapLoaded';
     script.async = true;
     window._mapPendingSpots = spots;
     document.head.appendChild(script);
     return;
   }
-  _renderGoogleMap(spots);
+  // Wait for DOM to render before initialising map
+  setTimeout(() => _renderGoogleMap(spots), 100);
 }
 
 window._mapLoaded = function() {
@@ -2998,7 +2997,6 @@ input, textarea, select {
   -webkit-text-size-adjust: 100%;
 }
 </style>
-
 
 </body>
 </html>
