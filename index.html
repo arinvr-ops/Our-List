@@ -620,10 +620,21 @@ input, textarea, select {
 <!-- MAP VIEW -->
 <div id="mapView">
   <div id="mapHeader">
-    <h2>Map View</h2>
-    <span id="mapCount" style="color:var(--muted);font-size:0.78rem;"></span>
-    <button class="map-close-btn" onclick="closeMapView()">✕ Close</button>
+    <div style="display:flex;align-items:center;gap:8px;flex:1;">
+      <h2 style="margin:0;">Map</h2>
+      <input type="text" id="mapSearch" placeholder="Search spots..." 
+        style="flex:1;background:#252320;border:1px solid var(--border);border-radius:6px;
+        padding:6px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;"
+        oninput="filterMapSpots()">
+      <select id="mapLocFilter" onchange="filterMapSpots()"
+        style="background:#252320;border:1px solid var(--border);border-radius:6px;
+        padding:6px 8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.74rem;max-width:120px;">
+        <option value="All">All areas</option>
+      </select>
+    </div>
+    <button class="map-close-btn" onclick="closeMapView()">✕</button>
   </div>
+  <div style="padding:4px 12px;font-size:0.72rem;color:var(--muted);" id="mapCount"></div>
   <div id="mapContainer"></div>
   <div id="mapSpotList"></div>
 </div>
@@ -1324,6 +1335,7 @@ let beenOnly       = false;
 let wantOnly       = false;
 let randIncludeBeen = false;
 let activeView = 'active'; // active | archive | repeats
+let activeLocation = 'All'; // location filter
 let editingId      = null;
 let modalStars     = 0;
 
@@ -1528,6 +1540,29 @@ function buildTypePills() {
     closeAllDropdowns();
     openTypeDropdown(btn, types);
   };
+
+  // Location filter button
+  const existingLoc = document.getElementById('locationFilterBtn');
+  if (existingLoc) existingLoc.remove();
+  const locations = Array.from(new Set(
+    db.spots.filter(s => s.location && s.location.trim()).map(s => s.location.trim())
+  )).sort();
+  if (!locations.length) return;
+
+  const locBtn = document.createElement('button');
+  locBtn.id = 'locationFilterBtn';
+  locBtn.className = 'cat-pill';
+  locBtn.style.cssText = activeLocation !== 'All'
+    ? 'background:#1a1500;border-color:#e8b84b;color:#e8b84b;flex-shrink:0;font-size:0.7rem;'
+    : 'border-color:#ffffff22;flex-shrink:0;color:var(--muted);font-size:0.7rem;';
+  locBtn.textContent = activeLocation !== 'All' ? '📍 ' + activeLocation + ' ▾' : '📍 Area ▾';
+  typeRow.appendChild(locBtn);
+
+  locBtn.onclick = e => {
+    e.stopPropagation();
+    closeAllDropdowns();
+    openLocationDropdown(locBtn, locations);
+  };
 }
 
 function openTypeDropdown(anchorBtn, types) {
@@ -1552,6 +1587,35 @@ function openTypeDropdown(anchorBtn, types) {
     const item = e.target.closest('.cat-dropdown-item');
     if (!item) return;
     activeCuisine = item.dataset.type;
+    closeAllDropdowns();
+    buildTypePills();
+    render();
+  };
+}
+
+function openLocationDropdown(anchorBtn, locations) {
+  const menu = document.getElementById('typeDropdown'); // reuse same dropdown
+  const rect = anchorBtn.getBoundingClientRect();
+  menu.style.top = (rect.bottom + 4) + 'px';
+  menu.style.left = Math.min(rect.left, window.innerWidth - 190) + 'px';
+  menu.style.maxHeight = (window.innerHeight - rect.bottom - 20) + 'px';
+
+  const allLocs = ['All', ...locations];
+  menu.innerHTML = allLocs.map(loc => {
+    const isActive = activeLocation === loc;
+    return `<div class="cat-dropdown-item${isActive?' active':''}" data-loc="${htmlAttr(loc)}">
+      ${loc === 'All' ? 'All areas' : '📍 ' + htmlText(loc)}
+      ${isActive ? '<span class="check">✓</span>' : ''}
+    </div>`;
+  }).join('');
+
+  menu.style.display = 'block';
+  requestAnimationFrame(() => menu.classList.add('open'));
+
+  menu.onclick = e => {
+    const item = e.target.closest('.cat-dropdown-item');
+    if (!item) return;
+    activeLocation = item.dataset.loc;
     closeAllDropdowns();
     buildTypePills();
     render();
@@ -2011,6 +2075,7 @@ function getFilteredList() {
     if (favOnly && !s.fav) return false;
     if (beenOnly && !s.been) return false;
     if (wantOnly && !s.want) return false;
+    if (activeLocation !== 'All' && s.location !== activeLocation) return false;
     if (q) {
       const hay = `${s.name} ${s.cuisine} ${s.cat} ${s.note||''} ${s.location||''}`.toLowerCase();
       if (!hay.includes(q)) return false;
@@ -2140,6 +2205,41 @@ async function searchPlace(query) {
   }
 }
 
+// Map Google place types to our categories
+function googleTypeToCategory(types) {
+  if (!types) return null;
+  const t = types.join(',');
+  if (t.includes('restaurant') || t.includes('food') || t.includes('meal') || t.includes('bakery') || t.includes('cafe') || t.includes('coffee') || t.includes('bar') || t.includes('night_club') || t.includes('pizza') || t.includes('sushi') || t.includes('ramen')) return 'food';
+  if (t.includes('lodging') || t.includes('hotel') || t.includes('resort')) return 'getaways';
+  if (t.includes('park') || t.includes('gym') || t.includes('stadium') || t.includes('amusement') || t.includes('bowling') || t.includes('spa')) return 'activities';
+  if (t.includes('natural_feature') || t.includes('campground') || t.includes('trail')) return 'hikes';
+  if (t.includes('store') || t.includes('shop') || t.includes('market') || t.includes('mall') || t.includes('clothing') || t.includes('book_store') || t.includes('furniture') || t.includes('jewelry')) return 'shopping';
+  if (t.includes('tourist_attraction') || t.includes('museum') || t.includes('art_gallery') || t.includes('place_of_worship') || t.includes('zoo') || t.includes('aquarium')) return 'activities';
+  return null;
+}
+
+function googleTypeToCuisine(types) {
+  if (!types) return '';
+  const t = types.join(',');
+  if (t.includes('bar') || t.includes('night_club')) return 'Bar';
+  if (t.includes('cafe') || t.includes('coffee')) return 'Coffee';
+  if (t.includes('bakery')) return 'Bakery';
+  if (t.includes('pizza')) return 'Pizza';
+  if (t.includes('japanese') || t.includes('sushi') || t.includes('ramen')) return 'Japanese';
+  if (t.includes('chinese')) return 'Chinese';
+  if (t.includes('mexican')) return 'Mexican';
+  if (t.includes('italian')) return 'Italian';
+  if (t.includes('thai')) return 'Thai';
+  if (t.includes('vietnamese')) return 'Vietnamese';
+  if (t.includes('indian')) return 'Indian';
+  if (t.includes('korean')) return 'Korean';
+  if (t.includes('spa')) return 'Spa';
+  if (t.includes('gym') || t.includes('fitness')) return 'Fitness';
+  if (t.includes('museum')) return 'Museum';
+  if (t.includes('hotel') || t.includes('lodging')) return 'Hotel';
+  return '';
+}
+
 async function selectPlace(placeId, description) {
   document.getElementById('placeResults').style.display = 'none';
   document.getElementById('mPlaceSearch').value = description;
@@ -2147,13 +2247,47 @@ async function selectPlace(placeId, description) {
   try {
     const { Place } = await google.maps.importLibrary('places');
     const place = new Place({ id: placeId });
-    await place.fetchFields({ fields: ['location','displayName','formattedAddress'] });
+    await place.fetchFields({ fields: ['location','displayName','formattedAddress','types'] });
     const lat = place.location.lat();
     const lng = place.location.lng();
     setPinFromCoords(lat, lng, place.displayName);
+
+    // Auto-fill name if empty
+    if (!document.getElementById('mName').value && place.displayName) {
+      document.getElementById('mName').value = place.displayName;
+    }
+
+    // Auto-fill address
     if (place.formattedAddress) {
       document.getElementById('mLocation').value = place.formattedAddress;
     }
+
+    // Auto-fill category if empty
+    const catEl = document.getElementById('mCategory');
+    if (!catEl.value && place.types) {
+      const guessedCat = googleTypeToCategory(place.types);
+      if (guessedCat) {
+        const catInfo = CAT_MAP[guessedCat];
+        if (catInfo) {
+          if (catInfo.parent === 'food') {
+            catEl.value = 'Food';
+            document.getElementById('mSubCat').value = catInfo.label;
+            document.getElementById('subCatField').style.display = '';
+          } else {
+            catEl.value = catInfo.label;
+          }
+        }
+      }
+    }
+
+    // Auto-fill cuisine/type if empty
+    const cuisineEl = document.getElementById('mCuisine');
+    if (!cuisineEl.value && place.types) {
+      const guessedCuisine = googleTypeToCuisine(place.types);
+      if (guessedCuisine) cuisineEl.value = guessedCuisine;
+    }
+
+    showStatus('Location pinned - fields auto-filled');
   } catch(e) { console.warn('Place error:', e); }
 }
 
@@ -2537,12 +2671,34 @@ const MAPS_KEY = 'AIzaSyAn2Bpv623J3Q7M8wAkG4i73MKltg4levY'; // Replace with your
 let mapInstance = null;
 let mapMarkers = [];
 
+let _mapAllSpots = [];
+
 function openMapView() {
-  const spots = getFilteredList();
+  _mapAllSpots = getFilteredList();
   document.getElementById('mapView').classList.add('open');
-  const pinned = spots.filter(s => s.lat && s.lng);
-  document.getElementById('mapCount').textContent = pinned.length + ' pinned';
-  initMap(spots);
+
+  // Populate location filter
+  const locSelect = document.getElementById('mapLocFilter');
+  const locs = Array.from(new Set(_mapAllSpots.filter(s=>s.location).map(s=>s.location))).sort();
+  locSelect.innerHTML = '<option value="All">All areas</option>' +
+    locs.map(l => `<option value="${htmlAttr(l)}">📍 ${htmlText(l)}</option>`).join('');
+
+  filterMapSpots();
+}
+
+function filterMapSpots() {
+  const q = (document.getElementById('mapSearch').value || '').toLowerCase();
+  const loc = document.getElementById('mapLocFilter').value;
+  const filtered = _mapAllSpots.filter(s => {
+    if (loc !== 'All' && s.location !== loc) return false;
+    if (q && !`${s.name} ${s.location||''}`.toLowerCase().includes(q)) return false;
+    return true;
+  });
+  const pinned = filtered.filter(s => s.lat && s.lng);
+  document.getElementById('mapCount').textContent = pinned.length + ' pinned · ' + (filtered.length - pinned.length) + ' unpinned';
+  renderMapSpotList(pinned, filtered.filter(s => !s.lat || !s.lng));
+  if (window.google && pinned.length) _renderGoogleMap(filtered);
+  else if (!window.google) initMap(filtered);
 }
 
 function closeMapView() {
