@@ -394,7 +394,8 @@ select {
   background: var(--bg); flex-direction: column;
 }
 #mapView.open { display: flex; }
-#mapContainer { flex: 1; width: 100%; }
+#mapView.open { display: flex; }
+#mapContainer { flex: 1; width: 100%; min-height: 0; position: relative; }
 #mapHeader {
   display: flex; align-items: center; gap: 10px;
   padding: 12px 16px; background: var(--card);
@@ -1499,30 +1500,32 @@ function buildTypePills() {
   const typeRow = document.getElementById('typeRow');
   typeRow.innerHTML = '';
 
-  if (activeCategory === 'all') return;
-
   let spots;
-  if (activeCategory === 'food') {
+  if (activeCategory === 'all') {
+    spots = db.spots;
+  } else if (activeCategory === 'food') {
     spots = db.spots.filter(s => isFood(s.cat));
   } else {
     spots = db.spots.filter(s => s.cat === activeCategory);
   }
   const types = Array.from(new Set(spots.map(s => s.cuisine))).sort();
-  if (!types.length) return;
 
-  // Always show type dropdown for any non-all category
+  // Show type dropdown only when a category is selected
   const activeColor = catColor(activeCategory === 'food' ? 'food' : activeCategory);
-  const label = activeCuisine === 'All' ? 'All types ▾' : activeCuisine + ' ▾';
-  const btn = document.createElement('button');
-  btn.id = 'typeFilterBtn';
-  btn.className = 'cat-pill';
-  if (activeCuisine !== 'All') {
-    btn.style.cssText = `background:${activeColor}33;border-color:${activeColor};color:${activeColor};font-weight:500;flex-shrink:0;`;
-  } else {
-    btn.style.cssText = 'border-color:#ffffff22;flex-shrink:0;color:var(--muted);';
+  let btn = null;
+  if (activeCategory !== 'all' && types.length) {
+    const label = activeCuisine === 'All' ? 'All types ▾' : activeCuisine + ' ▾';
+    btn = document.createElement('button');
+    btn.id = 'typeFilterBtn';
+    btn.className = 'cat-pill';
+    if (activeCuisine !== 'All') {
+      btn.style.cssText = `background:${activeColor}33;border-color:${activeColor};color:${activeColor};font-weight:500;flex-shrink:0;`;
+    } else {
+      btn.style.cssText = 'border-color:#ffffff22;flex-shrink:0;color:var(--muted);';
+    }
+    btn.textContent = label;
+    typeRow.appendChild(btn);
   }
-  btn.textContent = label;
-  typeRow.appendChild(btn);
 
   // Also add a "Been? filter" and "Want?" quick pills in this row
   const beenPill = document.createElement('button');
@@ -1543,7 +1546,7 @@ function buildTypePills() {
   wantPill.onclick = e => { e.stopPropagation(); toggleWantOnly(); };
   typeRow.appendChild(wantPill);
 
-  btn.onclick = e => {
+  if (btn) btn.onclick = e => {
     e.stopPropagation();
     closeAllDropdowns();
     openTypeDropdown(btn, types);
@@ -1555,8 +1558,6 @@ function buildTypePills() {
   const locations = Array.from(new Set(
     db.spots.filter(s => s.area && s.area.trim()).map(s => s.area.trim())
   )).sort();
-  if (!locations.length) return;
-
   const locBtn = document.createElement('button');
   locBtn.id = 'locationFilterBtn';
   locBtn.className = 'cat-pill';
@@ -2715,8 +2716,7 @@ function filterMapSpots() {
   const pinned = filtered.filter(s => s.lat && s.lng);
   document.getElementById('mapCount').textContent = pinned.length + ' pinned · ' + (filtered.length - pinned.length) + ' unpinned';
   renderMapSpotList(pinned, filtered.filter(s => !s.lat || !s.lng));
-  if (window.google && pinned.length) _renderGoogleMap(filtered);
-  else if (!window.google) initMap(filtered);
+  initMap(filtered);
 }
 
 function closeMapView() {
