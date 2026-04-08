@@ -716,6 +716,14 @@ input, textarea, select {
       </div>
     </div>
     <div class="field">
+      <label>Area <span style="color:var(--muted);font-size:0.65rem;text-transform:none;letter-spacing:0">(suburb/neighborhood for filtering)</span></label>
+      <div class="ac-wrap">
+        <input type="text" id="mArea" placeholder="e.g. Beaverton, SE Portland, Pearl District..." 
+          autocomplete="off" autocorrect="off" list="areaList">
+        <datalist id="areaList"></datalist>
+      </div>
+    </div>
+    <div class="field">
       <label>Pin on map <span style="color:var(--muted);font-size:0.65rem;text-transform:none;letter-spacing:0">(search for exact location)</span></label>
       <div style="position:relative;">
         <input type="text" id="mPlaceSearch" placeholder="Search place name, e.g. Jacqueline Portland..." autocomplete="off" autocorrect="off"
@@ -1313,13 +1321,13 @@ function startRealtime() {
   // Poll every 8 seconds for changes from other users - simple and reliable
   setInterval(async () => {
     try {
-      const rows = await sbFetch('GET', 'spots?select=id,fav,been,stars,link,lat,lng,goback&order=name.asc');
+      const rows = await sbFetch('GET', 'spots?select=id,fav,been,stars,link,lat,lng,goback,area&order=name.asc');
       if (!rows) return;
       let changed = false;
       rows.forEach(r => {
         const s = db.spots.find(x => x.id === r.id);
         if (s && (s.fav !== r.fav || s.been !== r.been || s.stars !== r.stars || s.link !== r.link)) {
-          Object.assign(s, { fav: r.fav, been: r.been, stars: r.stars, link: r.link||'', lat: r.lat||null, lng: r.lng||null, goback: r.goback !== undefined ? r.goback : null });
+          Object.assign(s, { fav: r.fav, been: r.been, stars: r.stars, link: r.link||'', lat: r.lat||null, lng: r.lng||null, goback: r.goback !== undefined ? r.goback : null, area: r.area||'' });
           changed = true;
         }
       });
@@ -1545,7 +1553,7 @@ function buildTypePills() {
   const existingLoc = document.getElementById('locationFilterBtn');
   if (existingLoc) existingLoc.remove();
   const locations = Array.from(new Set(
-    db.spots.filter(s => s.location && s.location.trim()).map(s => s.location.trim())
+    db.spots.filter(s => s.area && s.area.trim()).map(s => s.area.trim())
   )).sort();
   if (!locations.length) return;
 
@@ -1772,6 +1780,7 @@ function ensureMapsLoaded() {
 
 function openAdd() {
   ensureMapsLoaded();
+  populateAreaList();
   editingId = null; modalStars = 0;
   document.getElementById('modalTitle').textContent = 'Add a spot';
   hideDeleteConfirm();
@@ -1782,6 +1791,7 @@ function openAdd() {
   document.getElementById('mCuisine').value = '';
   document.getElementById('subCatField').style.display = 'none';
   document.getElementById('mLocation').value = '';
+  document.getElementById('mArea').value = '';
   document.getElementById('mNote').value = '';
   document.getElementById('mLink').value = '';
   document.getElementById('mCollections').value = '';
@@ -1797,6 +1807,7 @@ function openEdit(id) {
   const s = db.spots.find(x => x.id === id);
   if (!s) return;
   ensureMapsLoaded();
+  populateAreaList();
   editingId = id; modalStars = s.stars || 0;
   hideDeleteConfirm();
   document.getElementById('modalTitle').textContent = 'Edit spot';
@@ -1814,6 +1825,7 @@ function openEdit(id) {
   }
   document.getElementById('mCuisine').value = s.cuisine;
   document.getElementById('mLocation').value = s.location || '';
+  document.getElementById('mArea').value = s.area || '';
   document.getElementById('mPlaceSearch').value = s.lat && s.lng ? (s.location || s.name) : '';
   document.getElementById('mLat').value = s.lat || '';
   document.getElementById('mLng').value = s.lng || '';
@@ -1893,14 +1905,14 @@ function saveSpot() {
   if (editingId !== null) {
     const s = db.spots.find(x => x.id === editingId);
     if (s) {
-      Object.assign(s, { name, cat, cuisine, location, note, link: link||'', photo: photo||'', collections: collections||'', stars: modalStars, lat: lat||null, lng: lng||null });
+      Object.assign(s, { name, cat, cuisine, location, area: area||'', note, link: link||'', photo: photo||'', collections: collections||'', stars: modalStars, lat: lat||null, lng: lng||null });
       render();
-      sbFetch('PATCH', 'spots?id=eq.' + editingId, { name, cat, cuisine, location, note, link: link||'', photo: photo||'', collections: collections||'', stars: modalStars, lat: lat||null, lng: lng||null, goback: s.goback||null })
+      sbFetch('PATCH', 'spots?id=eq.' + editingId, { name, cat, cuisine, location, area: area||'', note, link: link||'', photo: photo||'', collections: collections||'', stars: modalStars, lat: lat||null, lng: lng||null, goback: s.goback||null })
         .then(() => showStatus('Saved'))
         .catch(() => showStatus('Save failed', true));
     }
   } else {
-    const newSpot = { name, cat, cuisine, location, note, link: link||'', photo: photo||'', collections: collections||'', stars: modalStars, fav: false, been: false, want: false, lat, lng, goback: null };
+    const newSpot = { name, cat, cuisine, location, area: area||'', note, link: link||'', photo: photo||'', collections: collections||'', stars: modalStars, fav: false, been: false, want: false, lat, lng, goback: null };
     sbFetch('POST', 'spots', newSpot)
       .then(res => {
         if (res && res[0]) { db.spots.push(res[0]); render(); }
@@ -2075,7 +2087,7 @@ function getFilteredList() {
     if (favOnly && !s.fav) return false;
     if (beenOnly && !s.been) return false;
     if (wantOnly && !s.want) return false;
-    if (activeLocation !== 'All' && s.location !== activeLocation) return false;
+    if (activeLocation !== 'All' && (s.area || s.location) !== activeLocation) return false;
     if (q) {
       const hay = `${s.name} ${s.cuisine} ${s.cat} ${s.note||''} ${s.location||''}`.toLowerCase();
       if (!hay.includes(q)) return false;
@@ -2206,6 +2218,12 @@ async function searchPlace(query) {
 }
 
 // Map Google place types to our categories
+function populateAreaList() {
+  const areas = Array.from(new Set(db.spots.map(s => s.area).filter(Boolean))).sort();
+  const dl = document.getElementById('areaList');
+  if (dl) dl.innerHTML = areas.map(a => `<option value="${htmlAttr(a)}">`).join('');
+}
+
 function googleTypeToCategory(types) {
   if (!types) return null;
   const t = types.join(',');
@@ -2679,7 +2697,7 @@ function openMapView() {
 
   // Populate location filter
   const locSelect = document.getElementById('mapLocFilter');
-  const locs = Array.from(new Set(_mapAllSpots.filter(s=>s.location).map(s=>s.location))).sort();
+  const locs = Array.from(new Set(_mapAllSpots.filter(s=>s.area||s.location).map(s=>s.area||s.location)).filter(Boolean)).sort();
   locSelect.innerHTML = '<option value="All">All areas</option>' +
     locs.map(l => `<option value="${htmlAttr(l)}">📍 ${htmlText(l)}</option>`).join('');
 
@@ -2690,7 +2708,7 @@ function filterMapSpots() {
   const q = (document.getElementById('mapSearch').value || '').toLowerCase();
   const loc = document.getElementById('mapLocFilter').value;
   const filtered = _mapAllSpots.filter(s => {
-    if (loc !== 'All' && s.location !== loc) return false;
+    if (loc !== 'All' && (s.area||s.location) !== loc) return false;
     if (q && !`${s.name} ${s.location||''}`.toLowerCase().includes(q)) return false;
     return true;
   });
