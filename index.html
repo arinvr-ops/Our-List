@@ -684,7 +684,8 @@ input, textarea, select {
     <h2 id="modalTitle">Add a spot</h2>
     <div class="field">
       <label>Name</label>
-      <input type="text" id="mName" placeholder="Name" autocomplete="off" autocorrect="off">
+      <input type="text" id="mName" placeholder="Name or search a place..." autocomplete="off" autocorrect="off" oninput="searchPlaceFromName(this.value)">
+      <div id="nameResults" style="display:none;background:#222018;border:1px solid var(--accent);border-radius:0 0 8px 8px;max-height:200px;overflow-y:auto;width:100%;margin-top:-1px;"></div>
     </div>
     <div class="field">
       <label>Category</label>
@@ -1858,6 +1859,7 @@ function openEdit(id) {
 function closeModal() {
   _acWidget = null;
   document.getElementById('modal').classList.remove('open');
+  const _nr = document.getElementById('nameResults'); if(_nr) _nr.style.display='none';
   document.querySelectorAll('.ac-list').forEach(l => l.classList.remove('open'));
   if (document.activeElement) document.activeElement.blur();
 }
@@ -2307,6 +2309,47 @@ async function searchPlace(query) {
 }
 
 // Map Google place types to our categories
+function searchPlaceFromName(query) {
+  const res = document.getElementById('nameResults');
+  if (!query || query.length < 2) { res.style.display = 'none'; return; }
+  ensureMapsLoaded();
+  if (!window.google || !autocompleteService) {
+    // Try again shortly after Maps loads
+    setTimeout(() => searchPlaceFromName(query), 500);
+    return;
+  }
+  autocompleteService.getPlacePredictions({
+    input: query,
+    locationBias: { center: { lat: 45.5051, lng: -122.6750 }, radius: 50000 },
+    types: ['establishment']
+  }, (predictions, status) => {
+    if (status !== google.maps.places.PlacesServiceStatus.OK || !predictions) {
+      res.style.display = 'none'; return;
+    }
+    res.innerHTML = predictions.slice(0,5).map(p =>
+      `<div class="name-result-item"
+        data-pid="${p.place_id}"
+        data-desc="${p.description.replace(/"/g,'&quot;')}"
+        style="padding:10px 14px;cursor:pointer;font-size:0.84rem;color:var(--text);border-bottom:1px solid var(--border);"
+        onmouseover="this.style.background='#2a2820'" onmouseout="this.style.background=''">
+        ${p.description}
+      </div>`
+    ).join('');
+    res.style.display = 'block';
+    res.onclick = e => {
+      const item = e.target.closest('.name-result-item');
+      if (!item) return;
+      res.style.display = 'none';
+      // Set name to just the place name (not full address)
+      const fullDesc = item.dataset.desc.replace(/&quot;/g, '"');
+      const placeName = fullDesc.split(',')[0].trim();
+      document.getElementById('mName').value = placeName;
+      // Use selectPlace to fill all other fields
+      selectPlace(item.dataset.pid, fullDesc);
+    };
+  });
+}
+
 function populateAreaList() {
   const areas = Array.from(new Set(db.spots.map(s => s.area).filter(Boolean))).sort();
   const dl = document.getElementById('areaList');
@@ -3099,6 +3142,9 @@ document.getElementById('modal').addEventListener('click', function(e) { if(e.ta
 document.addEventListener('click', e => {
   if (!e.target.closest('.cat-pill') && !e.target.closest('.cat-dropdown-menu')) {
     closeAllDropdowns();
+  }
+  if (!e.target.closest('#mName') && !e.target.closest('#nameResults')) {
+    const nr = document.getElementById('nameResults'); if(nr) nr.style.display='none';
   }
 });
 document.getElementById('randOverlay').addEventListener('click', function(e) { if(e.target===this) closeRandom(); });
