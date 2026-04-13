@@ -2191,20 +2191,23 @@ async function autoTagAreas() {
 
   for (const spot of pinned) {
     try {
-      const res = await fetch(
-        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${spot.lat},${spot.lng}&key=${MAPS_KEY}`
-      );
-      const data = await res.json();
-      if (data.results && data.results.length) {
-        const area = extractArea(data.results[0].address_components);
-        if (area) {
-          spot.area = area;
-          await sbFetch('PATCH', 'spots?id=eq.' + spot.id, { area });
-          tagged++;
-        }
-      }
-      // Small delay to avoid rate limiting
-      await new Promise(r => setTimeout(r, 150));
+      await new Promise((resolve) => {
+        const geocoder = new google.maps.Geocoder();
+        geocoder.geocode({ location: { lat: spot.lat, lng: spot.lng } }, async (results, status) => {
+          if (status === 'OK' && results && results.length) {
+            const area = extractArea(results[0].address_components);
+            if (area) {
+              spot.area = area;
+              try {
+                await sbFetch('PATCH', 'spots?id=eq.' + spot.id, { area });
+                tagged++;
+              } catch(e) { failed++; }
+            }
+          }
+          resolve();
+        });
+      });
+      await new Promise(r => setTimeout(r, 200)); // Rate limit
     } catch(e) {
       failed++;
       console.warn('Tag error for', spot.name, e);
@@ -2358,25 +2361,21 @@ async function selectPlace(placeId, description) {
   } catch(e) { console.warn('Place error:', e); }
 }
 
-async function reverseGeocodeArea(lat, lng) {
-  try {
-    const res = await fetch(
-      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${MAPS_KEY}`
-    );
-    const data = await res.json();
-    console.log('Geocode status:', data.status);
-    console.log('Geocode results:', data.results ? data.results.length : 0);
-    if (data.results && data.results[0]) {
-      console.log('Components:', JSON.stringify(data.results[0].address_components));
-    }
-    if (!data.results || !data.results.length) return;
-    const area = extractArea(data.results[0].address_components);
+function reverseGeocodeArea(lat, lng) {
+  // Use Google Maps Geocoder (uses loaded Maps JS, respects API key restrictions)
+  if (!window.google) return;
+  const geocoder = new google.maps.Geocoder();
+  geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+    console.log('Geocode status:', status);
+    if (status !== 'OK' || !results || !results.length) return;
+    console.log('Components:', JSON.stringify(results[0].address_components));
+    const area = extractArea(results[0].address_components);
     console.log('Extracted area:', area);
     if (area) {
       const el = document.getElementById('mArea');
       if (el) { el.value = area; console.log('Area field set to:', area); }
     }
-  } catch(e) { console.warn('Reverse geocode error:', e); }
+  });
 }
 
 function extractArea(components) {
