@@ -2180,18 +2180,26 @@ async function autoTagAreas() {
 
   // Ensure Maps is loaded before geocoding
   if (!window.google) {
-    ensureMapsLoaded();
     btn.textContent = '⏳ Loading Maps...';
     btn.style.opacity = '0.6';
     btn.style.pointerEvents = 'none';
-    // Wait up to 10s for Maps to load
-    let waited = 0;
-    while (!window.google && waited < 10000) {
-      await new Promise(r => setTimeout(r, 300));
-      waited += 300;
-    }
+    await new Promise((resolve, reject) => {
+      const existing = document.getElementById('gmaps-script');
+      if (existing) {
+        // Script already added, just wait
+      } else {
+        const script = document.createElement('script');
+        script.id = 'gmaps-script';
+        script.src = 'https://maps.googleapis.com/maps/api/js?key=' + MAPS_KEY + '&libraries=places&callback=_mapsReadyForTag';
+        script.async = true;
+        document.head.appendChild(script);
+      }
+      window._mapsReadyForTag = resolve;
+      setTimeout(reject, 10000); // 10s timeout
+    }).catch(() => null);
+
     if (!window.google) {
-      showStatus('Maps not loaded - open Map view first then try again');
+      showStatus('Could not load Maps - check connection');
       btn.textContent = '📍 Auto-tag areas';
       btn.style.opacity = '1';
       btn.style.pointerEvents = 'auto';
