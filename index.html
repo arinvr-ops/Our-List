@@ -2286,10 +2286,19 @@ async function searchPlace(query) {
     res.innerHTML = suggestions.slice(0,5).map(s => {
       const text = s.placePrediction.text.toString();
       const pid = s.placePrediction.placeId;
-      return `<div onclick="selectPlace('${pid}','${text.replace(/'/g,"\'").replace(/"/g,'&quot;')}')"
+      return `<div class="place-result-item"
+        data-pid="${pid}"
+        data-desc="${text.replace(/"/g,'&quot;')}"
         style="padding:10px 14px;cursor:pointer;font-size:0.84rem;color:var(--text);border-bottom:1px solid var(--border);"
-        onmouseover="this.style.background='#2a2820'" onmouseout="this.style.background=''">${text}</div>`;
+        onmouseover="this.style.background='#2a2820'" onmouseout="this.style.background=''">
+        ${text}
+      </div>`;
     }).join('');
+    res.onclick = e => {
+      const item = e.target.closest('.place-result-item');
+      if (!item) return;
+      selectPlace(item.dataset.pid, item.dataset.desc.replace(/&quot;/g,'"'));
+    };
     res.style.display = 'block';
   } catch(e) {
     console.warn('Search error:', e);
