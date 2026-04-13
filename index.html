@@ -2364,12 +2364,17 @@ async function reverseGeocodeArea(lat, lng) {
       `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${MAPS_KEY}`
     );
     const data = await res.json();
+    console.log('Geocode status:', data.status);
+    console.log('Geocode results:', data.results ? data.results.length : 0);
+    if (data.results && data.results[0]) {
+      console.log('Components:', JSON.stringify(data.results[0].address_components));
+    }
     if (!data.results || !data.results.length) return;
-    // Extract neighborhood or suburb
     const area = extractArea(data.results[0].address_components);
+    console.log('Extracted area:', area);
     if (area) {
       const el = document.getElementById('mArea');
-      if (el) el.value = area;
+      if (el) { el.value = area; console.log('Area field set to:', area); }
     }
   } catch(e) { console.warn('Reverse geocode error:', e); }
 }
