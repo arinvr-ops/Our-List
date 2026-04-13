@@ -684,7 +684,7 @@ input, textarea, select {
     <h2 id="modalTitle">Add a spot</h2>
     <div class="field">
       <label>Name</label>
-      <input type="text" id="mName" placeholder="Name or search a place..." autocomplete="off" autocorrect="off" oninput="searchPlaceFromName(this.value)">
+      <input type="text" id="mName" placeholder="Name or search a place..." autocomplete="off" autocorrect="off" oninput="searchPlaceFromName(this.value)" onblur="setTimeout(()=>{const nr=document.getElementById('nameResults');if(nr)nr.style.display='none';},200)">
       <div id="nameResults" style="display:none;background:#222018;border:1px solid var(--accent);border-radius:0 0 8px 8px;max-height:200px;overflow-y:auto;width:100%;margin-top:-1px;"></div>
     </div>
     <div class="field">
@@ -731,7 +731,7 @@ input, textarea, select {
       <label>Pin on map <span style="color:var(--muted);font-size:0.65rem;text-transform:none;letter-spacing:0">(search for exact location)</span></label>
       <div style="position:relative;">
         <input type="text" id="mPlaceSearch" placeholder="Search place name, e.g. Jacqueline Portland..." autocomplete="off" autocorrect="off"
-          style="padding:9px 11px;width:100%;box-sizing:border-box;" oninput="searchPlace(this.value)">
+          style="padding:9px 11px;width:100%;box-sizing:border-box;" oninput="searchPlace(this.value)" onfocus="const nr=document.getElementById('nameResults');if(nr)nr.style.display='none';" onfocus="const nr=document.getElementById('nameResults');if(nr)nr.style.display='none';">
         <div id="placeResults" style="display:none;background:#222018;border:1px solid var(--accent);border-radius:0 0 8px 8px;max-height:200px;overflow-y:auto;margin-top:-2px;width:100%;"></div>
       </div>
       <div id="miniMapWrap" style="display:none;border-radius:8px;overflow:hidden;height:160px;margin-top:4px;position:relative;width:100%;max-width:100%;">
@@ -2309,45 +2309,46 @@ async function searchPlace(query) {
 }
 
 // Map Google place types to our categories
-function searchPlaceFromName(query) {
+async function searchPlaceFromName(query) {
   const res = document.getElementById('nameResults');
   if (!query || query.length < 2) { res.style.display = 'none'; return; }
   ensureMapsLoaded();
-  if (!window.google || !autocompleteService) {
-    // Try again shortly after Maps loads
+  if (!window.google) {
     setTimeout(() => searchPlaceFromName(query), 500);
     return;
   }
-  autocompleteService.getPlacePredictions({
-    input: query,
-    locationBias: { center: { lat: 45.5051, lng: -122.6750 }, radius: 50000 },
-    types: ['establishment']
-  }, (predictions, status) => {
-    if (status !== google.maps.places.PlacesServiceStatus.OK || !predictions) {
-      res.style.display = 'none'; return;
-    }
-    res.innerHTML = predictions.slice(0,5).map(p =>
-      `<div class="name-result-item"
-        data-pid="${p.place_id}"
-        data-desc="${p.description.replace(/"/g,'&quot;')}"
+  try {
+    const { AutocompleteSuggestion } = await google.maps.importLibrary('places');
+    const { suggestions } = await AutocompleteSuggestion.fetchAutocompleteSuggestions({
+      input: query,
+      locationBias: new google.maps.Circle({ center: { lat: 45.5051, lng: -122.6750 }, radius: 50000 }),
+    });
+    if (!suggestions || !suggestions.length) { res.style.display = 'none'; return; }
+    res.innerHTML = suggestions.slice(0,5).map(s => {
+      const text = s.placePrediction.text.toString();
+      const pid = s.placePrediction.placeId;
+      return `<div class="name-result-item"
+        data-pid="${pid}"
+        data-desc="${text.replace(/"/g,'&quot;')}"
         style="padding:10px 14px;cursor:pointer;font-size:0.84rem;color:var(--text);border-bottom:1px solid var(--border);"
         onmouseover="this.style.background='#2a2820'" onmouseout="this.style.background=''">
-        ${p.description}
-      </div>`
-    ).join('');
+        ${text}
+      </div>`;
+    }).join('');
     res.style.display = 'block';
     res.onclick = e => {
       const item = e.target.closest('.name-result-item');
       if (!item) return;
       res.style.display = 'none';
-      // Set name to just the place name (not full address)
       const fullDesc = item.dataset.desc.replace(/&quot;/g, '"');
       const placeName = fullDesc.split(',')[0].trim();
       document.getElementById('mName').value = placeName;
-      // Use selectPlace to fill all other fields
       selectPlace(item.dataset.pid, fullDesc);
     };
-  });
+  } catch(e) {
+    console.warn('Name search error:', e);
+    res.style.display = 'none';
+  }
 }
 
 function populateAreaList() {
