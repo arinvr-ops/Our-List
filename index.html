@@ -565,6 +565,7 @@ input, textarea, select {
     <button class="toggle-btn" id="wantOnlyBtn" onclick="toggleWantOnly()">🔥 Want to go</button>
     <button class="random-btn" id="randBtn" onclick="openRandom()">🎲 Surprise me</button>
     <button class="map-btn" onclick="openMapView()">🗺 Map</button>
+    <button class="map-btn" id="autoTagBtn" onclick="autoTagAreas()">📍 Auto-tag areas</button>
   </div>
 
   <div id="topRow">
@@ -2173,6 +2174,51 @@ function render() {
   }).join('');
 }
 
+// ---- AUTO TAG AREAS ----
+async function autoTagAreas() {
+  const btn = document.getElementById('autoTagBtn');
+  const pinned = db.spots.filter(s => s.lat && s.lng && !s.area);
+  if (!pinned.length) {
+    showStatus('All pinned spots already have areas tagged');
+    return;
+  }
+  btn.textContent = '⏳ Tagging...';
+  btn.style.opacity = '0.6';
+  btn.style.pointerEvents = 'none';
+
+  let tagged = 0;
+  let failed = 0;
+
+  for (const spot of pinned) {
+    try {
+      const res = await fetch(
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${spot.lat},${spot.lng}&key=${MAPS_KEY}&result_type=neighborhood|sublocality|locality`
+      );
+      const data = await res.json();
+      if (data.results && data.results.length) {
+        const area = extractArea(data.results[0].address_components);
+        if (area) {
+          spot.area = area;
+          await sbFetch('PATCH', 'spots?id=eq.' + spot.id, { area });
+          tagged++;
+        }
+      }
+      // Small delay to avoid rate limiting
+      await new Promise(r => setTimeout(r, 150));
+    } catch(e) {
+      failed++;
+      console.warn('Tag error for', spot.name, e);
+    }
+  }
+
+  btn.textContent = '📍 Auto-tag areas';
+  btn.style.opacity = '1';
+  btn.style.pointerEvents = 'auto';
+  showStatus(`Tagged ${tagged} spots${failed ? ', ' + failed + ' failed' : ''}`);
+  buildTypePills();
+  render();
+}
+
 // ---- PLACE SEARCH + MINI MAP ----
 let autocompleteService = null;
 let placesService = null;
@@ -2306,8 +2352,36 @@ async function selectPlace(placeId, description) {
       if (guessedCuisine) cuisineEl.value = guessedCuisine;
     }
 
+    // Auto-fill area from reverse geocoding
+    reverseGeocodeArea(lat, lng);
     showStatus('Location pinned - fields auto-filled');
   } catch(e) { console.warn('Place error:', e); }
+}
+
+async function reverseGeocodeArea(lat, lng) {
+  try {
+    const res = await fetch(
+      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${MAPS_KEY}&result_type=neighborhood|sublocality|locality`
+    );
+    const data = await res.json();
+    if (!data.results || !data.results.length) return;
+    // Extract neighborhood or suburb
+    const area = extractArea(data.results[0].address_components);
+    if (area) {
+      const el = document.getElementById('mArea');
+      if (el && !el.value) el.value = area;
+    }
+  } catch(e) { console.warn('Reverse geocode error:', e); }
+}
+
+function extractArea(components) {
+  // Priority: neighborhood > sublocality_level_1 > locality
+  const types = ['neighborhood', 'sublocality_level_1', 'sublocality', 'locality'];
+  for (const type of types) {
+    const comp = components.find(c => c.types.includes(type));
+    if (comp) return comp.long_name;
+  }
+  return null;
 }
 
 function setPinFromCoords(lat, lng, name) {
