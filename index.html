@@ -2177,6 +2177,28 @@ function render() {
 // ---- AUTO TAG AREAS ----
 async function autoTagAreas() {
   const btn = document.getElementById('autoTagBtn');
+
+  // Ensure Maps is loaded before geocoding
+  if (!window.google) {
+    ensureMapsLoaded();
+    btn.textContent = '⏳ Loading Maps...';
+    btn.style.opacity = '0.6';
+    btn.style.pointerEvents = 'none';
+    // Wait up to 10s for Maps to load
+    let waited = 0;
+    while (!window.google && waited < 10000) {
+      await new Promise(r => setTimeout(r, 300));
+      waited += 300;
+    }
+    if (!window.google) {
+      showStatus('Maps not loaded - open Map view first then try again');
+      btn.textContent = '📍 Auto-tag areas';
+      btn.style.opacity = '1';
+      btn.style.pointerEvents = 'auto';
+      return;
+    }
+  }
+
   const pinned = db.spots.filter(s => s.lat && s.lng && (!s.area || !s.area.trim()));
   if (!pinned.length) {
     showStatus('All pinned spots already have areas tagged');
