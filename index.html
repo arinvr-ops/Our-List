@@ -2177,7 +2177,7 @@ function render() {
 // ---- AUTO TAG AREAS ----
 async function autoTagAreas() {
   const btn = document.getElementById('autoTagBtn');
-  const pinned = db.spots.filter(s => s.lat && s.lng && !s.area);
+  const pinned = db.spots.filter(s => s.lat && s.lng && (!s.area || !s.area.trim()));
   if (!pinned.length) {
     showStatus('All pinned spots already have areas tagged');
     return;
@@ -2192,7 +2192,7 @@ async function autoTagAreas() {
   for (const spot of pinned) {
     try {
       const res = await fetch(
-        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${spot.lat},${spot.lng}&key=${MAPS_KEY}&result_type=neighborhood|sublocality|locality`
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${spot.lat},${spot.lng}&key=${MAPS_KEY}`
       );
       const data = await res.json();
       if (data.results && data.results.length) {
@@ -2353,15 +2353,15 @@ async function selectPlace(placeId, description) {
     }
 
     // Auto-fill area from reverse geocoding
-    reverseGeocodeArea(lat, lng);
     showStatus('Location pinned - fields auto-filled');
+    reverseGeocodeArea(lat, lng);
   } catch(e) { console.warn('Place error:', e); }
 }
 
 async function reverseGeocodeArea(lat, lng) {
   try {
     const res = await fetch(
-      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${MAPS_KEY}&result_type=neighborhood|sublocality|locality`
+      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${MAPS_KEY}`
     );
     const data = await res.json();
     if (!data.results || !data.results.length) return;
@@ -2369,18 +2369,24 @@ async function reverseGeocodeArea(lat, lng) {
     const area = extractArea(data.results[0].address_components);
     if (area) {
       const el = document.getElementById('mArea');
-      if (el && !el.value) el.value = area;
+      if (el) el.value = area;
     }
   } catch(e) { console.warn('Reverse geocode error:', e); }
 }
 
 function extractArea(components) {
-  // Priority: neighborhood > sublocality_level_1 > locality
-  const types = ['neighborhood', 'sublocality_level_1', 'sublocality', 'locality'];
-  for (const type of types) {
-    const comp = components.find(c => c.types.includes(type));
-    if (comp) return comp.long_name;
+  const locality    = components.find(c => c.types.includes('locality'));
+  const neighborhood = components.find(c => c.types.includes('neighborhood'));
+  const sublocality  = components.find(c => c.types.includes('sublocality_level_1') || c.types.includes('sublocality'));
+  // Portland proper - use neighborhood for specificity (Pearl District, Nob Hill etc)
+  if (locality && locality.long_name === 'Portland') {
+    if (neighborhood) return neighborhood.long_name;
+    if (sublocality) return sublocality.long_name;
+    return 'Portland';
   }
+  // Suburbs - Beaverton, Tigard, Lake Oswego etc
+  if (locality) return locality.long_name;
+  if (neighborhood) return neighborhood.long_name;
   return null;
 }
 
