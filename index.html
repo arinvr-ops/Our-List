@@ -590,7 +590,7 @@ input, textarea, select {
         <option value="view-archive">Decide Later</option>
       </optgroup>
     </select>
-    <button class="add-btn" onclick="openAdd()">+ Add</button>
+    <button class="add-btn" onclick="openAdd()">+ Add spot</button>
   </div>
 
   <div id="catRow" style="display:flex;gap:6px;align-items:center;padding:0 14px 6px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;transition:max-height 0.3s ease,opacity 0.26s ease,padding 0.3s ease;max-height:60px;opacity:1;white-space:nowrap;"></div>
@@ -623,15 +623,27 @@ input, textarea, select {
 <!-- MAP VIEW -->
 <div id="mapView">
   <div id="mapHeader">
-    <div style="display:flex;align-items:center;gap:8px;flex:1;">
+    <div style="display:flex;align-items:center;gap:6px;flex:1;flex-wrap:wrap;">
       <h2 style="margin:0;">Map</h2>
       <input type="text" id="mapSearch" placeholder="Search spots..." 
-        style="flex:1;background:#252320;border:1px solid var(--border);border-radius:6px;
+        style="flex:1;min-width:100px;background:#252320;border:1px solid var(--border);border-radius:6px;
         padding:6px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;"
         oninput="filterMapSpots()">
+      <select id="mapCatFilter" onchange="filterMapSpots()"
+        style="background:#252320;border:1px solid var(--border);border-radius:6px;
+        padding:6px 8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.74rem;">
+        <option value="all">All categories</option>
+        <option value="food">🍜 Food</option>
+        <option value="activities">⚡ Activities</option>
+        <option value="hikes">🥾 Hikes</option>
+        <option value="getaways">✈️ Getaways</option>
+        <option value="shopping">🛍 Shopping</option>
+        <option value="international">🌍 International</option>
+        <option value="other">• Other</option>
+      </select>
       <select id="mapLocFilter" onchange="filterMapSpots()"
         style="background:#252320;border:1px solid var(--border);border-radius:6px;
-        padding:6px 8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.74rem;max-width:120px;">
+        padding:6px 8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.74rem;max-width:110px;">
         <option value="All">All areas</option>
       </select>
     </div>
@@ -1657,9 +1669,32 @@ function toggleFavOnly() {
   document.getElementById('favOnlyBtn').classList.toggle('active-fav', favOnly);
   render();
 }
+function clearFilters() {
+  activeCategory = 'all';
+  activeCuisine = 'All';
+  activeLocation = 'All';
+  activeStar = 0;
+  beenOnly = false;
+  wantOnly = false;
+  favOnly = false;
+  document.getElementById('searchInput').value = '';
+  buildCatPills();
+  buildTypePills();
+  render();
+}
+
+function anyFilterActive() {
+  return activeCategory !== 'all'
+    || activeCuisine !== 'All'
+    || activeLocation !== 'All'
+    || activeStar > 0
+    || beenOnly || wantOnly || favOnly
+    || document.getElementById('searchInput').value.trim() !== '';
+}
+
 function toggleBeenOnly() {
   beenOnly = !beenOnly;
-  document.getElementById('beenOnlyBtn').classList.toggle('active-been', beenOnly);
+  buildTypePills();
   render();
 }
 function handleSortChange(sel) {
@@ -1701,7 +1736,7 @@ function toggleIncludeBeen() {
 
 function toggleWantOnly() {
   wantOnly = !wantOnly;
-  document.getElementById('wantOnlyBtn').classList.toggle('active-been', wantOnly);
+  buildTypePills();
   render();
 }
 
@@ -2114,7 +2149,21 @@ function render() {
   const favs = db.spots.filter(s=>s.fav).length;
   const beens = db.spots.filter(s=>s.been).length;
   document.getElementById('totalCount').textContent = `${db.spots.length} spots · ${beens} been · ${favs} ❤`;
-  document.getElementById('countBar').textContent = `Showing ${list.length} spot${list.length!==1?'s':''}`;
+  document.getElementById('countBar').textContent = `Showing ${list.length} spot${list.length!==1?'s':''}${viewLabel ? ' · ' + viewLabel : ''}`;
+  // Show/hide clear filters button
+  let clearBtn = document.getElementById('clearFiltersBtn');
+  if (anyFilterActive()) {
+    if (!clearBtn) {
+      clearBtn = document.createElement('button');
+      clearBtn.id = 'clearFiltersBtn';
+      clearBtn.onclick = clearFilters;
+      clearBtn.style.cssText = 'background:none;border:1px solid #e84b4b;color:#e84b4b;font-family:"DM Sans",sans-serif;font-size:0.72rem;padding:3px 10px;border-radius:20px;cursor:pointer;white-space:nowrap;margin-left:8px;';
+      clearBtn.textContent = '✕ Clear filters';
+      document.getElementById('countBar').appendChild(clearBtn);
+    }
+  } else if (clearBtn) {
+    clearBtn.remove();
+  }
 
   const grid = document.getElementById('grid');
   if (!list.length) { grid.innerHTML = '<div class="empty">No spots match that filter.</div>'; return; }
@@ -2874,7 +2923,12 @@ function openMapView() {
 function filterMapSpots() {
   const q = (document.getElementById('mapSearch').value || '').toLowerCase();
   const loc = document.getElementById('mapLocFilter').value;
+  const cat = document.getElementById('mapCatFilter').value;
   const filtered = _mapAllSpots.filter(s => {
+    if (cat !== 'all') {
+      if (cat === 'food' && !isFood(s.cat)) return false;
+      if (cat !== 'food' && s.cat !== cat) return false;
+    }
     if (loc !== 'All' && (s.area||s.location) !== loc) return false;
     if (q && !`${s.name} ${s.location||''}`.toLowerCase().includes(q)) return false;
     return true;
@@ -3011,13 +3065,18 @@ function _renderGoogleMap(spots) {
         strokeWeight: 2
       }
     });
-    const infoContent = `
-      <div style="background:#1a1916;padding:10px 12px;border-radius:8px;color:#f0ede6;font-family:'DM Sans',sans-serif;max-width:200px;">
+    const infoContent = (() => {
+        const mUrl = s.lat && s.lng
+          ? `https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}`
+          : s.location ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(s.location)}` : null;
+        return `
+      <div style="background:#1a1916;padding:10px 12px;border-radius:8px;color:#f0ede6;font-family:'DM Sans',sans-serif;max-width:220px;">
         <div style="font-weight:500;font-size:0.92rem;margin-bottom:3px;">${s.name}</div>
-        ${s.location ? `<div style="font-size:0.76rem;color:#7a776e;margin-bottom:3px;">📍 ${s.location}</div>` : ''}
-        ${s.note ? `<div style="font-size:0.78rem;margin-bottom:4px;">${s.note}</div>` : ''}
+        ${s.location ? `<div style="font-size:0.76rem;margin-bottom:3px;">${mUrl ? `<a href="${mUrl}" target="_blank" style="color:#e8b84b;text-decoration:none;">📍 ${s.location}</a>` : `<span style="color:#7a776e;">📍 ${s.location}</span>`}</div>` : ''}
+        ${s.note ? `<div style="font-size:0.78rem;color:#7a776e;margin-bottom:4px;">${s.note}</div>` : ''}
         ${s.link ? `<a href="${s.link}" target="_blank" style="font-size:0.74rem;color:#e8b84b;">Open link 🔗</a>` : ''}
       </div>`;
+      })()
     const info = new google.maps.InfoWindow({ content: infoContent });
     marker.addListener('click', () => {
       mapMarkers.forEach(m => m && m.info.close());
