@@ -2149,7 +2149,7 @@ function render() {
   const favs = db.spots.filter(s=>s.fav).length;
   const beens = db.spots.filter(s=>s.been).length;
   document.getElementById('totalCount').textContent = `${db.spots.length} spots · ${beens} been · ${favs} ❤`;
-  document.getElementById('countBar').textContent = `Showing ${list.length} spot${list.length!==1?'s':''}${viewLabel ? ' · ' + viewLabel : ''}`;
+  document.getElementById('countBar').textContent = `Showing ${list.length} spot${list.length!==1?'s':''}${activeView !== 'active' ? ' · ' + activeView : ''}`.replace('repeats','worth it').replace('noback','one & done').replace('archive','decide later');
   // Show/hide clear filters button
   let clearBtn = document.getElementById('clearFiltersBtn');
   if (anyFilterActive()) {
