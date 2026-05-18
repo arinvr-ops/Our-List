@@ -3514,7 +3514,7 @@ document.addEventListener('click', e => {
   if (!e.target.closest('.cat-pill') && !e.target.closest('.cat-dropdown-menu')) {
     closeAllDropdowns();
   }
-  if (!e.target.closest('#customSortWrap')) {
+  if (!e.target.closest('#customSortWrap') && !e.target.closest('#customSortMenu')) {
     const m = document.getElementById('customSortMenu');
     if (m) m.classList.remove('open');
   }
