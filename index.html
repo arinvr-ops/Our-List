@@ -845,16 +845,16 @@ input, textarea, select {
       </button>
       <div class="custom-sort-menu" id="customSortMenu">
         <div class="sort-section-label">Sort</div>
-        <div class="custom-sort-item active" data-sort="newest">Newest first</div>
-        <div class="custom-sort-item" data-sort="az">A - Z</div>
-        <div class="custom-sort-item" data-sort="za">Z - A</div>
-        <div class="custom-sort-item" data-sort="top">Top rated</div>
-        <div class="custom-sort-item" data-sort="lowest">Lowest rated</div>
+        <div class="custom-sort-item active" data-sort="newest" onclick="selectSortOption('newest')">Newest first</div>
+        <div class="custom-sort-item" data-sort="az" onclick="selectSortOption('az')">A - Z</div>
+        <div class="custom-sort-item" data-sort="za" onclick="selectSortOption('za')">Z - A</div>
+        <div class="custom-sort-item" data-sort="top" onclick="selectSortOption('top')">Top rated</div>
+        <div class="custom-sort-item" data-sort="lowest" onclick="selectSortOption('lowest')">Lowest rated</div>
         <div class="sort-section-label">View</div>
-        <div class="custom-sort-item" data-sort="ourlist">Our List</div>
-        <div class="custom-sort-item" data-sort="worthit">👍 Worth it</div>
-        <div class="custom-sort-item" data-sort="onedone">One &amp; Done</div>
-        <div class="custom-sort-item" data-sort="decide">Decide Later</div>
+        <div class="custom-sort-item" data-sort="ourlist" onclick="selectSortOption('ourlist')">Our List</div>
+        <div class="custom-sort-item" data-sort="worthit" onclick="selectSortOption('worthit')">👍 Worth it</div>
+        <div class="custom-sort-item" data-sort="onedone" onclick="selectSortOption('onedone')">One &amp; Done</div>
+        <div class="custom-sort-item" data-sort="decide" onclick="selectSortOption('decide')">Decide Later</div>
       </div>
     </div>
     <button class="add-btn" onclick="openAdd()">+ Add spot</button>
@@ -3538,23 +3538,20 @@ function toggleSortMenu(e) {
   menu.classList.toggle('open');
 }
 
-document.getElementById('customSortMenu').addEventListener('mousedown', function(e) {
-  e.stopPropagation();
-  const item = e.target.closest('.custom-sort-item');
-  if (!item) return;
-  const val = item.dataset.sort;
+function selectSortOption(val) {
   const labels = { newest:'Newest first', az:'A - Z', za:'Z - A', top:'Top rated', lowest:'Lowest rated', ourlist:'Our List', worthit:'👍 Worth it', onedone:'One & Done', decide:'Decide Later' };
   const sortMap = { newest:'newest', az:'alpha', za:'alpha-desc', top:'stars-desc', lowest:'stars-asc', ourlist:'view-active', worthit:'view-repeats', onedone:'view-noback', decide:'view-archive' };
   document.getElementById('customSortLabel').textContent = labels[val] || 'Newest first';
   document.getElementById('customSortMenu').classList.remove('open');
   document.querySelectorAll('.custom-sort-item').forEach(i => i.classList.remove('active'));
-  item.classList.add('active');
+  const active = document.querySelector('.custom-sort-item[data-sort="' + val + '"]');
+  if (active) active.classList.add('active');
   const sel = document.getElementById('sortSelect');
   if (sel && sortMap[val]) {
     sel.value = sortMap[val];
     handleSortChange(sel);
   }
-});
+}
 
 // Visual effects via JS (CSP compatible)
 (function() {
