@@ -96,13 +96,13 @@ header .sub {
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
   white-space: nowrap;
-  transition: max-height 0.3s ease, opacity 0.25s ease, padding 0.3s ease;
+  transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease, padding 0.35s cubic-bezier(0.4,0,0.2,1);
   max-height: 56px; opacity: 1;
   border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
+  flex-shrink: 0; overflow: hidden;
 }
 #favBar::-webkit-scrollbar { display: none; }
-#favBar.gone { max-height: 0; padding-top: 0; padding-bottom: 0; opacity: 0; border-bottom-color: transparent; }
+#favBar.gone { max-height: 0; padding-top: 0; padding-bottom: 0; opacity: 0; border-bottom-color: transparent; overflow: hidden; }
 #favBar > * { flex-shrink: 0; }
 
 /* Hide count elements - kept for JS compatibility, not shown in action row */
@@ -140,7 +140,7 @@ header .sub {
 
 /* Search + sort row */
 #topRow {
-  transition: max-height 0.3s ease, opacity 0.25s ease, padding 0.3s ease;
+  transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease, padding 0.35s cubic-bezier(0.4,0,0.2,1);
   display: flex; gap: 8px; align-items: center;
   padding: 8px 16px;
   border-bottom: 1px solid var(--border);
@@ -158,7 +158,7 @@ header .sub {
   padding: 8px 16px 6px;
   overflow-x: auto; overflow-y: hidden;
   scrollbar-width: none; -webkit-overflow-scrolling: touch;
-  transition: max-height 0.3s ease, opacity 0.26s ease, padding 0.3s ease;
+  transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease, padding 0.35s cubic-bezier(0.4,0,0.2,1);
   max-height: 60px; opacity: 1; white-space: nowrap;
 }
 #catRow::-webkit-scrollbar { display: none; }
@@ -215,7 +215,7 @@ header .sub {
   padding: 0 16px 8px;
   overflow-x: auto; overflow-y: hidden;
   scrollbar-width: none; -webkit-overflow-scrolling: touch;
-  transition: max-height 0.3s ease, opacity 0.26s ease, padding 0.3s ease;
+  transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease, padding 0.35s cubic-bezier(0.4,0,0.2,1);
   max-height: 0; opacity: 0; pointer-events: none;
 }
 #filterRow::-webkit-scrollbar { display: none; }
@@ -226,10 +226,10 @@ header .sub {
   display: flex; gap: 6px; align-items: center;
   padding: 6px 16px;
   overflow: hidden;
-  transition: max-height 0.3s ease, opacity 0.26s ease, padding 0.3s ease;
+  transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease, padding 0.35s cubic-bezier(0.4,0,0.2,1);
   max-height: 56px; opacity: 1;
 }
-#starRow.gone { max-height: 0; padding-bottom: 0; opacity: 0; pointer-events: none; }
+#starRow.gone { max-height: 0; padding-bottom: 0; opacity: 0; pointer-events: none; overflow: hidden; }
 
 #stickyBorder { border-bottom: 1px solid var(--border); }
 
@@ -531,8 +531,9 @@ select {
 .view-tab:hover { color: var(--text); border-color: #3e3b34; }
 .view-tab.active:hover { color: #0c0b09; }
 #viewTabs {
-  transition: max-height 0.3s ease, opacity 0.25s ease, padding 0.3s ease;
+  transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease, padding 0.35s cubic-bezier(0.4,0,0.2,1);
   border-bottom: 1px solid var(--border);
+  overflow: hidden;
 }
 #viewTabs.gone { max-height: 0 !important; padding: 0 !important; opacity: 0; pointer-events: none; overflow: hidden; border-bottom: none !important; }
 
@@ -683,14 +684,14 @@ input, textarea, select {
 body::before {
   content: '';
   position: fixed;
-  inset: -5%;
-  width: 110%; height: 110%;
-  z-index: 0;
-  pointer-events: none;
+  inset: 0;
   background:
-    radial-gradient(ellipse 60% 45% at 25% 15%, rgba(232,184,75,0.07) 0%, transparent 60%),
-    radial-gradient(ellipse 45% 35% at 75% 80%, rgba(200,100,75,0.04) 0%, transparent 55%);
-  animation: bgDrift 22s ease-in-out infinite alternate;
+    radial-gradient(ellipse 70% 50% at 85% 10%, rgba(232,184,75,0.18), transparent 65%),
+    radial-gradient(ellipse 50% 60% at 15% 85%, rgba(180,140,60,0.10), transparent 65%);
+  filter: blur(40px);
+  pointer-events: none;
+  z-index: 0;
+  animation: bgDrift 36s ease-in-out infinite alternate;
 }
 
 /* 2 — Film grain overlay */
@@ -698,11 +699,10 @@ body::after {
   content: '';
   position: fixed;
   inset: 0;
-  z-index: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='3' height='3'%3E%3Crect width='1' height='1' fill='rgba(255,255,255,0.025)'/%3E%3C/svg%3E");
   pointer-events: none;
-  opacity: 0.032;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size: 200px 200px;
+  z-index: 0;
+  opacity: 0.6;
 }
 
 /* Keyframes */
@@ -830,7 +830,7 @@ input, textarea, select {
     <button class="add-btn" onclick="openAdd()">+ Add spot</button>
   </div>
 
-  <div id="catRow" style="display:flex;gap:6px;align-items:center;padding:0 14px 6px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;transition:max-height 0.3s ease,opacity 0.26s ease,padding 0.3s ease;max-height:60px;opacity:1;white-space:nowrap;"></div>
+  <div id="catRow" style="display:flex;gap:6px;align-items:center;padding:0 14px 6px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;transition:max-height 0.35s cubic-bezier(0.4,0,0.2,1),opacity 0.25s ease,padding 0.35s cubic-bezier(0.4,0,0.2,1);max-height:60px;opacity:1;white-space:nowrap;"></div>
   <div id="typeRow" style="display:flex;gap:6px;align-items:center;padding:0 14px 8px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;white-space:nowrap;min-height:0;"></div>
   <div id="subCatRow"></div>
   <div id="filterRow"></div>
@@ -1644,18 +1644,6 @@ function applyCardColors() {
 }
 
 // ---- SCROLL COLLAPSE ----
-let collapseThreshold = 100;
-function measureThreshold() {
-  const topRow = document.getElementById('topRow');
-  const bar = document.getElementById('stickyBar');
-  const barTop = bar.getBoundingClientRect().top + window.scrollY;
-  const rowBottom = topRow.getBoundingClientRect().bottom + window.scrollY;
-  collapseThreshold = Math.max(rowBottom - barTop + 10, 50);
-}
-
-const EXPAND_THRESHOLD = 20;
-
-let rafPending = false;
 let lastY = 0;
 let fullyCollapsed = false;
 let tabsVisible = false;
@@ -1670,31 +1658,28 @@ function setCollapse(hideAll, hideTabs) {
   document.getElementById('viewTabs').classList.toggle('gone', hideTabs);
 }
 
-window.addEventListener('scroll', () => {
-  if (rafPending) return;
-  rafPending = true;
-  requestAnimationFrame(() => {
-    rafPending = false;
-    const y = window.scrollY;
-    const scrollingDown = y > lastY;
-    lastY = y;
+const scrollSentinel = document.createElement('div');
+scrollSentinel.style.cssText = 'position:absolute;top:50px;height:1px;width:1px;pointer-events:none;visibility:hidden;';
+document.body.prepend(scrollSentinel);
 
-    if (y <= 10) {
-      // At top - show everything
-      if (fullyCollapsed || tabsVisible) {
-        fullyCollapsed = false; tabsVisible = false;
-        setCollapse(false, false);
-      }
-    } else if (scrollingDown && y > 50 && !fullyCollapsed) {
-      // Scrolling down past 50px - collapse everything
-      fullyCollapsed = true; tabsVisible = false;
-      setCollapse(true, true);
-    } else if (!scrollingDown && fullyCollapsed) {
-      // Any upward pull - show tabs
-      tabsVisible = true;
-      setCollapse(true, false);
-    }
-  });
+new IntersectionObserver(entries => {
+  const atTop = entries[0].isIntersecting;
+  if (atTop) {
+    fullyCollapsed = false; tabsVisible = false;
+    setCollapse(false, false);
+  } else if (!fullyCollapsed) {
+    fullyCollapsed = true; tabsVisible = false;
+    setCollapse(true, true);
+  }
+}, { threshold: 0 }).observe(scrollSentinel);
+
+window.addEventListener('scroll', () => {
+  const y = window.scrollY;
+  if (fullyCollapsed && y < lastY) {
+    tabsVisible = true;
+    setCollapse(true, false);
+  }
+  lastY = y;
 }, { passive: true });
 
 // ---- BUILD CATEGORY PILLS ----
