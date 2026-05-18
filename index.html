@@ -102,6 +102,8 @@ header .sub {
   max-height: 56px; opacity: 1;
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
+  will-change: max-height, opacity;
+  contain: layout style;
 }
 #favBar::-webkit-scrollbar { display: none; }
 #favBar.gone { max-height: 0; padding-top: 0; padding-bottom: 0; opacity: 0; border-bottom-color: transparent; overflow: hidden; }
@@ -150,6 +152,8 @@ header .sub {
   overflow-x: auto; overflow-y: hidden;
   scrollbar-width: none; -webkit-overflow-scrolling: touch;
   white-space: nowrap;
+  will-change: max-height, opacity;
+  contain: layout style;
 }
 #topRow::-webkit-scrollbar { display: none; }
 #topRow.gone { max-height: 0 !important; padding: 0 !important; opacity: 0; pointer-events: none; overflow: hidden; }
@@ -164,6 +168,8 @@ header .sub {
   scrollbar-width: none; -webkit-overflow-scrolling: touch;
   transition: max-height 0.3s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease, padding 0.3s cubic-bezier(0.4,0,0.2,1);
   max-height: 60px; opacity: 1; white-space: nowrap;
+  will-change: max-height, opacity;
+  contain: layout style;
 }
 #catRow::-webkit-scrollbar { display: none; }
 #catRow.gone { max-height: 0 !important; padding: 0 !important; opacity: 0; pointer-events: none; overflow: hidden; }
@@ -231,6 +237,8 @@ header .sub {
   scrollbar-width: none; -webkit-overflow-scrolling: touch;
   transition: max-height 0.3s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease, padding 0.3s cubic-bezier(0.4,0,0.2,1);
   max-height: 0; opacity: 0; pointer-events: none;
+  will-change: max-height, opacity;
+  contain: layout style;
 }
 #filterRow::-webkit-scrollbar { display: none; }
 #filterRow.visible { max-height: 48px; opacity: 1; pointer-events: auto; }
@@ -244,6 +252,8 @@ header .sub {
   white-space: nowrap;
   transition: max-height 0.3s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease, padding 0.3s cubic-bezier(0.4,0,0.2,1);
   max-height: 56px; opacity: 1;
+  will-change: max-height, opacity;
+  contain: layout style;
 }
 #starRow::-webkit-scrollbar { display: none; }
 #starRow.gone { max-height: 0; padding-bottom: 0; opacity: 0; pointer-events: none; overflow: hidden; }
@@ -560,6 +570,8 @@ select {
   max-height: 80px;
   border-bottom: 1px solid var(--border);
   overflow-x: auto; overflow-y: hidden;
+  will-change: max-height, opacity;
+  contain: layout style;
 }
 #viewTabs.gone { max-height: 0 !important; padding: 0 !important; opacity: 0; pointer-events: none; overflow: hidden; border-bottom: none !important; }
 
@@ -826,24 +838,23 @@ input, textarea, select {
         <option value="view-archive">Decide Later</option>
       </optgroup>
     </select>
-    <div id="sortDropdownWrap" style="position:relative;display:inline-block;flex-shrink:0;">
-      <button id="sortDropdownBtn" onclick="toggleSortDropdown()" style="background:rgba(22,20,16,0.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.82rem;padding:8px 10px;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap;line-height:1;">
-        <span id="sortDropdownLabel">Newest first</span>
-        <svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <div class="custom-sort-wrap" id="customSortWrap">
+      <button class="custom-sort-btn" id="customSortBtn" onclick="toggleSortMenu(event)">
+        <span id="customSortLabel">Newest first</span>
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
       </button>
-      <div id="sortDropdownMenu" style="display:none;position:absolute;top:calc(100% + 6px);left:0;min-width:160px;background:rgba(20,18,14,0.95);border:1px solid rgba(255,255,255,0.1);border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.8);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);z-index:200;padding:6px;">
-        <div style="padding:4px 10px 2px;font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;color:var(--muted);font-weight:500;">Sort</div>
-        <div class="sort-opt" data-val="newest" data-label="Newest first" onclick="setSortOption(this)" style="padding:8px 12px;border-radius:8px;cursor:pointer;font-size:0.84rem;color:var(--text);font-family:'DM Sans',sans-serif;font-weight:500;white-space:nowrap;">Newest first</div>
-        <div class="sort-opt" data-val="alpha" data-label="A – Z" onclick="setSortOption(this)" style="padding:8px 12px;border-radius:8px;cursor:pointer;font-size:0.84rem;color:var(--text);font-family:'DM Sans',sans-serif;font-weight:300;white-space:nowrap;">A – Z</div>
-        <div class="sort-opt" data-val="alpha-desc" data-label="Z – A" onclick="setSortOption(this)" style="padding:8px 12px;border-radius:8px;cursor:pointer;font-size:0.84rem;color:var(--text);font-family:'DM Sans',sans-serif;font-weight:300;white-space:nowrap;">Z – A</div>
-        <div class="sort-opt" data-val="stars-desc" data-label="Top rated" onclick="setSortOption(this)" style="padding:8px 12px;border-radius:8px;cursor:pointer;font-size:0.84rem;color:var(--text);font-family:'DM Sans',sans-serif;font-weight:300;white-space:nowrap;">Top rated</div>
-        <div class="sort-opt" data-val="stars-asc" data-label="Lowest rated" onclick="setSortOption(this)" style="padding:8px 12px;border-radius:8px;cursor:pointer;font-size:0.84rem;color:var(--text);font-family:'DM Sans',sans-serif;font-weight:300;white-space:nowrap;">Lowest rated</div>
-        <div style="height:1px;background:rgba(255,255,255,0.06);margin:4px 0;"></div>
-        <div style="padding:4px 10px 2px;font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;color:var(--muted);font-weight:500;">View</div>
-        <div class="sort-opt" data-val="view-active" data-label="Our List" onclick="setSortOption(this)" style="padding:8px 12px;border-radius:8px;cursor:pointer;font-size:0.84rem;color:var(--text);font-family:'DM Sans',sans-serif;font-weight:300;white-space:nowrap;">Our List</div>
-        <div class="sort-opt" data-val="view-repeats" data-label="👍 Worth it" onclick="setSortOption(this)" style="padding:8px 12px;border-radius:8px;cursor:pointer;font-size:0.84rem;color:var(--text);font-family:'DM Sans',sans-serif;font-weight:300;white-space:nowrap;">👍 Worth it</div>
-        <div class="sort-opt" data-val="view-noback" data-label="One &amp; Done" onclick="setSortOption(this)" style="padding:8px 12px;border-radius:8px;cursor:pointer;font-size:0.84rem;color:var(--text);font-family:'DM Sans',sans-serif;font-weight:300;white-space:nowrap;">One &amp; Done</div>
-        <div class="sort-opt" data-val="view-archive" data-label="Decide Later" onclick="setSortOption(this)" style="padding:8px 12px;border-radius:8px;cursor:pointer;font-size:0.84rem;color:var(--text);font-family:'DM Sans',sans-serif;font-weight:300;white-space:nowrap;">Decide Later</div>
+      <div class="custom-sort-menu" id="customSortMenu">
+        <div class="sort-section-label">Sort</div>
+        <div class="custom-sort-item active" data-sort="newest">Newest first</div>
+        <div class="custom-sort-item" data-sort="az">A - Z</div>
+        <div class="custom-sort-item" data-sort="za">Z - A</div>
+        <div class="custom-sort-item" data-sort="top">Top rated</div>
+        <div class="custom-sort-item" data-sort="lowest">Lowest rated</div>
+        <div class="sort-section-label">View</div>
+        <div class="custom-sort-item" data-sort="ourlist">Our List</div>
+        <div class="custom-sort-item" data-sort="worthit">👍 Worth it</div>
+        <div class="custom-sort-item" data-sort="onedone">One &amp; Done</div>
+        <div class="custom-sort-item" data-sort="decide">Decide Later</div>
       </div>
     </div>
     <button class="add-btn" onclick="openAdd()">+ Add spot</button>
@@ -1692,13 +1703,17 @@ new IntersectionObserver(entries => {
   }
 }, { threshold: 0 }).observe(scrollSentinel);
 
-window.addEventListener('scroll', () => {
+let scrollDebounce;
+window.addEventListener('scroll', function() {
   const y = window.scrollY;
-  if (fullyCollapsed && y < lastY) {
-    tabsVisible = true;
-    setCollapse(true, false);
-  }
-  lastY = y;
+  clearTimeout(scrollDebounce);
+  scrollDebounce = setTimeout(function() {
+    if (fullyCollapsed && y < lastY) {
+      tabsVisible = true;
+      setCollapse(true, false);
+    }
+    lastY = y;
+  }, 16);
 }, { passive: true });
 
 // ---- BUILD CATEGORY PILLS ----
@@ -1995,7 +2010,7 @@ function setView(view, el) {
   const sel = document.getElementById('sortSelect');
   const opt = sel.querySelector(`option[value="view-${view}"]`);
   if (!opt) sel.value = sel.querySelector('option').value; // reset to first sort
-  const labelEl = document.getElementById('sortDropdownLabel');
+  const labelEl = document.getElementById('customSortLabel');
   if (labelEl) {
     const activeOpt = sel.options[sel.selectedIndex];
     if (activeOpt) labelEl.textContent = activeOpt.text;
@@ -3505,9 +3520,9 @@ document.addEventListener('click', e => {
   if (!e.target.closest('.cat-pill') && !e.target.closest('.cat-dropdown-menu')) {
     closeAllDropdowns();
   }
-  if (!e.target.closest('#sortDropdownWrap')) {
-    const m = document.getElementById('sortDropdownMenu');
-    if (m) m.style.display = 'none';
+  if (!e.target.closest('#customSortWrap')) {
+    const m = document.getElementById('customSortMenu');
+    if (m) m.classList.remove('open');
   }
   if (!e.target.closest('#mName') && !e.target.closest('#nameResults')) {
     const nr = document.getElementById('nameResults'); if(nr) nr.style.display='none';
@@ -3519,24 +3534,32 @@ document.getElementById('randOverlay').addEventListener('click', function(e) { i
 loadCustomCats();
 loadFromSupabase();
 
-function toggleSortDropdown() {
-  const menu = document.getElementById('sortDropdownMenu');
-  if (!menu) return;
-  menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+function toggleSortMenu(e) {
+  e.stopPropagation();
+  const menu = document.getElementById('customSortMenu');
+  const btn = document.getElementById('customSortBtn');
+  const rect = btn.getBoundingClientRect();
+  menu.style.top = (rect.bottom + 6) + 'px';
+  menu.style.right = (window.innerWidth - rect.right) + 'px';
+  menu.classList.toggle('open');
 }
 
-function setSortOption(el) {
-  const val = el.dataset.val;
-  const label = el.dataset.label || el.textContent.trim();
-  document.getElementById('sortDropdownLabel').textContent = label;
-  document.querySelectorAll('.sort-opt').forEach(o => {
-    o.style.fontWeight = o === el ? '500' : '300';
+document.querySelectorAll('.custom-sort-item').forEach(item => {
+  item.addEventListener('click', function() {
+    const val = this.dataset.sort;
+    const labels = { newest:'Newest first', az:'A - Z', za:'Z - A', top:'Top rated', lowest:'Lowest rated', ourlist:'Our List', worthit:'👍 Worth it', onedone:'One & Done', decide:'Decide Later' };
+    const sortMap = { newest:'newest', az:'alpha', za:'alpha-desc', top:'stars-desc', lowest:'stars-asc', ourlist:'view-active', worthit:'view-repeats', onedone:'view-noback', decide:'view-archive' };
+    document.getElementById('customSortLabel').textContent = labels[val];
+    document.getElementById('customSortMenu').classList.remove('open');
+    document.querySelectorAll('.custom-sort-item').forEach(i => i.classList.remove('active'));
+    this.classList.add('active');
+    const sel = document.getElementById('sortSelect');
+    if (sel && sortMap[val]) {
+      sel.value = sortMap[val];
+      handleSortChange(sel);
+    }
   });
-  document.getElementById('sortDropdownMenu').style.display = 'none';
-  const sel = document.getElementById('sortSelect');
-  sel.value = val;
-  handleSortChange(sel);
-}
+});
 
 // Visual effects via JS (CSP compatible)
 (function() {
@@ -3569,6 +3592,16 @@ input, textarea, select {
   font-size: 16px !important;
   -webkit-text-size-adjust: 100%;
 }
+
+/* CUSTOM SORT DROPDOWN */
+.custom-sort-wrap { position: relative; display: inline-block; flex-shrink: 0; }
+.custom-sort-btn { background: rgba(22,20,16,0.85); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.88rem; font-weight: 300; padding: 9px 14px; cursor: pointer; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+.custom-sort-menu { display: none; position: fixed; min-width: 200px; background: rgba(18,16,12,0.97); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 200; padding: 6px; }
+.custom-sort-menu.open { display: block; }
+.sort-section-label { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); padding: 8px 12px 4px; }
+.custom-sort-item { padding: 10px 12px; font-family: 'DM Sans', sans-serif; font-size: 0.88rem; color: var(--text); cursor: pointer; border-radius: 8px; transition: background 0.12s; }
+.custom-sort-item:hover { background: rgba(255,255,255,0.06); }
+.custom-sort-item.active { color: var(--accent); font-weight: 500; }
 
 /* ===== VISUAL OVERRIDES ===== */
 header {
