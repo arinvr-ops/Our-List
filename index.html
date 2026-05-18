@@ -90,7 +90,7 @@ header .sub {
 
 /* ACTION PILL ROW */
 #favBar {
-  display: flex; align-items: center; gap: 7px;
+  display: flex; flex-wrap: nowrap; align-items: center; gap: 7px;
   padding: 10px 16px;
   overflow-x: auto; overflow-y: hidden;
   scrollbar-width: none;
@@ -99,7 +99,7 @@ header .sub {
   transition: max-height 0.3s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease, padding 0.3s cubic-bezier(0.4,0,0.2,1);
   max-height: 56px; opacity: 1;
   border-bottom: 1px solid var(--border);
-  flex-shrink: 0; overflow: hidden;
+  flex-shrink: 0;
 }
 #favBar::-webkit-scrollbar { display: none; }
 #favBar.gone { max-height: 0; padding-top: 0; padding-bottom: 0; opacity: 0; border-bottom-color: transparent; overflow: hidden; }
@@ -141,12 +141,13 @@ header .sub {
 /* Search + sort row */
 #topRow {
   transition: max-height 0.3s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease, padding 0.3s cubic-bezier(0.4,0,0.2,1);
-  display: flex; gap: 8px; align-items: center;
+  display: flex; flex-wrap: nowrap; gap: 8px; align-items: center;
   padding: 8px 16px;
   max-height: 80px;
   border-bottom: 1px solid var(--border);
   overflow-x: auto; overflow-y: hidden;
   scrollbar-width: none; -webkit-overflow-scrolling: touch;
+  white-space: nowrap;
 }
 #topRow::-webkit-scrollbar { display: none; }
 #topRow.gone { max-height: 0 !important; padding: 0 !important; opacity: 0; pointer-events: none; overflow: hidden; }
@@ -155,7 +156,7 @@ header .sub {
 
 /* CATEGORY FILTER ROW */
 #catRow {
-  display: flex; gap: 6px; align-items: center;
+  display: flex; flex-wrap: nowrap; gap: 6px; align-items: center;
   padding: 8px 16px 6px;
   overflow-x: auto; overflow-y: hidden;
   scrollbar-width: none; -webkit-overflow-scrolling: touch;
@@ -228,12 +229,15 @@ header .sub {
 #filterRow.gone { max-height: 0; padding-bottom: 0; opacity: 0; pointer-events: none; }
 
 #starRow {
-  display: flex; gap: 6px; align-items: center;
+  display: flex; flex-wrap: nowrap; gap: 6px; align-items: center;
   padding: 6px 16px;
-  overflow: hidden;
+  overflow-x: auto; overflow-y: hidden;
+  scrollbar-width: none; -webkit-overflow-scrolling: touch;
+  white-space: nowrap;
   transition: max-height 0.3s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease, padding 0.3s cubic-bezier(0.4,0,0.2,1);
   max-height: 56px; opacity: 1;
 }
+#starRow::-webkit-scrollbar { display: none; }
 #starRow.gone { max-height: 0; padding-bottom: 0; opacity: 0; pointer-events: none; overflow: hidden; }
 
 #stickyBorder { border-bottom: 1px solid var(--border); }
@@ -515,12 +519,13 @@ select {
 
 /* VIEW TABS - pill style */
 .view-tabs {
-  display: flex; gap: 6px;
+  display: flex; flex-wrap: nowrap; gap: 6px;
   padding: 8px 16px;
   background: transparent;
-  overflow-x: auto;
+  overflow-x: auto; overflow-y: hidden;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
+  white-space: nowrap;
 }
 .view-tabs::-webkit-scrollbar { display: none; }
 .view-tab {
@@ -546,7 +551,7 @@ select {
   transition: max-height 0.3s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease, padding 0.3s cubic-bezier(0.4,0,0.2,1);
   max-height: 80px;
   border-bottom: 1px solid var(--border);
-  overflow: hidden;
+  overflow-x: auto; overflow-y: hidden;
 }
 #viewTabs.gone { max-height: 0 !important; padding: 0 !important; opacity: 0; pointer-events: none; overflow: hidden; border-bottom: none !important; }
 
@@ -3520,6 +3525,55 @@ input, textarea, select {
   font-size: 16px !important;
   -webkit-text-size-adjust: 100%;
 }
+
+/* ===== VISUAL OVERRIDES ===== */
+body::before {
+  content: '' !important;
+  position: fixed !important;
+  inset: 0 !important;
+  background: radial-gradient(ellipse 70% 50% at 85% 10%, rgba(232,184,75,0.2), transparent 65%), radial-gradient(ellipse 50% 60% at 15% 85%, rgba(180,140,60,0.12), transparent 65%) !important;
+  filter: blur(40px) !important;
+  pointer-events: none !important;
+  z-index: 0 !important;
+}
+body::after {
+  content: '' !important;
+  position: fixed !important;
+  inset: 0 !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='3' height='3'%3E%3Crect width='1' height='1' fill='rgba(255,255,255,0.03)'/%3E%3C/svg%3E") !important;
+  pointer-events: none !important;
+  z-index: 0 !important;
+}
+header {
+  background: rgba(12,11,9,0.88) !important;
+  backdrop-filter: blur(20px) saturate(1.2) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(1.2) !important;
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 30 !important;
+}
+#stickyBar {
+  background: rgba(12,11,9,0.92) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+}
+#favBar, #viewTabs, #catRow, #starRow, #topRow {
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+  scrollbar-width: none !important;
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  white-space: nowrap !important;
+}
+.fab {
+  animation: fabPulse 3s ease-in-out infinite !important;
+}
+@keyframes fabPulse {
+  0%, 100% { box-shadow: 0 4px 20px rgba(232,184,75,0.5), 0 2px 8px rgba(0,0,0,0.5); }
+  50% { box-shadow: 0 4px 32px rgba(232,184,75,0.8), 0 2px 8px rgba(0,0,0,0.5); }
+}
+/* ===== END VISUAL OVERRIDES ===== */
 </style>
 
 </body>
