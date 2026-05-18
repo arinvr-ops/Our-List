@@ -1,0 +1,3334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content">
+<title>Our List</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet">
+<style>
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+:root {
+  --bg: #0c0b09;
+  --card: #161410;
+  --card-hover: #1e1b16;
+  --border: #2a2720;
+  --border-subtle: #1e1c18;
+  --text: #f2ede4;
+  --muted: #7a776e;
+  --muted-light: #9a9690;
+  --tag-bg: #201e1a;
+  --accent: #e8b84b;
+  --accent-dim: #e8b84b22;
+  --accent-glow: #e8b84b44;
+
+  /* Category colours */
+  --c-food:        #e8b84b;
+  --c-italian:     #e07b4a;
+  --c-asian:       #e84b7a;
+  --c-latino:      #4be87a;
+  --c-american:    #4b9ee8;
+  --c-brunch:      #b44be8;
+  --c-fusion:      #e8d44b;
+  --c-bars:        #4be8d4;
+  --c-coffee:      #c8885a;
+  --c-dessert:     #e84bb4;
+  --c-carts:       #88c84b;
+  --c-finedining:  #c8b8f8;
+  --c-activities:  #4bd4e8;
+  --c-hikes:       #6be84b;
+  --c-getaways:    #e84b4b;
+  --c-shopping:    #f8a84b;
+  --c-international: #a84be8;
+  --c-seafood:     #4b9ee8;
+  --c-greek:       #e8e04b;
+  --c-african:     #e8784b;
+  --c-other:       #888888;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-weight: 300; min-height: 100vh; }
+
+/* HEADER */
+header {
+  border-bottom: 1px solid var(--border);
+  padding: 20px 20px 14px;
+  display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap;
+}
+header h1 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2.4rem;
+  letter-spacing: 6px;
+  color: var(--accent);
+  margin: 0;
+  line-height: 1;
+  text-shadow: 0 0 40px rgba(232,184,75,0.25);
+}
+header .sub {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 400;
+}
+
+/* STICKY BAR */
+#stickyBar { position: sticky; top: 0; z-index: 20; background: var(--bg); }
+
+#favBar {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 14px;
+  font-size: 0.74rem; color: var(--muted);
+  overflow-x: auto; overflow-y: hidden;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  white-space: nowrap;
+  transition: max-height 0.3s ease, opacity 0.25s ease, padding 0.3s ease;
+  max-height: 50px; opacity: 1;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+#favBar::-webkit-scrollbar { display: none; }
+#favBar.gone { max-height: 0; padding-top: 0; padding-bottom: 0; opacity: 0; border-bottom-color: transparent; }
+#favBar > * { flex-shrink: 0; }
+
+#topRow {
+  transition: max-height 0.3s ease, opacity 0.25s ease, padding 0.3s ease;
+  display: flex; gap: 8px; align-items: center;
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto; overflow-y: hidden;
+  scrollbar-width: none; -webkit-overflow-scrolling: touch;
+}
+#topRow::-webkit-scrollbar { display: none; }
+#topRow.gone { max-height: 0 !important; padding: 0 !important; opacity: 0; pointer-events: none; overflow: hidden; }
+#topRow > * { flex-shrink: 0; }
+.search-wrap { flex: 1; min-width: 120px; flex-shrink: 1 !important; }
+
+/* CATEGORY FILTER ROW */
+#catRow {
+  display: flex; gap: 6px; align-items: center;
+  padding: 0 14px 8px;
+  overflow-x: auto; overflow-y: hidden;
+  scrollbar-width: none; -webkit-overflow-scrolling: touch;
+  transition: max-height 0.3s ease, opacity 0.26s ease, padding 0.3s ease;
+  max-height: 60px; opacity: 1; white-space: nowrap;
+}
+#catRow::-webkit-scrollbar { display: none; }
+#catRow.gone { max-height: 0 !important; padding: 0 !important; opacity: 0; pointer-events: none; overflow: hidden; }
+
+/* DROPDOWN MENUS for sub-category and type filter */
+.cat-dropdown-wrap {
+  position: relative; display: inline-block;
+}
+.cat-dropdown-menu {
+  display: none;
+  position: absolute; top: calc(100% + 6px); left: 0;
+  background: #1a1916; border: 1px solid var(--border);
+  border-radius: 10px; z-index: 50;
+  min-width: 200px; max-height: 320px; overflow-y: auto;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.6);
+  scrollbar-width: none; -webkit-overflow-scrolling: touch;
+  padding: 6px;
+}
+.cat-dropdown-menu::-webkit-scrollbar { display: none; }
+.cat-dropdown-menu.open { display: block; }
+.cat-dropdown-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 12px; border-radius: 7px;
+  cursor: pointer; font-family: 'DM Sans', sans-serif;
+  font-size: 0.84rem; color: var(--text); font-weight: 300;
+  transition: background 0.12s; white-space: nowrap;
+}
+.cat-dropdown-item:hover { background: #252320; }
+.cat-dropdown-item.active { background: #252320; font-weight: 500; }
+.cat-dropdown-item .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.cat-dropdown-item .check { margin-left: auto; font-size: 0.8rem; color: var(--accent); }
+
+/* type filter dropdown */
+#typeDropdownWrap { position: relative; display: inline-block; }
+#typeDropdownMenu {
+  display: none;
+  position: absolute; top: calc(100% + 6px); left: 0;
+  background: #1a1916; border: 1px solid var(--border);
+  border-radius: 10px; z-index: 50;
+  min-width: 180px; max-height: 280px; overflow-y: auto;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.6);
+  scrollbar-width: none; padding: 6px;
+}
+#typeDropdownMenu::-webkit-scrollbar { display: none; }
+#typeDropdownMenu.open { display: block; }
+
+/* subCatRow hidden - replaced by dropdown */
+#subCatRow { display: none; }
+#filterRow { display: none; }
+#typeRow.gone { max-height: 0; padding-bottom: 0; opacity: 0; pointer-events: none; overflow: hidden; }
+
+/* TYPE + STAR ROW */
+#filterRow {
+  display: flex; flex-wrap: nowrap; gap: 6px;
+  padding: 0 14px 8px;
+  overflow-x: auto; overflow-y: hidden;
+  scrollbar-width: none; -webkit-overflow-scrolling: touch;
+  transition: max-height 0.3s ease, opacity 0.26s ease, padding 0.3s ease;
+  max-height: 0; opacity: 0; pointer-events: none;
+}
+#filterRow::-webkit-scrollbar { display: none; }
+#filterRow.visible { max-height: 48px; opacity: 1; pointer-events: auto; }
+#filterRow.gone { max-height: 0; padding-bottom: 0; opacity: 0; pointer-events: none; }
+
+#starRow {
+  display: flex; gap: 6px; align-items: center;
+  padding: 0 20px 8px;
+  overflow: hidden;
+  transition: max-height 0.3s ease, opacity 0.26s ease, padding 0.3s ease;
+  max-height: 56px; opacity: 1;
+}
+#starRow.gone { max-height: 0; padding-bottom: 0; opacity: 0; pointer-events: none; }
+
+#stickyBorder { border-bottom: 1px solid var(--border); }
+
+/* PILLS */
+.cat-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: var(--tag-bg); border: 2px solid transparent;
+  font-family: 'DM Sans', sans-serif; font-size: 0.72rem; font-weight: 500;
+  letter-spacing: 0.4px; padding: 5px 12px; border-radius: 20px;
+  cursor: pointer; transition: all 0.14s; white-space: nowrap; text-transform: uppercase;
+  color: var(--muted); flex-shrink: 0;
+}
+.cat-pill:hover { color: var(--text); }
+.cat-pill.active { color: #0f0e0d; font-weight: 600; }
+.cat-pill .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+.pill {
+  background: var(--tag-bg); border: 1px solid var(--border); color: var(--muted);
+  font-family: 'DM Sans', sans-serif; font-size: 0.7rem; font-weight: 500;
+  letter-spacing: 0.4px; padding: 4px 10px; border-radius: 20px;
+  cursor: pointer; transition: all 0.14s; white-space: nowrap; text-transform: uppercase;
+}
+.pill:hover { border-color: var(--accent); color: var(--accent); }
+.pill.active { background: var(--accent); border-color: var(--accent); color: #0f0e0d; }
+
+.star-pill {
+  background: var(--tag-bg); border: 1px solid var(--border); color: var(--muted);
+  font-family: 'DM Sans', sans-serif; font-size: 0.7rem; font-weight: 500;
+  padding: 4px 10px; border-radius: 20px; cursor: pointer; transition: all 0.14s; white-space: nowrap;
+}
+.star-pill:hover { border-color: var(--accent); color: var(--accent); }
+.star-pill.active { background: #2a2000; border-color: var(--accent); color: var(--accent); }
+
+.toggle-btn {
+  background: none; border: 1px solid var(--border); color: var(--muted);
+  font-family: 'DM Sans', sans-serif; font-size: 0.7rem; font-weight: 500;
+  letter-spacing: 0.4px; padding: 4px 10px; border-radius: 20px;
+  cursor: pointer; transition: all 0.14s; text-transform: uppercase; white-space: nowrap;
+}
+.toggle-btn:hover { border-color: #4caf78; color: #4caf78; }
+.toggle-btn.active-fav { background: #e84b4b22; border-color: #e84b4b; color: #e87a7a; }
+.toggle-btn.active-been { background: #0f231822; border-color: #2a6644; color: #4caf78; }
+
+/* INPUTS */
+.search-wrap { position: relative; flex: 1; min-width: 160px; }
+.search-wrap svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+input[type="text"] {
+  width: 100%; background: var(--card); border: 1px solid var(--border);
+  color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.88rem; font-weight: 300;
+  padding: 9px 10px 9px 32px; border-radius: 6px; outline: none; transition: border-color 0.18s;
+}
+input[type="text"]:focus { border-color: var(--accent); }
+input[type="text"]::placeholder { color: var(--muted); }
+.modal input[type="text"], .modal input[type="url"] { padding: 9px 11px; width: 100%; max-width: 100%; box-sizing: border-box; background: var(--card); color: var(--text); border: 1px solid var(--border); border-radius: 6px; }
+select {
+  background: var(--card); border: 1px solid var(--border); color: var(--text);
+  font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
+  padding: 8px 10px; border-radius: 6px; outline: none; cursor: pointer;
+}
+.add-btn {
+  background: none; border: 1px dashed var(--border); color: var(--muted);
+  font-family: 'DM Sans', sans-serif; font-size: 0.74rem;
+  padding: 7px 12px; border-radius: 6px; cursor: pointer; transition: all 0.15s; white-space: nowrap;
+}
+.add-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* RANDOM BUTTON */
+.random-btn {
+  background: none; border: 1px solid var(--border); color: var(--muted);
+  font-family: 'DM Sans', sans-serif; font-size: 0.74rem; font-weight: 500;
+  padding: 7px 12px; border-radius: 6px; cursor: pointer; transition: all 0.15s;
+  white-space: nowrap; letter-spacing: 0.3px;
+}
+.random-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* COUNT BAR */
+#countBar { padding: 6px 16px 2px; color: var(--muted); font-size: 0.7rem; letter-spacing: 0.8px; text-transform: uppercase; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+/* GRID */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; padding: 10px 20px 60px; }
+
+/* CARD */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--card-color, var(--accent));
+  border-radius: 10px;
+  padding: 0;
+  transition: background 0.18s, box-shadow 0.18s;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+.card:hover { background: var(--card-hover); box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
+.card.has-photo { border-left: none; }
+.card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  transform: scaleX(1); transform-origin: left;
+}
+.card:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(0,0,0,0.4); border-color: #3e3b34; }
+
+.card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px; }
+.card-name { font-size: 0.96rem; font-weight: 500; color: var(--text); line-height: 1.3; flex: 1; padding-right: 6px; }
+.card-actions { display: flex; gap: 3px; align-items: center; flex-shrink: 0; }
+.icon-btn { background: none; border: none; cursor: pointer; color: var(--muted); padding: 2px 3px; line-height: 1; font-size: 0.85rem; transition: opacity 0.14s; opacity: 0.4; }
+.icon-btn:hover { opacity: 1; }
+
+.card-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
+.card-location { font-size: 0.72rem; color: var(--muted); }
+.card-note { font-size: 0.74rem; color: var(--muted); margin-bottom: 8px; font-style: italic; }
+
+.card-footer { display: flex; justify-content: space-between; align-items: center; gap: 6px; flex-wrap: wrap; }
+.card-stars { display: flex; gap: 2px; }
+.card-stars .s { font-size: 0.85rem; cursor: pointer; color: #3a3730; transition: color 0.1s; line-height: 1; }
+.card-stars .s.lit { color: #f0b429; text-shadow: 0 0 6px rgba(240,180,41,0.4); }
+
+.card-badges { display: flex; gap: 5px; align-items: center; flex-wrap: wrap; }
+.ctag {
+  font-size: 0.6rem; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase;
+  padding: 3px 8px; border-radius: 4px; border: 1px solid; cursor: pointer;
+  transition: opacity 0.12s; white-space: nowrap;
+}
+.ctag:hover { opacity: 0.75; }
+.ctag:hover { border-color: var(--accent); color: var(--accent); }
+.been-btn {
+  font-size: 0.64rem; font-weight: 500; letter-spacing: 0.3px; text-transform: uppercase;
+  padding: 2px 7px; border-radius: 3px; cursor: pointer; white-space: nowrap;
+  background: none; border: 1px solid var(--border); color: var(--muted);
+  font-family: 'DM Sans', sans-serif; transition: all 0.14s;
+}
+.been-btn.on { background: #0f2318; border-color: #2a6644; color: #4caf78; }
+.been-btn:hover { border-color: #4caf78; color: #4caf78; }
+
+.goback-btn {
+  font-size: 0.78rem; font-weight: 600;
+  width: 24px; height: 24px; border-radius: 4px; cursor: pointer; white-space: nowrap;
+  background: none; border: 1px solid var(--border); color: var(--muted);
+  font-family: 'DM Sans', sans-serif; transition: all 0.14s;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.goback-btn.yes { background: #0d1e2e; border-color: #2a5a8a; color: #4a9ee8; }
+.goback-btn.no  { background: #2a0f0f; border-color: #8a2a2a; color: #e87a4a; }
+.goback-btn:hover { opacity: 0.8; }
+/* Show been decision label */
+.been-decision {
+  font-size: 0.62rem; color: var(--muted); letter-spacing: 0.3px;
+  text-transform: uppercase; align-self: center;
+}
+
+.link-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 24px; height: 24px; border-radius: 4px;
+  background: none; border: 1px solid var(--border); color: var(--muted);
+  cursor: pointer; transition: all 0.14s; text-decoration: none; font-size: 0.82rem;
+  flex-shrink: 0;
+}
+.link-btn:hover { border-color: var(--accent); color: var(--accent); background: #1e1c18; }
+
+/* card photo */
+.card-photo {
+  width: 100%; height: 140px; object-fit: cover; object-position: center center;
+  display: block; border-radius: 0;
+}
+.card.has-photo .card-photo {
+  height: 150px;
+  margin-bottom: 0;
+}
+.card.has-photo .card-inner {
+  background: linear-gradient(to bottom, transparent 0%, rgba(12,11,9,0.95) 100%);
+  position: relative;
+}
+.card.has-photo .card-name {
+  font-size: 1.08rem;
+  font-weight: 600;
+}
+
+/* want-to-go fire button */
+.want-btn {
+  background: none; border: none; cursor: pointer;
+  font-size: 1rem; padding: 2px 3px; line-height: 1;
+  opacity: 0.25; transition: opacity 0.14s, transform 0.14s;
+}
+.want-btn.on { opacity: 1; transform: scale(1.15); }
+.want-btn:hover { opacity: 0.8; }
+
+/* collection tags */
+.coll-tag {
+  font-size: 0.62rem; font-weight: 500; letter-spacing: 0.3px;
+  padding: 2px 6px; border-radius: 10px;
+  background: #1e1c18; border: 1px solid #3a3520;
+  color: #a09060; white-space: nowrap;
+}
+
+/* bigger card note */
+.card-note {
+  font-size: 0.84rem !important;
+  color: var(--text) !important;
+  opacity: 0.75;
+  font-style: normal !important;
+  margin-bottom: 9px;
+  line-height: 1.4;
+}
+.fav-btn-card { font-size: 1rem; opacity: 0.3; transition: opacity 0.14s; background: none; border: none; cursor: pointer; line-height: 1; }
+.fav-btn-card.on { opacity: 1; color: #e84b4b; }
+
+.empty { grid-column: 1/-1; text-align: center; padding: 50px 20px; color: var(--muted); font-size: 0.88rem; }
+
+/* VIEW TABS */
+.view-tabs {
+  display: flex; gap: 0; border-bottom: 1px solid var(--border);
+  padding: 0 14px; background: var(--bg);
+}
+.view-tab {
+  padding: 9px 16px; font-family: 'DM Sans', sans-serif; font-size: 0.78rem;
+  font-weight: 500; letter-spacing: 0.5px; text-transform: uppercase;
+  color: var(--muted); cursor: pointer; border: none; background: none;
+  border-bottom: 2px solid transparent; transition: all 0.14s; white-space: nowrap;
+}
+.view-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+#viewTabs { transition: max-height 0.3s ease, opacity 0.25s ease, padding 0.3s ease; }
+#viewTabs.gone { max-height: 0 !important; padding: 0 !important; opacity: 0; pointer-events: none; overflow: hidden; border-bottom: none !important; }
+.view-tab:hover { color: var(--text); }
+
+/* archived card dim */
+.card.archived { opacity: 0.6; }
+.card.archived:hover { opacity: 1; }
+.archive-badge {
+  font-size: 0.62rem; font-weight: 500; letter-spacing: 0.3px; text-transform: uppercase;
+  padding: 2px 6px; border-radius: 3px; background: #2a2010; border: 1px solid #4a3820;
+  color: #a07840; white-space: nowrap;
+}
+.repeat-badge {
+  font-size: 0.62rem; font-weight: 500; letter-spacing: 0.3px; text-transform: uppercase;
+  padding: 2px 6px; border-radius: 3px; background: #0d1e2e; border: 1px solid #2a5a8a;
+  color: #4a9ee8; white-space: nowrap;
+}
+
+/* MAP VIEW */
+#mapView {
+  display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  width: 100%; height: 100%; z-index: 150;
+  background: var(--bg); flex-direction: column;
+}
+#mapView.open { display: flex; }
+
+#mapContainer { flex: 1; width: 100%; min-height: 200px; position: relative; overflow: hidden; }
+#mapHeader {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 16px; background: var(--card);
+  border-bottom: 1px solid var(--border); flex-shrink: 0;
+}
+#mapHeader h2 {
+  font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem;
+  letter-spacing: 2px; color: var(--accent); flex: 1;
+}
+.map-close-btn {
+  background: var(--tag-bg); border: 1px solid var(--border);
+  color: var(--text); font-family: 'DM Sans', sans-serif;
+  font-size: 0.82rem; padding: 7px 14px; border-radius: 6px;
+  cursor: pointer;
+}
+#mapSpotList {
+  max-height: 38vh; overflow-y: auto;
+  background: var(--bg); border-top: 1px solid var(--border);
+  flex-shrink: 0; scrollbar-width: none;
+}
+#mapSpotList::-webkit-scrollbar { display: none; }
+.map-spot-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 16px; border-bottom: 1px solid var(--border);
+  cursor: pointer; transition: background 0.12s;
+}
+.map-spot-item:hover { background: var(--card); }
+.map-spot-item .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.map-spot-item .spot-name { font-size: 0.88rem; font-weight: 500; flex: 1; }
+.map-spot-item .spot-loc { font-size: 0.74rem; color: var(--muted); }
+
+.map-btn {
+  background: none; border: 1px solid var(--border); color: var(--muted);
+  font-family: 'DM Sans', sans-serif; font-size: 0.74rem; font-weight: 500;
+  padding: 7px 12px; border-radius: 6px; cursor: pointer;
+  transition: all 0.15s; white-space: nowrap;
+}
+.map-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+#photoUploadBtn:hover { border-color: var(--accent); color: var(--accent); }
+#photoUploadBtn.uploading { opacity: 0.5; pointer-events: none; }
+
+/* RANDOM OVERLAY */
+.rand-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.85); z-index: 200;
+  align-items: center; justify-content: center;
+  flex-direction: column; gap: 20px; padding: 30px;
+}
+.rand-overlay.open { display: flex; }
+.rand-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 14px; padding: 28px 28px 24px;
+  width: 100%; max-width: 380px; text-align: center;
+  position: relative; overflow: hidden;
+}
+.rand-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+}
+.rand-cat { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); margin-bottom: 10px; }
+.rand-name { font-family: 'Bebas Neue', sans-serif; font-size: 2.2rem; letter-spacing: 2px; color: var(--text); line-height: 1.1; margin-bottom: 8px; }
+.rand-note { font-size: 0.82rem; color: var(--muted); font-style: italic; margin-bottom: 6px; }
+.rand-loc { font-size: 0.78rem; color: var(--muted); }
+.rand-btns { display: flex; gap: 10px; width: 100%; max-width: 380px; }
+.rand-btn { flex: 1; padding: 12px; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.86rem; font-weight: 500; cursor: pointer; border: none; transition: opacity 0.14s; }
+.rand-btn:hover { opacity: 0.82; }
+.rand-shuffle { background: var(--accent); color: #0f0e0d; }
+.rand-close { background: var(--tag-bg); color: var(--muted); border: 1px solid var(--border); }
+.rand-spinning .rand-name { opacity: 0.3; transform: scale(0.95); transition: all 0.1s; }
+
+/* MODAL */
+.overlay { display: none; position: fixed; left: 0; right: 0; bottom: 0; top: 0; background: rgba(0,0,0,0.75); z-index: 100; }
+.overlay.open { display: block; }
+.modal {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 14px 14px 0 0; padding: 18px 18px env(safe-area-inset-bottom, 28px);
+  position: fixed; bottom: 0; left: 0; right: 0;
+  max-height: 90dvh; overflow-y: auto; overflow-x: hidden;
+  -webkit-overflow-scrolling: touch; box-sizing: border-box;
+}
+.modal-handle { width: 36px; height: 4px; border-radius: 2px; background: var(--border); margin: 0 auto 14px; }
+.modal h2 { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; letter-spacing: 2px; color: var(--accent); margin-bottom: 14px; }
+.field { margin-bottom: 11px; }
+.field label { display: block; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 4px; }
+.star-picker { display: flex; gap: 8px; margin-top: 3px; }
+.star-picker .sp { font-size: 1.5rem; cursor: pointer; color: #3a3730; transition: color 0.1s; line-height: 1; }
+.star-picker .sp.lit { color: var(--accent); }
+.modal-btns { display: flex; gap: 9px; margin-top: 16px; padding-bottom: 8px; }
+.btn { flex: 1; padding: 11px; border-radius: 7px; font-family: 'DM Sans', sans-serif; font-size: 0.84rem; font-weight: 500; cursor: pointer; border: none; transition: opacity 0.14s; }
+.btn-primary { background: var(--accent); color: #0f0e0d; }
+.btn-danger { background: #3a1a15; color: #e87a7a; border: 1px solid #5a2a20; }
+.btn-secondary { background: var(--tag-bg); color: var(--muted); border: 1px solid var(--border); }
+.btn:hover { opacity: 0.82; }
+
+/* autocomplete */
+.ac-wrap { position: relative; }
+.ac-list {
+  display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+  background: #222018; border: 1px solid var(--accent); border-radius: 8px; z-index: 300;
+  max-height: 220px; overflow-y: scroll; box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+  -webkit-overflow-scrolling: touch; overscroll-behavior: contain; touch-action: pan-y;
+}
+.ac-list.open { display: block; }
+.ac-item { padding: 10px 14px; font-size: 0.88rem; color: var(--text); cursor: pointer; border-bottom: 1px solid var(--border); transition: background 0.12s; }
+.ac-item:last-child { border-bottom: none; }
+.ac-item:hover, .ac-item.highlighted { background: #2a2820; color: var(--accent); }
+
+@media (max-width: 600px) {
+  header { padding: 16px 16px 12px; }
+  #topRow, #catRow, #subCatRow, #filterRow, #starRow, #favBar, #countBar { padding-left: 12px; padding-right: 12px; }
+  .grid { padding: 8px 14px 48px; }
+  header h1 { font-size: 2rem; }
+}
+.field input, .field select, .field textarea, input[type="text"], input[type="url"] { font-size: 16px !important; }
+
+/* Prevent iOS auto-zoom - inputs must be >= 16px */
+.modal input, .modal textarea, .modal select,
+.field input, .field textarea, .field select {
+  font-size: 16px !important;
+}
+/* Nuclear iOS zoom prevention */
+input, textarea, select {
+  font-size: 16px !important;
+  -webkit-text-size-adjust: 100%;
+}
+</style>
+</head>
+<body>
+
+<div id="loadingBar" style="display:none;position:fixed;inset:0;background:rgba(15,14,13,0.92);z-index:999;align-items:center;justify-content:center;flex-direction:column;gap:14px;">
+  <div style="width:40px;height:40px;border:3px solid #2e2c28;border-top-color:#e8b84b;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+  <span style="color:#7a776e;font-size:0.82rem;letter-spacing:1px;text-transform:uppercase;">Loading your list...</span>
+</div>
+<div id="statusMsg" style="display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1a1916;border:1px solid #2e2c28;border-radius:8px;padding:8px 18px;font-size:0.8rem;z-index:500;white-space:nowrap;"></div>
+<style>
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+}@keyframes spin { to { transform: rotate(360deg); } }.field input, .field select, .field textarea, input[type="text"], input[type="url"] { font-size: 16px !important; }
+
+/* Prevent iOS auto-zoom - inputs must be >= 16px */
+.modal input, .modal textarea, .modal select,
+.field input, .field textarea, .field select {
+  font-size: 16px !important;
+}
+/* Nuclear iOS zoom prevention */
+input, textarea, select {
+  font-size: 16px !important;
+  -webkit-text-size-adjust: 100%;
+}
+</style>
+
+<header>
+  <div style="display:flex;align-items:baseline;gap:12px;">
+    <h1>Our List</h1>
+    <span class="sub">Portland &amp; Beyond</span>
+  </div>
+</header>
+
+<div id="stickyBar">
+  <div id="favBar">
+    <span id="totalCount">0 spots</span><div id="catBreakdown" style="font-size:0.68rem;color:var(--muted);padding:2px 20px 4px;letter-spacing:0.3px;display:block;"></div>
+    <button class="toggle-btn" id="favOnlyBtn" onclick="toggleFavOnly()">❤ Favorites</button>
+    <button class="toggle-btn" id="beenOnlyBtn" onclick="toggleBeenOnly()">✓ Been here</button>
+    <button class="toggle-btn" id="wantOnlyBtn" onclick="toggleWantOnly()">🔥 Want to go</button>
+    <button class="random-btn" id="randBtn" onclick="openRandom()">🎲 Surprise me</button>
+    <button class="map-btn" onclick="openMapView()">🗺 Map</button>
+    <button class="map-btn" id="autoTagBtn" onclick="autoTagAreas()">📍 Auto-tag areas</button>
+  </div>
+
+  <div id="topRow">
+    <div class="search-wrap">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+      <input type="text" id="searchInput" placeholder="Search everything..." oninput="render()">
+    </div>
+    <select id="sortSelect" onchange="handleSortChange(this)">
+      <optgroup label="Sort">
+        <option value="newest">Newest first</option>
+        <option value="alpha">A - Z</option>
+        <option value="alpha-desc">Z - A</option>
+        <option value="stars-desc">Top rated</option>
+        <option value="stars-asc">Lowest rated</option>
+      </optgroup>
+      <optgroup label="View">
+        <option value="view-active">Our List</option>
+        <option value="view-repeats">👍 Worth it</option>
+        <option value="view-noback">One &amp; Done</option>
+        <option value="view-archive">Decide Later</option>
+      </optgroup>
+    </select>
+    <button class="add-btn" onclick="openAdd()">+ Add spot</button>
+  </div>
+
+  <div id="catRow" style="display:flex;gap:6px;align-items:center;padding:0 14px 6px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;transition:max-height 0.3s ease,opacity 0.26s ease,padding 0.3s ease;max-height:60px;opacity:1;white-space:nowrap;"></div>
+  <div id="typeRow" style="display:flex;gap:6px;align-items:center;padding:0 14px 8px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;white-space:nowrap;min-height:0;"></div>
+  <div id="subCatRow"></div>
+  <div id="filterRow"></div>
+  <!-- Dropdowns rendered outside sticky bar so they overflow correctly -->
+  <div id="subCatDropdown" class="cat-dropdown-menu" style="position:fixed;z-index:200;display:none;"></div>
+  <div id="typeDropdown" class="cat-dropdown-menu" style="position:fixed;z-index:200;display:none;"></div>
+  <div id="starRow">
+    <button class="star-pill active" onclick="setStarFilter(0,this)">All ratings</button>
+    <button class="star-pill" onclick="setStarFilter(1,this)">1+ ★</button>
+    <button class="star-pill" onclick="setStarFilter(2,this)">2+ ★</button>
+    <button class="star-pill" onclick="setStarFilter(3,this)">3+ ★</button>
+    <button class="star-pill" onclick="setStarFilter(4,this)">4+ ★</button>
+    <button class="star-pill" onclick="setStarFilter(5,this)">5 ★</button>
+  </div>
+  <div class="view-tabs" id="viewTabs" style="border-bottom:1px solid var(--border);">
+    <button class="view-tab active" data-view="active" onclick="setView('active',this)">Our List</button>
+    <button class="view-tab" data-view="repeats" onclick="setView('repeats',this)">👍 Worth it</button>
+    <button class="view-tab" data-view="noback" onclick="setView('noback',this)">One &amp; Done</button>
+    <button class="view-tab" data-view="archive" onclick="setView('archive',this)">Decide Later</button>
+  </div>
+  <div id="stickyBorder"></div>
+</div>
+
+<div id="countBar"></div>
+<div class="grid" id="grid"></div>
+
+<!-- MAP VIEW -->
+<div id="mapView">
+  <div id="mapHeader">
+    <div style="display:flex;align-items:center;gap:6px;flex:1;flex-wrap:wrap;">
+      <h2 style="margin:0;">Map</h2>
+      <input type="text" id="mapSearch" placeholder="Search spots..." 
+        style="flex:1;min-width:100px;background:#252320;border:1px solid var(--border);border-radius:6px;
+        padding:6px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;"
+        oninput="filterMapSpots()">
+      <select id="mapCatFilter" onchange="filterMapSpots()"
+        style="background:#252320;border:1px solid var(--border);border-radius:6px;
+        padding:6px 8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.74rem;">
+        <option value="all">All categories</option>
+        <option value="food">🍜 Food</option>
+        <option value="activities">⚡ Activities</option>
+        <option value="hikes">🥾 Hikes</option>
+        <option value="getaways">✈️ Getaways</option>
+        <option value="shopping">🛍 Shopping</option>
+        <option value="international">🌍 International</option>
+        <option value="other">• Other</option>
+      </select>
+      <select id="mapLocFilter" onchange="filterMapSpots()"
+        style="background:#252320;border:1px solid var(--border);border-radius:6px;
+        padding:6px 8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.74rem;max-width:110px;">
+        <option value="All">All areas</option>
+      </select>
+    </div>
+    <button class="map-close-btn" onclick="closeMapView()">✕</button>
+  </div>
+  <div style="padding:4px 12px;font-size:0.72rem;color:var(--muted);" id="mapCount"></div>
+  <div id="mapContainer"></div>
+  <div id="mapSpotList"></div>
+</div>
+
+<!-- Been? popup -->
+<div id="beenPopup" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.75);z-index:200;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;width:100%;max-width:320px;text-align:center;position:relative;box-sizing:border-box;">
+    <button onclick="undoBeen()" style="position:absolute;top:12px;right:14px;background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;line-height:1;">✕</button>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:2px;color:var(--accent);margin-bottom:6px;">Been there!</div>
+    <div id="beenPopupName" style="font-size:1rem;font-weight:500;color:var(--text);margin-bottom:6px;"></div>
+    <div style="font-size:0.82rem;color:var(--muted);margin-bottom:20px;">Would you go back?</div>
+    <div style="display:flex;gap:10px;margin-bottom:10px;">
+      <button onclick="setBeenDecision(true)" style="flex:1;padding:12px;border-radius:8px;background:#0d1e2e;border:1px solid #2a5a8a;color:#4a9ee8;font-family:'DM Sans',sans-serif;font-size:0.88rem;font-weight:600;cursor:pointer;">👍 Worth it</button>
+      <button onclick="setBeenDecision(false)" style="flex:1;padding:12px;border-radius:8px;background:#2a0f0f;border:1px solid #8a2a2a;color:#e87a4a;font-family:'DM Sans',sans-serif;font-size:0.88rem;font-weight:600;cursor:pointer;">One &amp; Done</button>
+    </div>
+    <button onclick="setBeenDecision(null)" style="width:100%;padding:9px;border-radius:8px;background:none;border:1px solid var(--border);color:var(--muted);font-family:'DM Sans',sans-serif;font-size:0.82rem;cursor:pointer;">Decide later</button>
+  </div>
+</div>
+
+<!-- Random picker overlay -->
+<div class="rand-overlay" id="randOverlay">
+  <div class="rand-card" id="randCard">
+    <div class="rand-cat" id="randCat"></div>
+    <div class="rand-name" id="randName"></div>
+    <div class="rand-note" id="randNote"></div>
+    <div class="rand-loc" id="randLoc" onclick="openRandMaps()" style="cursor:pointer;"></div>
+  </div>
+  <div class="rand-btns">
+    <button class="rand-btn rand-shuffle" onclick="spinRandom()">🎲 Again</button>
+    <button class="rand-btn rand-close" onclick="closeRandom()">Done</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
+    <button id="includBeenBtn" onclick="toggleIncludeBeen()"
+      style="background:none;border:1px solid var(--border);color:var(--muted);font-family:'DM Sans',sans-serif;font-size:0.72rem;padding:5px 12px;border-radius:20px;cursor:pointer;transition:all 0.14s;text-transform:uppercase;letter-spacing:0.4px;">
+      Include places we've been
+    </button>
+  </div>
+</div>
+
+<!-- Add/Edit modal -->
+<div class="overlay" id="modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h2 id="modalTitle">Add a spot</h2>
+    <div class="field">
+      <label>Name</label>
+      <input type="text" id="mName" placeholder="Name or search a place..." autocomplete="off" autocorrect="off" oninput="searchPlaceFromName(this.value)" onblur="setTimeout(()=>{const nr=document.getElementById('nameResults');if(nr)nr.style.display='none';},200)">
+      <div id="nameResults" style="display:none;background:#222018;border:1px solid var(--accent);border-radius:0 0 8px 8px;max-height:200px;overflow-y:auto;width:100%;margin-top:-1px;"></div>
+    </div>
+    <div class="field">
+      <label>Category</label>
+      <div class="ac-wrap">
+        <input type="text" id="mCategory" placeholder="e.g. Food, Activities, Hikes..." autocomplete="off" autocorrect="off"
+          oninput="onCategoryInput(this)" onfocus="acShow(this,'topcategory')" onblur="acBlur()">
+        <div class="ac-list" id="acCategory"></div>
+      </div>
+    </div>
+    <div class="field" id="subCatField" style="display:none">
+      <label>Sub-category</label>
+      <div class="ac-wrap">
+        <input type="text" id="mSubCat" placeholder="e.g. Asian, Italian, Brunch..." autocomplete="off" autocorrect="off"
+          oninput="acShow(this,'subcategory')" onfocus="acShow(this,'subcategory')" onblur="acBlur()">
+        <div class="ac-list" id="acSubCat"></div>
+      </div>
+    </div>
+    <div class="field">
+      <label>Type / cuisine <span style="color:var(--muted);font-size:0.65rem;text-transform:none;letter-spacing:0">(optional - e.g. Vietnamese, Burgers...)</span></label>
+      <div class="ac-wrap">
+        <input type="text" id="mCuisine" placeholder="e.g. Vietnamese, Burgers, Sushi..." autocomplete="off" autocorrect="off"
+          oninput="acShow(this,'cuisine')" onfocus="acShow(this,'cuisine')" onblur="acBlur()">
+        <div class="ac-list" id="acCuisine"></div>
+      </div>
+    </div>
+    <div class="field">
+      <label>Location / neighborhood</label>
+      <div class="ac-wrap">
+        <input type="text" id="mLocation" placeholder="e.g. NE Portland, Lake Oswego..." autocomplete="off" autocorrect="off"
+          oninput="acShow(this,'location')" onfocus="acShow(this,'location')" onblur="acBlur()">
+        <div class="ac-list" id="acLocation"></div>
+      </div>
+    </div>
+    <div class="field">
+      <label>Area <span style="color:var(--muted);font-size:0.65rem;text-transform:none;letter-spacing:0">(suburb/neighborhood for filtering)</span></label>
+      <div class="ac-wrap">
+        <input type="text" id="mArea" placeholder="e.g. Beaverton, SE Portland, Pearl District..." 
+          autocomplete="off" autocorrect="off" list="areaList">
+        <datalist id="areaList"></datalist>
+      </div>
+    </div>
+    <div class="field">
+      <label>Pin on map <span style="color:var(--muted);font-size:0.65rem;text-transform:none;letter-spacing:0">(search for exact location)</span></label>
+      <div style="position:relative;">
+        <input type="text" id="mPlaceSearch" placeholder="Search place name, e.g. Jacqueline Portland..." autocomplete="off" autocorrect="off"
+          style="padding:9px 11px;width:100%;box-sizing:border-box;" oninput="searchPlace(this.value)" onfocus="const nr=document.getElementById('nameResults');if(nr)nr.style.display='none';" onfocus="const nr=document.getElementById('nameResults');if(nr)nr.style.display='none';">
+        <div id="placeResults" style="display:none;background:#222018;border:1px solid var(--accent);border-radius:0 0 8px 8px;max-height:200px;overflow-y:auto;margin-top:-2px;width:100%;"></div>
+      </div>
+      <div id="miniMapWrap" style="display:none;border-radius:8px;overflow:hidden;height:160px;margin-top:4px;position:relative;width:100%;max-width:100%;">
+        <div id="miniMap" style="width:100%;height:100%;"></div>
+        <div style="position:absolute;bottom:6px;right:6px;background:rgba(15,14,13,0.8);padding:4px 8px;border-radius:4px;font-size:0.7rem;color:var(--muted);" id="miniMapLabel">Drag pin to adjust</div>
+      </div>
+      <input type="hidden" id="mLat">
+      <input type="hidden" id="mLng">
+      <div id="pinStatus" style="font-size:0.74rem;color:#4caf78;margin-top:4px;display:none;">📍 Location pinned</div>
+    </div>
+    <div class="field">
+      <label>Note</label>
+      <input type="text" id="mNote" placeholder="e.g. happy hour 5-6, cash only...">
+    </div>
+    <div class="field">
+      <label>Link <span style="color:var(--muted);font-size:0.65rem;text-transform:none;letter-spacing:0">(Instagram, Maps, website...)</span></label>
+      <input type="url" id="mLink" placeholder="https://..." autocomplete="off">
+    </div>
+    <div class="field">
+      <label>Photo</label>
+      <div id="photoPreviewWrap" style="display:none;margin-bottom:8px;position:relative;">
+        <img id="photoPreview" style="width:100%;height:140px;object-fit:cover;border-radius:8px;display:block;">
+        <button onclick="removePhoto()" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.7);border:none;color:#fff;border-radius:50%;width:26px;height:26px;cursor:pointer;font-size:0.8rem;line-height:1;">✕</button>
+      </div>
+      <input type="hidden" id="mPhoto">
+      <label for="photoFileInput" id="photoUploadBtn" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:10px;border:1px dashed var(--border);border-radius:8px;cursor:pointer;color:var(--muted);font-size:0.82rem;transition:all 0.15s;">
+        📷 Tap to add photo from camera roll
+      </label>
+      <input type="file" id="photoFileInput" accept="image/*" style="display:none;" onchange="handlePhotoCrop(this)">
+      <div id="photoUploadStatus" style="font-size:0.76rem;color:var(--muted);margin-top:4px;display:none;"></div>
+      <div id="cropWrap" style="display:none;margin-top:8px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+          <div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">Drag · Pinch to zoom</div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span style="font-size:0.7rem;color:var(--muted);">🔍</span>
+            <input type="range" id="zoomSlider" min="1" max="100" value="25"
+              style="width:80px;accent-color:var(--accent);"
+              oninput="sliderZoom(this.value)">
+          </div>
+        </div>
+        <div id="cropFrame" style="width:100%;height:150px;border-radius:8px;overflow:hidden;position:relative;background:#0f0e0d;touch-action:none;user-select:none;">
+          <img id="cropImg" draggable="false" style="position:absolute;top:0;left:0;will-change:transform;">
+        </div>
+        <div style="font-size:0.7rem;color:var(--muted);margin:6px 0 3px;text-transform:uppercase;letter-spacing:1px;">How it looks on the card</div>
+        <div style="width:100%;height:110px;border-radius:8px;overflow:hidden;background:#0f0e0d;">
+          <canvas id="cropPreviewCanvas" style="width:100%;height:100%;display:block;"></canvas>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:10px;">
+          <button onclick="cancelCrop()" style="flex:1;padding:10px;border-radius:7px;background:var(--tag-bg);border:1px solid var(--border);color:var(--muted);font-family:'DM Sans',sans-serif;font-size:0.84rem;cursor:pointer;">Cancel</button>
+          <button onclick="confirmCrop()" id="confirmCropBtn" style="flex:1;padding:10px;border-radius:7px;background:var(--accent);border:none;color:#0f0e0d;font-family:'DM Sans',sans-serif;font-size:0.84rem;font-weight:600;cursor:pointer;">Use photo</button>
+        </div>
+      </div>
+    </div>
+    <div class="field">
+      <label>Collections <span style="color:var(--muted);font-size:0.65rem;text-transform:none;letter-spacing:0">(e.g. Date Night, Quick Lunch)</span></label>
+      <div class="ac-wrap">
+        <input type="text" id="mCollections" placeholder="e.g. Date Night, Special Occasion..." autocomplete="off" autocorrect="off"
+          oninput="acShow(this,'collections')" onfocus="acShow(this,'collections')" onblur="acBlur()">
+        <div class="ac-list" id="acCollections"></div>
+      </div>
+    </div>
+    <div class="field">
+      <label>Rating</label>
+      <div class="star-picker">
+        <span class="sp" onclick="pickStar(1)">★</span>
+        <span class="sp" onclick="pickStar(2)">★</span>
+        <span class="sp" onclick="pickStar(3)">★</span>
+        <span class="sp" onclick="pickStar(4)">★</span>
+        <span class="sp" onclick="pickStar(5)">★</span>
+      </div>
+    </div>
+    <div class="modal-btns" id="modalBtnsNormal">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-danger" id="deleteBtn" style="display:none" onclick="showDeleteConfirm()">Delete</button>
+      <button class="btn btn-primary" onclick="saveSpot()">Save</button>
+    </div>
+    <div class="modal-btns" id="modalBtnsConfirm" style="display:none">
+      <p style="width:100%;text-align:center;font-size:0.82rem;color:var(--muted);margin-bottom:8px;">Remove this spot for good?</p>
+      <button class="btn btn-secondary" onclick="hideDeleteConfirm()">Keep it</button>
+      <button class="btn btn-danger" onclick="deleteSpot()">Yes, delete</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const KEY = 'our-list-v2';
+
+// Category config
+// FOOD_SUBS = subcategories that live under the Food parent
+let FOOD_SUBS = ['brunch','italian','asian','latino','american','fusion','bars','coffee','dessert','carts','finedining','seafood','greek','african'];
+
+const CATS = [
+  // Top-level
+  { key: 'food',         label: 'Food',         color: '#e8b84b', parent: null },
+  // Food subcategories
+  { key: 'brunch',       label: 'Brunch',        color: '#b44be8', parent: 'food' },
+  { key: 'italian',      label: 'Italian',       color: '#e07b4a', parent: 'food' },
+  { key: 'asian',        label: 'Asian',         color: '#e84b7a', parent: 'food' },
+  { key: 'latino',       label: 'Latino',        color: '#4be87a', parent: 'food' },
+  { key: 'american',     label: 'American',      color: '#4b9ee8', parent: 'food' },
+  { key: 'fusion',       label: 'Fusion',        color: '#e8d44b', parent: 'food' },
+  { key: 'bars',         label: 'Bars',          color: '#4be8d4', parent: 'food' },
+  { key: 'coffee',       label: 'Coffee',        color: '#c8885a', parent: 'food' },
+  { key: 'dessert',      label: 'Dessert',       color: '#e84bb4', parent: 'food' },
+  { key: 'carts',        label: 'Food Carts',    color: '#88c84b', parent: 'food' },
+  { key: 'finedining',   label: 'Fine Dining',   color: '#c8b8f8', parent: 'food' },
+  // Other top-level
+  { key: 'activities',   label: 'Activities',    color: '#4bd4e8', parent: null },
+  { key: 'hikes',        label: 'Hikes',         color: '#6be84b', parent: null },
+  { key: 'getaways',     label: 'Getaways',      color: '#e84b4b', parent: null },
+  { key: 'shopping',     label: 'Shopping',      color: '#f8a84b', parent: null },
+  { key: 'international',label: 'International', color: '#a84be8', parent: null },
+  { key: 'seafood',      label: 'Seafood',       color: '#4b9ee8', parent: 'food' },
+  { key: 'greek',        label: 'Greek',         color: '#e8e04b', parent: 'food' },
+  { key: 'african',      label: 'African',       color: '#e8784b', parent: 'food' },
+  { key: 'other',        label: 'Other',         color: '#888888', parent: null },
+];
+const CAT_MAP = Object.fromEntries(CATS.map(c => [c.key, c]));
+function shareSpot(id) {
+  const s = db.spots.find(x => x.id === id);
+  if (!s) return;
+  const parts = [];
+  parts.push('📍 ' + s.name);
+  if (s.location) parts.push(s.location);
+  if (s.note) parts.push(s.note);
+  if (s.stars) parts.push('⭐'.repeat(s.stars));
+  const mapsUrl = s.lat && s.lng
+    ? `https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}`
+    : s.location ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.location)}` : null;
+  if (mapsUrl) parts.push(mapsUrl);
+  const text = parts.join('\n');
+  if (navigator.share) {
+    navigator.share({ title: s.name, text }).catch(() => {});
+  } else {
+    navigator.clipboard.writeText(text).then(() => showStatus('Copied to clipboard!')).catch(() => {
+      // Fallback - prompt
+      prompt('Copy this:', text);
+    });
+  }
+}
+
+function timeAgo(dateStr) {
+  if (!dateStr) return '';
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const days = Math.floor(diff / 86400000);
+  if (days === 0) return 'today';
+  if (days === 1) return 'yesterday';
+  if (days < 7) return days + ' days ago';
+  if (days < 30) return Math.floor(days/7) + ' week' + (Math.floor(days/7)>1?'s':'') + ' ago';
+  if (days < 365) return Math.floor(days/30) + ' month' + (Math.floor(days/30)>1?'s':'') + ' ago';
+  return Math.floor(days/365) + ' year' + (Math.floor(days/365)>1?'s':'') + ' ago';
+}
+function catColor(key) { return CAT_MAP[key] ? CAT_MAP[key].color : '#888888'; }
+function catLabel(key) { return CAT_MAP[key] ? CAT_MAP[key].label : key; }
+function isFood(key) { return key === 'food' || FOOD_SUBS.includes(key); }
+
+const LOCATION_OPTS = [
+  'Portland','NE Portland','SE Portland','NW Portland','North Portland','Downtown Portland',
+  'Lake Oswego','Beaverton','Milwaukie','Milwaukee','Tigard','Gresham','Hillsboro',
+  'Columbia Gorge','Mt Hood','Hood River','Dundee','Sellwood','Pearl District',
+  'Alberta Arts District','Division St','Mississippi Ave','Hawthorne','Belmont',
+  'Nob Hill','Burnside','Oregon Coast','Astoria','Bend','Seattle','Washington',
+  'Oregon','PNW','International'
+];
+
+// ---- MERGED SPOT DATA ----
+const BASE = [
+  // FOOD - General
+  {name:"World Foods Deli",cat:"food",cuisine:"International",location:"Barbur & Everett",note:"Imported foods, raclette nights",been:false,fav:false,stars:0},
+  {name:"Yokai Musubi",cat:"asian",cuisine:"Hawaiian",location:"Burnside near Nob Hill",note:"Hawaiian musubi and sweet shop",been:false,fav:false,stars:0},
+  {name:"Jacqueline",cat:"seafood",cuisine:"Seafood",location:"East Side",note:"Happy hour 5-6pm, $1 oysters",been:false,fav:false,stars:0},
+  {name:"Good Neighbor Cafe",cat:"asian",cuisine:"Vietnamese",location:"Portland",note:"Banh mi",been:false,fav:false,stars:0},
+  {name:"Rough Russian",cat:"food",cuisine:"Specialty",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Podnah's",cat:"american",cuisine:"BBQ",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Fogo de Chao",cat:"finedining",cuisine:"Brazilian",location:"Portland",note:"Steakhouse",been:false,fav:false,stars:0},
+  {name:"Lowfeld Soul Food",cat:"american",cuisine:"Soul Food",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Painted Lady",cat:"american",cuisine:"American",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Rocking Crab",cat:"seafood",cuisine:"Seafood",location:"Portland",note:"Seafood broil",been:false,fav:false,stars:0},
+  {name:"OG Poke PDX",cat:"asian",cuisine:"Hawaiian",location:"Portland",note:"Poke bowls",been:false,fav:false,stars:0},
+  {name:"Pho Van",cat:"asian",cuisine:"Vietnamese",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Annam VI",cat:"asian",cuisine:"Vietnamese",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Providore Fine Foods",cat:"food",cuisine:"Specialty",location:"Portland",note:"Raclette night, Weds from 4:30pm, $15/plate",been:false,fav:false,stars:0},
+  {name:"Constantinople",cat:"food",cuisine:"Turkish",location:"Nob Hill",note:"Turkish door",been:false,fav:false,stars:0},
+  {name:"Bluto's",cat:"greek",cuisine:"Greek",location:"Beaverton",note:"Wood fired Greek food and soft serve",been:false,fav:false,stars:0},
+  {name:"Laverne's",cat:"american",cuisine:"American",location:"NE Portland",note:"Rotisserie chicken specialty",been:false,fav:false,stars:0},
+  {name:"Yours Truly",cat:"coffee",cuisine:"Cafe",location:"Sellwood",note:"Coffee, wine and bites",been:false,fav:false,stars:0},
+  {name:"Good Measure",cat:"coffee",cuisine:"Cafe",location:"Milwaukie",note:"One stop chop deli and cafe",been:false,fav:false,stars:0},
+  {name:"Prost!",cat:"bars",cuisine:"German",location:"East Side",note:"German pub and restaurant",been:false,fav:false,stars:0},
+  {name:"Trela Greek Kitchen",cat:"greek",cuisine:"Greek",location:"East Side",note:"Glisan - east side",been:false,fav:false,stars:0},
+  {name:"Bardo",cat:"coffee",cuisine:"Tea House",location:"NE Portland",note:"Tea house",been:false,fav:false,stars:0},
+  {name:"Tabor Bread",cat:"brunch",cuisine:"Bakery",location:"Belmont",note:"Cute bakery with bagels",been:false,fav:false,stars:0},
+  {name:"Malpractice",cat:"bars",cuisine:"Bar Bites",location:"East Side",note:"Cocktails and bites, near Cargo",been:false,fav:false,stars:0},
+  {name:"Don's",cat:"american",cuisine:"American",location:"Beaverton",note:"",been:false,fav:false,stars:0},
+  {name:"Akadi",cat:"african",cuisine:"African",location:"East Side near OMSI",note:"Where the chefs eat",been:false,fav:false,stars:0},
+  {name:"L'Echelle",cat:"finedining",cuisine:"French",location:"South Side",note:"French bistro near The Turning Peel",been:false,fav:false,stars:0},
+  {name:"Wow the Crab",cat:"seafood",cuisine:"Seafood",location:"Beaverton",note:"Seafood boil",been:false,fav:false,stars:0},
+  {name:"Pan Roast",cat:"seafood",cuisine:"Seafood",location:"Flock Food Market",note:"Seafood in Flock food market",been:false,fav:false,stars:0},
+  {name:"Bubbie's Deli Board",cat:"brunch",cuisine:"Deli",location:"Portland",note:"Traditional Jewish deli at Mother's, weds-fri 9-2",been:false,fav:false,stars:0},
+  {name:"OK Omens",cat:"american",cuisine:"American",location:"Hawthorne",note:"Wine, oysters, fries and salad",been:false,fav:false,stars:0},
+  {name:"Cowbell",cat:"food",cuisine:"Specialty",location:"East Side",note:"Cheese shop near Cargo",been:true,fav:false,stars:0},
+  {name:"Cheese and Crack",cat:"food",cuisine:"Specialty",location:"Burnside East Side",note:"Snack shop",been:true,fav:false,stars:0},
+  {name:"Dan & Louis Oyster Bar",cat:"seafood",cuisine:"Seafood",location:"Downtown",note:"",been:true,fav:false,stars:0},
+  {name:"Oyster Bar Downtown",cat:"seafood",cuisine:"Seafood",location:"Downtown",note:"",been:false,fav:false,stars:0},
+  {name:"Mike's Drive In",cat:"american",cuisine:"American",location:"Portland",note:"Classic drive-in",been:false,fav:false,stars:0},
+  {name:"Tanya's Cafe con Pan",cat:"latino",cuisine:"Mexican",location:"Portland",note:"Mexican bakery",been:false,fav:false,stars:0},
+  {name:"Otto's Sausages",cat:"food",cuisine:"Specialty",location:"Portland",note:"Sausages and meats",been:false,fav:false,stars:0},
+  {name:"Abigail Hall",cat:"coffee",cuisine:"Tea",location:"Portland",note:"High tea",been:false,fav:false,stars:0},
+  {name:"Social Spoon",cat:"food",cuisine:"Specialty",location:"Downtown",note:"Christmas popup, next to bier garden",been:false,fav:false,stars:0},
+
+  // BRUNCH
+  {name:"Keeper's Coffee",cat:"brunch",cuisine:"Cafe",location:"Milwaukie",note:"Shakshuka, comfy breakfast",been:false,fav:false,stars:0},
+  {name:"Sanae Thai",cat:"brunch",cuisine:"Thai",location:"Portland",note:"Thai brunch",been:false,fav:false,stars:0},
+  {name:"Cafe Nell",cat:"brunch",cuisine:"Brunch",location:"NE Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Xiao Ye",cat:"brunch",cuisine:"Asian Fusion",location:"East Side",note:"Close to Cheese and Crack",been:false,fav:false,stars:0},
+  {name:"Cafe Rowan",cat:"brunch",cuisine:"Brunch",location:"Portland",note:"Elevated brunch, Alan and Jeanine tried",been:true,fav:false,stars:0},
+  {name:"Gravy",cat:"brunch",cuisine:"Brunch",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Broder Nord",cat:"brunch",cuisine:"Scandinavian",location:"Portland",note:"Scandinavian brunch",been:false,fav:false,stars:0},
+  {name:"Little Griddle",cat:"brunch",cuisine:"Brunch",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Fried Egg I'm in Love",cat:"brunch",cuisine:"Brunch",location:"Hawthorne",note:"",been:false,fav:false,stars:0},
+  {name:"Happy Sparrow Cafe",cat:"brunch",cuisine:"Cafe",location:"Lake Oswego",note:"",been:false,fav:false,stars:0},
+  {name:"Limelight",cat:"brunch",cuisine:"Bar Brunch",location:"Portland",note:"Chris rec - dive bar with breakfast on weekends",been:true,fav:false,stars:0},
+  {name:"RJ Skillets",cat:"brunch",cuisine:"Brunch",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Memoire Ca Phe",cat:"brunch",cuisine:"Vietnamese",location:"Portland",note:"Vietnamese brunch",been:false,fav:false,stars:0},
+  {name:"The Loveshack",cat:"brunch",cuisine:"Brunch",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"The Rambler",cat:"brunch",cuisine:"Brunch",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Churn Cafe",cat:"brunch",cuisine:"Cafe",location:"Mississippi",note:"East side",been:false,fav:false,stars:0},
+  {name:"Loro Coffee",cat:"brunch",cuisine:"Cafe",location:"Beaverton & Stark",note:"Ranch pizza joint in Beaverton is fire",been:true,fav:false,stars:0},
+  {name:"Miss Delta",cat:"brunch",cuisine:"Southern",location:"Mississippi Ave",note:"Southern-style brunch, fri-sun",been:false,fav:false,stars:0},
+
+  // ITALIAN
+  {name:"Mucca Pizza",cat:"italian",cuisine:"Pizza",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"The Turning Peel",cat:"italian",cuisine:"Pizza",location:"Portland",note:"",been:true,fav:false,stars:0},
+  {name:"Apizza Scholls",cat:"italian",cuisine:"Pizza",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Ken's Artisan Pizza",cat:"italian",cuisine:"Pizza",location:"Portland",note:"Won award for pizza in Naples",been:false,fav:false,stars:0},
+  {name:"Pizza Thief",cat:"italian",cuisine:"Pizza",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Lovely's 50 50",cat:"italian",cuisine:"Pizza",location:"Portland",note:"Pizza and ice cream",been:false,fav:false,stars:0},
+  {name:"Pizzicato",cat:"italian",cuisine:"Pizza",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Nostrana",cat:"italian",cuisine:"Pizza",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Life of Pie Pizza",cat:"italian",cuisine:"Pizza",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Cafe Olli",cat:"italian",cuisine:"Italian",location:"Portland",note:"",been:true,fav:false,stars:0},
+  {name:"Baby Doll Pizza",cat:"italian",cuisine:"Pizza",location:"Portland",note:"Hole in the wall",been:false,fav:false,stars:0},
+  {name:"Mt Hood Brewing Co",cat:"italian",cuisine:"Pizza",location:"Mt Hood",note:"",been:false,fav:false,stars:0},
+  {name:"Dolly Olive Italian",cat:"italian",cuisine:"Italian",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Old Spaghetti Factory",cat:"italian",cuisine:"Italian",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Pastificio D'Oro",cat:"italian",cuisine:"Italian",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Gumba",cat:"italian",cuisine:"Italian",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Montelupo Italian Market",cat:"italian",cuisine:"Italian",location:"Portland",note:"",been:true,fav:false,stars:0},
+  {name:"A Cena",cat:"italian",cuisine:"Italian",location:"Sellwood",note:"Chris rec",been:false,fav:false,stars:0},
+  {name:"Muddy Rudder Public House",cat:"italian",cuisine:"Pizza",location:"Portland",note:"Chris rec",been:false,fav:false,stars:0},
+  {name:"Piazza Italia",cat:"italian",cuisine:"Italian",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"No Saint",cat:"italian",cuisine:"Pizza",location:"Portland",note:"Pistachio pizza",been:false,fav:false,stars:0},
+  {name:"Fontina",cat:"italian",cuisine:"Italian",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Estes Ristorante",cat:"italian",cuisine:"Italian",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Tartuca",cat:"italian",cuisine:"Italian",location:"NE Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Firehouse",cat:"italian",cuisine:"Italian",location:"NE Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Dimos",cat:"italian",cuisine:"Italian",location:"East Side Burnside",note:"Deli by day, restaurant by night",been:false,fav:false,stars:0},
+  {name:"Sunday Sauce",cat:"italian",cuisine:"Italian",location:"NE Portland",note:"Lobster, pasta, cocktails",been:false,fav:false,stars:0},
+  {name:"Eden Pizza",cat:"italian",cuisine:"Pizza",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Feraldi's Italian",cat:"italian",cuisine:"Italian",location:"Portland",note:"",been:false,fav:false,stars:0},
+
+  // ASIAN
+  {name:"Tada Sushi",cat:"asian",cuisine:"Japanese",location:"Lake Oswego",note:"",been:false,fav:false,stars:0},
+  {name:"Yaowarat",cat:"asian",cuisine:"Thai",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"OK Chicken Khao Soi",cat:"asian",cuisine:"Thai",location:"Portland",note:"Khao soi",been:false,fav:false,stars:0},
+  {name:"Eem",cat:"asian",cuisine:"Thai",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Guy View",cat:"asian",cuisine:"Thai",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Langbaan",cat:"asian",cuisine:"Thai",location:"Portland",note:"Upscale Thai",been:false,fav:false,stars:0},
+  {name:"Sanae Thai Eatery",cat:"asian",cuisine:"Thai",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Janken",cat:"asian",cuisine:"Japanese",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Swagat Indian Cuisine",cat:"asian",cuisine:"Indian",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Lung Fung",cat:"asian",cuisine:"Chinese",location:"Lake Oswego",note:"",been:true,fav:false,stars:0},
+  {name:"Rose VL Deli",cat:"asian",cuisine:"Vietnamese",location:"Portland",note:"Vietnamese pho",been:false,fav:false,stars:0},
+  {name:"Rukdiew",cat:"asian",cuisine:"Thai",location:"East Side",note:"",been:true,fav:false,stars:0},
+  {name:"Han Oak",cat:"asian",cuisine:"Korean",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Gen Korean BBQ",cat:"asian",cuisine:"Korean",location:"Washington Square",note:"All you can eat",been:false,fav:false,stars:0},
+  {name:"Afuri",cat:"asian",cuisine:"Japanese",location:"Portland",note:"Tokyo-based",been:false,fav:false,stars:0},
+  {name:"Masu",cat:"asian",cuisine:"Japanese",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Nepali Kitchen + Chai Garden",cat:"asian",cuisine:"Nepali",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Dodo Dumpling",cat:"asian",cuisine:"Chinese",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Seventeen Hot Pot",cat:"asian",cuisine:"Hot Pot",location:"NW Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Ba Mee Noodle House",cat:"asian",cuisine:"Thai",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Kaede",cat:"asian",cuisine:"Japanese",location:"Sellwood",note:"Sushi",been:false,fav:false,stars:0},
+  {name:"Khao Moo Deng",cat:"asian",cuisine:"Thai",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"KyuRamen",cat:"asian",cuisine:"Japanese",location:"Tigard",note:"",been:false,fav:false,stars:0},
+  {name:"Kinboshi Ramen",cat:"asian",cuisine:"Japanese",location:"Portland",note:"Wyatt rec",been:false,fav:false,stars:0},
+  {name:"Jade Teahouse",cat:"asian",cuisine:"Vietnamese",location:"Sellwood",note:"Chris rec",been:true,fav:true,stars:0},
+  {name:"Hotpot Palace",cat:"asian",cuisine:"Hot Pot",location:"Tigard",note:"All you can eat",been:false,fav:false,stars:0},
+  {name:"Magna Kusina",cat:"asian",cuisine:"Filipino",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Ahi Fish Butchery",cat:"asian",cuisine:"Japanese",location:"Portland",note:"Sushi grade fish, hidden gem",been:false,fav:false,stars:0},
+  {name:"Always Spring Korean",cat:"asian",cuisine:"Korean",location:"Portland",note:"Grocery store with restaurant upstairs",been:false,fav:false,stars:0},
+  {name:"Thai Hot Pot Heaven",cat:"asian",cuisine:"Hot Pot",location:"Nob Hill",note:"Next to the Pearl",been:false,fav:false,stars:0},
+  {name:"Paik's Noodle",cat:"asian",cuisine:"Korean",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Toshi Sushi",cat:"asian",cuisine:"Japanese",location:"Beaverton",note:"Hole in the wall",been:false,fav:false,stars:0},
+  {name:"Oyatsupan",cat:"asian",cuisine:"Japanese Bakery",location:"Beaverton",note:"Japanese bakery, go early",been:false,fav:false,stars:0},
+  {name:"Muteki Ramen",cat:"asian",cuisine:"Japanese",location:"Gresham",note:"",been:false,fav:false,stars:0},
+  {name:"Lily Thai Market",cat:"asian",cuisine:"Thai",location:"NE Portland",note:"Thai supermarket and deli",been:false,fav:false,stars:0},
+  {name:"Thai Brasserie",cat:"asian",cuisine:"Thai",location:"Beaverton",note:"",been:false,fav:false,stars:0},
+  {name:"Nikki Sushi & Steak",cat:"asian",cuisine:"Japanese",location:"Beaverton",note:"",been:false,fav:false,stars:0},
+  {name:"Gado Gado",cat:"asian",cuisine:"Indonesian",location:"East Side",note:"Try green curry",been:false,fav:false,stars:0},
+  {name:"Noa Sushi",cat:"asian",cuisine:"Japanese",location:"Beaverton",note:"",been:false,fav:false,stars:0},
+  {name:"Ryoma Ramen",cat:"asian",cuisine:"Japanese",location:"Beaverton",note:"Inside Uwajimaya",been:true,fav:false,stars:0},
+  {name:"Nami Sushi & Ramen",cat:"asian",cuisine:"Japanese",location:"Milwaukie",note:"Boba and sushi drive through",been:false,fav:false,stars:0},
+  {name:"Paadee",cat:"asian",cuisine:"Thai",location:"SE Portland",note:"Northern Thai",been:false,fav:false,stars:0},
+  {name:"Big Hey Hot Pot",cat:"asian",cuisine:"Hot Pot",location:"Portland",note:"Near Zupans on the way to downtown",been:false,fav:false,stars:0},
+  {name:"Matsunoki Ramen",cat:"asian",cuisine:"Japanese",location:"Mississippi",note:"Seasonal flavors",been:false,fav:false,stars:0},
+  {name:"Sushi Mazi",cat:"asian",cuisine:"Japanese",location:"East Side",note:"",been:false,fav:false,stars:0},
+  {name:"Hiyaku Buffet",cat:"asian",cuisine:"Japanese",location:"Beaverton",note:"All you can eat",been:false,fav:false,stars:0},
+  {name:"Fancy Pants",cat:"asian",cuisine:"Filipino",location:"Portland",note:"Lechon restaurant",been:false,fav:false,stars:0},
+  {name:"Indian Food Beaverton",cat:"asian",cuisine:"Indian",location:"Beaverton",note:"Near Target",been:false,fav:false,stars:0},
+  {name:"Steam Rice Roll King",cat:"asian",cuisine:"Chinese",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Khamdee Thai Cookhouse",cat:"asian",cuisine:"Thai",location:"Portland",note:"Underrated",been:false,fav:false,stars:0},
+  {name:"Phaya Thai Express",cat:"asian",cuisine:"Thai",location:"Portland",note:"Underrated",been:false,fav:false,stars:0},
+  {name:"Lanna Thai",cat:"asian",cuisine:"Thai",location:"Portland",note:"Underrated",been:false,fav:false,stars:0},
+
+  // LATINO
+  {name:"Tienda Santa Cruz",cat:"latino",cuisine:"Mexican",location:"Portland",note:"Mexican grocery",been:false,fav:false,stars:0},
+  {name:"La Barbecue",cat:"american",cuisine:"BBQ",location:"Portland",note:"Texas BBQ",been:false,fav:false,stars:0},
+  {name:"Bar Cala",cat:"latino",cuisine:"Mexican",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Por Que No",cat:"latino",cuisine:"Mexican",location:"Hawthorne & Mississippi",note:"",been:false,fav:false,stars:0},
+  {name:"Santa Fe",cat:"latino",cuisine:"Mexican",location:"Portland",note:"Mexican restaurant and cantina",been:false,fav:false,stars:0},
+  {name:"Taqueria Mexa",cat:"latino",cuisine:"Mexican",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Tito's Taquitos",cat:"latino",cuisine:"Mexican",location:"Beaverton",note:"",been:false,fav:false,stars:0},
+  {name:"Sabor Del Rio",cat:"latino",cuisine:"Puerto Rican",location:"Vancouver",note:"Floating cafe on Columbia River",been:false,fav:false,stars:0},
+  {name:"Que Pasa Cantina",cat:"latino",cuisine:"Mexican",location:"East Side",note:"Best nachos",been:false,fav:false,stars:0},
+  {name:"Los Punales",cat:"latino",cuisine:"Mexican",location:"Belmont",note:"",been:false,fav:false,stars:0},
+
+  // AMERICAN
+  {name:"Pleasure Burger",cat:"american",cuisine:"Burgers",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Wolf's Head Burgers",cat:"american",cuisine:"Burgers",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Botto's BBQ",cat:"american",cuisine:"BBQ",location:"Portland",note:"Casual, hole in the wall",been:false,fav:false,stars:0},
+  {name:"Tulip Shop Tavern",cat:"american",cuisine:"Burgers",location:"Portland",note:"Made NYT top 25 list",been:false,fav:false,stars:0},
+  {name:"Grand Fir Brewery",cat:"american",cuisine:"Pub",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Reverends BBQ",cat:"american",cuisine:"BBQ",location:"Portland",note:"Chris rec - smokehouse",been:false,fav:false,stars:0},
+  {name:"Fat Baby Barbecue",cat:"american",cuisine:"BBQ",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Reo's Ribs",cat:"american",cuisine:"BBQ",location:"Portland",note:"Hole in the wall, authentic smoked ribs",been:false,fav:false,stars:0},
+  {name:"Sure Shot Burger",cat:"american",cuisine:"Burgers",location:"East Side near airport",note:"Smash burgers",been:false,fav:false,stars:0},
+  {name:"Bellwether Bar",cat:"american",cuisine:"American",location:"East Side",note:"",been:false,fav:false,stars:0},
+  {name:"Roarke's",cat:"american",cuisine:"American",location:"NE Portland",note:"Chris rec",been:false,fav:false,stars:0},
+  {name:"Lil' Barbecue",cat:"american",cuisine:"BBQ",location:"NE Portland",note:"Austin TX sister restaurant",been:false,fav:false,stars:0},
+  {name:"Scotch Lodge",cat:"bars",cuisine:"Whisky Bar",location:"Portland",note:"Whisky bar and restaurant",been:false,fav:false,stars:0},
+
+  // FUSION
+  {name:"Hapa Pizza",cat:"fusion",cuisine:"Asian Fusion",location:"Portland",note:"Asian fusion pizza",been:false,fav:false,stars:0},
+  {name:"Curry Pizza House",cat:"fusion",cuisine:"Indian Fusion",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Terra Mae",cat:"fusion",cuisine:"Japanese Portuguese",location:"Portland",note:"High end, Japanese and Portuguese",been:true,fav:false,stars:0},
+  {name:"Que Dicee",cat:"fusion",cuisine:"Chinese Portuguese",location:"Old Town",note:"Orange chicken and bulgogi",been:false,fav:false,stars:0},
+  {name:"Sincerely Bagel",cat:"fusion",cuisine:"Korean Fusion",location:"East Side near Glisan",note:"Kimchi bagels",been:false,fav:false,stars:0},
+  {name:"Pan con Queso",cat:"fusion",cuisine:"Mexican Pizza",location:"East Side",note:"Mexican pizzas",been:false,fav:false,stars:0},
+
+  // BARS
+  {name:"Hey Love",cat:"bars",cuisine:"Bar",location:"Portland",note:"Christmas bar",been:false,fav:false,stars:0},
+  {name:"The Uncanny",cat:"bars",cuisine:"Bar",location:"Portland",note:"Cocktails and sandwiches",been:false,fav:false,stars:0},
+  {name:"Bar Loon",cat:"bars",cuisine:"Bar",location:"Belmont",note:"",been:true,fav:false,stars:0},
+  {name:"Below by Botanist",cat:"bars",cuisine:"Bar",location:"Portland",note:"Underground bar and restaurant",been:false,fav:false,stars:0},
+  {name:"Bushwhackers",cat:"bars",cuisine:"Bar",location:"Portland",note:"Line dancing bar with food",been:true,fav:false,stars:0},
+  {name:"The Redwood Room",cat:"bars",cuisine:"Bar",location:"Hillsboro",note:"Tequila bar in the woods",been:false,fav:false,stars:0},
+  {name:"Grandma's Secret",cat:"bars",cuisine:"Bar",location:"Portland",note:"Secret underground bar with Vietnamese food",been:false,fav:false,stars:0},
+  {name:"Bible Club",cat:"bars",cuisine:"Bar",location:"Portland",note:"Chris rec - speakeasy",been:false,fav:false,stars:0},
+  {name:"Nevermind",cat:"bars",cuisine:"Bar",location:"East Side south of OMSI",note:"Baby Jell-O shots and tacos",been:false,fav:false,stars:0},
+
+  // COFFEE
+  {name:"Tov Egyptian Coffee Bar",cat:"coffee",cuisine:"Coffee",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Bastion Coffee Roaster",cat:"coffee",cuisine:"Coffee",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Trung Nguyen",cat:"coffee",cuisine:"Vietnamese Coffee",location:"NE Portland",note:"Vietnamese coffee house",been:false,fav:false,stars:0},
+  {name:"Puff Coffee",cat:"coffee",cuisine:"Coffee",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Floyd's Coffeehouse",cat:"coffee",cuisine:"Coffee",location:"East Side",note:"",been:false,fav:false,stars:0},
+  {name:"Dear Sandy",cat:"coffee",cuisine:"Coffee Cocktails",location:"East Side",note:"Coffee, cocktails, community",been:false,fav:false,stars:0},
+  {name:"Caffe Umbria",cat:"coffee",cuisine:"Coffee",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Bubble N Tea",cat:"coffee",cuisine:"Boba",location:"Beaverton",note:"New boba shop",been:false,fav:false,stars:0},
+
+  // DESSERT
+  {name:"Champagne Poetry",cat:"dessert",cuisine:"Patisserie",location:"Portland",note:"Pink vibes, Christmas pastries",been:true,fav:false,stars:0},
+  {name:"Bon Creme",cat:"dessert",cuisine:"Korean Bakery",location:"Portland",note:"Korean pastry",been:false,fav:false,stars:0},
+  {name:"The Meadow",cat:"dessert",cuisine:"Chocolate",location:"Portland",note:"Chocolate shop",been:false,fav:false,stars:0},
+  {name:"Nico's Ice Cream",cat:"dessert",cuisine:"Ice Cream",location:"Portland",note:"New Zealand style",been:false,fav:false,stars:0},
+  {name:"DD Sweet House",cat:"dessert",cuisine:"Shaved Ice",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Jinju Patisserie",cat:"dessert",cuisine:"Patisserie",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Love Crumble",cat:"dessert",cuisine:"Ice Cream",location:"Portland",note:"Pop up dessert, Jan-Mar at La Floridita",been:false,fav:false,stars:0},
+  {name:"Handel's Ice Cream",cat:"dessert",cuisine:"Ice Cream",location:"Portland",note:"",been:true,fav:false,stars:0},
+  {name:"BingSu",cat:"dessert",cuisine:"Shaved Ice",location:"Milwaukie",note:"",been:false,fav:false,stars:0},
+  {name:"Dot.Sugar",cat:"dessert",cuisine:"Dessert",location:"Beaverton",note:"",been:false,fav:false,stars:0},
+
+  // FOOD CARTS
+  {name:"El Paisanito",cat:"carts",cuisine:"Mexican",location:"Portland",note:"Mexican street food cart",been:false,fav:false,stars:0},
+  {name:"Pica Drip",cat:"carts",cuisine:"Mexican",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"The Heist",cat:"carts",cuisine:"Food Cart Pod",location:"Portland",note:"Food cart pod",been:false,fav:false,stars:0},
+  {name:"Cookie McCakeFace",cat:"carts",cuisine:"Bakery",location:"Burnside near Powell's",note:"Two blocks from Powell's",been:false,fav:false,stars:0},
+  {name:"Hawthorne Asylum Pod",cat:"carts",cuisine:"Food Cart Pod",location:"Hawthorne",note:"",been:false,fav:false,stars:0},
+  {name:"Taco Stand Aloha",cat:"carts",cuisine:"Mexican",location:"Aloha",note:"Proper taco cart",been:false,fav:false,stars:0},
+
+  // FINE DINING
+  {name:"Anthology",cat:"finedining",cuisine:"Fine Dining",location:"Willamette Valley",note:"Fine dining, wine",been:false,fav:false,stars:0},
+  {name:"G-Love",cat:"finedining",cuisine:"Fine Dining",location:"Portland",note:"Mixed cuisine, high end",been:false,fav:false,stars:0},
+  {name:"Bergerac",cat:"finedining",cuisine:"French",location:"Portland",note:"$50-$100pp",been:false,fav:false,stars:0},
+  {name:"Le Pigeon",cat:"finedining",cuisine:"French",location:"Portland",note:"Chef tasting menu $140pp",been:false,fav:false,stars:0},
+  {name:"Hidden Kitchens",cat:"finedining",cuisine:"Fusion",location:"Portland",note:"Relaxed fusion, $50-$100pp",been:false,fav:false,stars:0},
+  {name:"Feral",cat:"finedining",cuisine:"Plant Based",location:"East Side",note:"Wild and foraged, $30-$50pp",been:false,fav:false,stars:0},
+  {name:"Ginza",cat:"finedining",cuisine:"Asian Fusion",location:"Pearl District",note:"Whole tuna cutting",been:false,fav:false,stars:0},
+  {name:"LucidWild Winery",cat:"finedining",cuisine:"Wine Dining",location:"Dundee",note:"Min $75pp",been:false,fav:false,stars:0},
+  {name:"L'Orange",cat:"finedining",cuisine:"French",location:"Portland",note:"Wine, crab, pasta",been:false,fav:false,stars:0},
+  {name:"Ox",cat:"finedining",cuisine:"Fine Dining",location:"Portland",note:"Iconic Portland",been:false,fav:false,stars:0},
+  {name:"Nong's Khao Man Gai",cat:"asian",cuisine:"Thai",location:"Portland",note:"Iconic Portland dish",been:false,fav:false,stars:0},
+
+  // ACTIVITIES
+  {name:"Grotto Light Festival",cat:"activities",cuisine:"Event",location:"NE Portland",note:"Seasonal festival",been:false,fav:false,stars:0},
+  {name:"Escapology",cat:"activities",cuisine:"Escape Room",location:"Portland",note:"Escape room",been:false,fav:false,stars:0},
+  {name:"Top Golf",cat:"activities",cuisine:"Golf",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Birdie Time",cat:"activities",cuisine:"Golf Pub",location:"Portland",note:"Pub and golf",been:false,fav:false,stars:0},
+  {name:"Milwaukee Arcade",cat:"activities",cuisine:"Arcade",location:"Milwaukie",note:"",been:false,fav:false,stars:0},
+  {name:"Cinemark Movie Theater",cat:"activities",cuisine:"Cinema",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Skeleton Key Odditorium",cat:"activities",cuisine:"Museum",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Ice Skating Rink",cat:"activities",cuisine:"Skating",location:"Portland",note:"Open 11/16-1/5",been:false,fav:false,stars:0},
+  {name:"National Sanctuary Our Lady of Sorrows",cat:"activities",cuisine:"Garden",location:"Portland",note:"Catholic shrine, botanical garden with viewpoint",been:false,fav:false,stars:0},
+  {name:"Freakybuttrue Peculiarium",cat:"activities",cuisine:"Museum",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"McMenamin's Baghdad Theater",cat:"activities",cuisine:"Theater Pub",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"McMenamin's Edgefield Spa",cat:"activities",cuisine:"Spa",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Cosmic Tubing",cat:"activities",cuisine:"Snow",location:"Mt Hood",note:"Night tubing, $39pp, book early",been:false,fav:false,stars:0},
+  {name:"Pinball Museum",cat:"activities",cuisine:"Arcade",location:"Hillsboro",note:"",been:false,fav:false,stars:0},
+  {name:"Crystal Hotel Spa",cat:"activities",cuisine:"Spa",location:"Portland",note:"Underground spa",been:false,fav:false,stars:0},
+  {name:"The Wine Spa",cat:"activities",cuisine:"Spa",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Cook Shop",cat:"activities",cuisine:"Cooking Class",location:"Portland",note:"Cooking classes",been:false,fav:false,stars:0},
+  {name:"Outdoor Concert Topaz Farms",cat:"activities",cuisine:"Music",location:"Portland",note:"Summer bucket list",been:false,fav:false,stars:0},
+  {name:"Yacht Tubs Hot Tub Boat",cat:"activities",cuisine:"Unique",location:"Portland",note:"Rent a hot tub boat",been:false,fav:false,stars:0},
+  {name:"Luscher Farms Gardens",cat:"activities",cuisine:"Garden",location:"Lake Oswego",note:"Stroll the gardens",been:false,fav:false,stars:0},
+  {name:"Hoyt Arboretum Redwoods",cat:"activities",cuisine:"Nature",location:"Portland",note:"See redwoods",been:false,fav:false,stars:0},
+  {name:"Kayak Tualatin River",cat:"activities",cuisine:"Outdoor",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Mt Tabor Sunset",cat:"activities",cuisine:"Viewpoint",location:"Portland",note:"Watch the sunset",been:false,fav:false,stars:0},
+  {name:"Mt Hood Rail Bike Tour",cat:"activities",cuisine:"Outdoor",location:"Hood River",note:"",been:false,fav:false,stars:0},
+  {name:"Cathedral Park Picnic",cat:"activities",cuisine:"Park",location:"North Portland",note:"",been:true,fav:false,stars:0},
+  {name:"Sugarpine Drive-in",cat:"activities",cuisine:"Drive-In",location:"Portland",note:"",been:true,fav:false,stars:0},
+  {name:"Crystal Springs Rhododendron Garden",cat:"activities",cuisine:"Garden",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Punchbowl Falls Swim",cat:"activities",cuisine:"Swimming",location:"Columbia Gorge",note:"",been:false,fav:false,stars:0},
+  {name:"E.Z. Orchards Shortcake",cat:"activities",cuisine:"Farm",location:"Salem",note:"Summer",been:false,fav:false,stars:0},
+  {name:"Free Movie in the Park",cat:"activities",cuisine:"Event",location:"Portland",note:"Summer",been:false,fav:false,stars:0},
+  {name:"U-cut Flowers Sauvie Island",cat:"activities",cuisine:"Farm",location:"Sauvie Island",note:"",been:false,fav:false,stars:0},
+  {name:"McMenamin's Edgefield",cat:"activities",cuisine:"Brewery",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Portland Pickles Game",cat:"activities",cuisine:"Baseball",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Wine Tasting Dundee",cat:"activities",cuisine:"Wine",location:"Dundee",note:"Wine and picnic basket",been:false,fav:false,stars:0},
+  {name:"CHO Wines",cat:"activities",cuisine:"Wine",location:"Hillsboro",note:"Wine tasting with a view",been:false,fav:false,stars:0},
+
+  // HIKES
+  {name:"Tamanawas Falls",cat:"hikes",cuisine:"Hike",location:"Mt Hood",note:"",been:false,fav:false,stars:0},
+  {name:"Tunnel Falls",cat:"hikes",cuisine:"Hike",location:"Columbia Gorge",note:"Waterfall hike",been:false,fav:false,stars:0},
+  {name:"Silver Falls Hike",cat:"hikes",cuisine:"Hike",location:"Oregon",note:"7 miles, 10 waterfalls",been:false,fav:false,stars:0},
+  {name:"Historic Columbia River Trail",cat:"hikes",cuisine:"Bike Trail",location:"Columbia Gorge",note:"12 miles along the gorge",been:false,fav:false,stars:0},
+  {name:"Rowena Crest Viewpoint",cat:"hikes",cuisine:"Hike",location:"Columbia Gorge",note:"",been:true,fav:false,stars:0},
+  {name:"Four Ts Loop",cat:"hikes",cuisine:"Urban Hike",location:"Portland",note:"Train, Trail, Tram, Trolley loop",been:false,fav:false,stars:0},
+  {name:"Beacon Rock Trail",cat:"hikes",cuisine:"Hike",location:"Washington",note:"1 hour away",been:false,fav:false,stars:0},
+  {name:"McKenzie River Trail",cat:"hikes",cuisine:"Hike",location:"Oregon",note:"3 hour drive",been:false,fav:false,stars:0},
+  {name:"Tamolitch Falls",cat:"hikes",cuisine:"Hike",location:"Oregon",note:"Blue pool and waterfall, 2.5 hour drive",been:false,fav:false,stars:0},
+  {name:"Lower Lewis Falls",cat:"hikes",cuisine:"Hike",location:"Washington",note:"",been:false,fav:false,stars:0},
+  {name:"Vesper Peak",cat:"hikes",cuisine:"Hike",location:"Washington",note:"4000ft, 5 hour drive",been:false,fav:false,stars:0},
+  {name:"Colchuck Lake Hike",cat:"hikes",cuisine:"Hike",location:"Washington",note:"8.5 mile round trip, swimming lake",been:false,fav:false,stars:0},
+  {name:"Swim at Punchbowl Falls",cat:"hikes",cuisine:"Hike",location:"Columbia Gorge",note:"",been:false,fav:false,stars:0},
+
+  // GETAWAYS
+  {name:"Yachats Day Trip",cat:"getaways",cuisine:"Coast",location:"Oregon Coast",note:"Oregon coast, 2 hour drive",been:false,fav:false,stars:0},
+  {name:"Multnomah Village Day Trip",cat:"getaways",cuisine:"Neighborhood",location:"SW Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Portland Day Itinerary",cat:"getaways",cuisine:"City",location:"Portland",note:"Cascada spa, Nike HQ, Phuket Cafe, thrifting, Powell's",been:false,fav:false,stars:0},
+  {name:"Skamania Lodge",cat:"getaways",cuisine:"Hotel",location:"Columbia Gorge",note:"1 hour from Portland",been:false,fav:false,stars:0},
+  {name:"Florence OR",cat:"getaways",cuisine:"Coast",location:"Oregon",note:"3 hour drive",been:false,fav:false,stars:0},
+  {name:"Aurora OR",cat:"getaways",cuisine:"Town",location:"Oregon",note:"",been:false,fav:false,stars:0},
+  {name:"Joseph OR",cat:"getaways",cuisine:"Mountain Town",location:"Oregon",note:"Near Wallowa Mountains",been:false,fav:false,stars:0},
+  {name:"Whidbey Island",cat:"getaways",cuisine:"Island",location:"Washington",note:"4.5-6 hour drive and ferry",been:false,fav:false,stars:0},
+  {name:"Leavenworth WA",cat:"getaways",cuisine:"Mountain Town",location:"Washington",note:"",been:false,fav:false,stars:0},
+  {name:"Edison WA",cat:"getaways",cuisine:"Foodie Town",location:"Washington",note:"Small foodie town north of Seattle",been:false,fav:false,stars:0},
+  {name:"Brookings OR",cat:"getaways",cuisine:"Coast",location:"Oregon",note:"Natural Bridges, Secret Beach, redwoods trail",been:false,fav:false,stars:0},
+  {name:"Bend OR",cat:"getaways",cuisine:"City",location:"Oregon",note:"Micro road trip",been:false,fav:false,stars:0},
+  {name:"Orcas Island",cat:"getaways",cuisine:"Island",location:"Washington",note:"",been:false,fav:false,stars:0},
+  {name:"Bagby Hot Springs",cat:"getaways",cuisine:"Hot Springs",location:"Oregon",note:"1.5 hour drive",been:false,fav:false,stars:0},
+  {name:"Umpqua Hot Springs",cat:"getaways",cuisine:"Hot Springs",location:"Oregon",note:"",been:false,fav:false,stars:0},
+  {name:"Deadman's Cove Cape Disappointment",cat:"getaways",cuisine:"Coast",location:"Washington",note:"Close to Astoria OR",been:false,fav:false,stars:0},
+  {name:"Headlands Coastal Lodge",cat:"getaways",cuisine:"Hotel Spa",location:"Oregon Coast",note:"",been:false,fav:false,stars:0},
+  {name:"Hot Tub Cabins WA",cat:"getaways",cuisine:"Cabin",location:"Washington",note:"Fire Lodge, Cushman Perch, Earthlight Villas etc",been:false,fav:false,stars:0},
+  {name:"Wallowa Mountains",cat:"getaways",cuisine:"Mountains",location:"Oregon",note:"Stay in Joseph",been:false,fav:false,stars:0,link:"https://www.instagram.com/reel/DEDb55Sy277/?igsh=MWVuODZpeGppbWU2Zg=="},
+  {name:"Maryhill Stonehenge",cat:"getaways",cuisine:"Landmark",location:"Oregon",note:"2 hour drive",been:false,fav:false,stars:0},
+  {name:"Hood River Fruit Loop",cat:"getaways",cuisine:"Road Trip",location:"Hood River",note:"30 stops, 35 miles of scenic roads",been:false,fav:false,stars:0},
+  {name:"Painted Hills",cat:"getaways",cuisine:"Nature",location:"Oregon",note:"",been:false,fav:false,stars:0},
+  {name:"Crater Lake",cat:"getaways",cuisine:"Nature",location:"Oregon",note:"",been:false,fav:false,stars:0},
+  {name:"Owyhee Canyonlands",cat:"getaways",cuisine:"Nature",location:"SE Oregon",note:"Grand Canyon of Oregon, 9 hour drive",been:false,fav:false,stars:0},
+  {name:"Midway UT",cat:"getaways",cuisine:"Town",location:"Utah",note:"Charming town with cenote-style hot spring",been:false,fav:false,stars:0},
+  {name:"Santa Fe NM",cat:"getaways",cuisine:"City",location:"New Mexico",note:"",been:false,fav:false,stars:0},
+
+  // SHOPPING
+  {name:"James Beard Public Market",cat:"shopping",cuisine:"Market",location:"Portland",note:"Fish, cheese and more",been:false,fav:false,stars:0},
+  {name:"Teso Asian Store",cat:"shopping",cuisine:"Asian Grocery",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"World Foods Grocery",cat:"shopping",cuisine:"International Grocery",location:"Portland",note:"International market",been:false,fav:false,stars:0},
+  {name:"Daiso",cat:"shopping",cuisine:"Japanese Store",location:"Portland",note:"Japanese value store",been:false,fav:false,stars:0},
+  {name:"Durant at Red Ridge",cat:"shopping",cuisine:"Farm Shop",location:"Dundee",note:"",been:true,fav:false,stars:0},
+  {name:"Memory Den Vintage Mall",cat:"shopping",cuisine:"Vintage",location:"Portland",note:"",been:true,fav:false,stars:0},
+  {name:"Zig Zag Wanderer",cat:"shopping",cuisine:"Thrift",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Deep Lake Thrift",cat:"shopping",cuisine:"Thrift",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Goodbye Horses",cat:"shopping",cuisine:"Thrift",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Jelly Cup Collective",cat:"shopping",cuisine:"Asian Gift",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Kokoro",cat:"shopping",cuisine:"Asian Gift",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Kiriko",cat:"shopping",cuisine:"Asian Gift",location:"Portland",note:"",been:false,fav:false,stars:0},
+  {name:"Powell's Books",cat:"shopping",cuisine:"Bookstore",location:"Downtown Portland",note:"",been:false,fav:false,stars:0},
+
+  // INTERNATIONAL
+  {name:"Koza Cave Hotel Cappadocia",cat:"international",cuisine:"Hotel",location:"Turkey",note:"",been:false,fav:false,stars:0},
+  {name:"Egypt Itinerary",cat:"international",cuisine:"Destination",location:"Egypt",note:"",been:false,fav:false,stars:0},
+  {name:"Paris Hotspots",cat:"international",cuisine:"Destination",location:"France",note:"Fabula, Le Pavillon Alleno, Candelaria etc",been:false,fav:false,stars:0},
+  {name:"Fairmont Banff Hotel",cat:"international",cuisine:"Hotel",location:"Canada",note:"Banff National Park",been:false,fav:false,stars:0},
+  {name:"Museum Voorlinden",cat:"international",cuisine:"Museum",location:"Netherlands",note:"",been:false,fav:false,stars:0},
+  {name:"Galiano Island",cat:"international",cuisine:"Island",location:"Canada",note:"55 min ferry from Vancouver, sandstone caves",been:false,fav:false,stars:0},
+  {name:"Palawan Philippines",cat:"international",cuisine:"Island",location:"Philippines",note:"",been:false,fav:false,stars:0},
+  {name:"Cat Island Japan",cat:"international",cuisine:"Destination",location:"Japan",note:"",been:false,fav:false,stars:0},
+  {name:"Phu Quoc Island",cat:"international",cuisine:"Island",location:"Vietnam",note:"",been:false,fav:false,stars:0},
+  {name:"10 Days in Peru",cat:"international",cuisine:"Destination",location:"Peru",note:"",been:false,fav:false,stars:0},
+  {name:"Japan Sightseeing",cat:"international",cuisine:"Destination",location:"Japan",note:"",been:false,fav:false,stars:0},
+  {name:"Bavaria Germany",cat:"international",cuisine:"Destination",location:"Germany",note:"",been:false,fav:false,stars:0},
+  {name:"Rome",cat:"international",cuisine:"Destination",location:"Italy",note:"",been:false,fav:false,stars:0},
+  {name:"Sao Miguel Island Azores",cat:"international",cuisine:"Island",location:"Portugal",note:"",been:false,fav:false,stars:0},
+  {name:"London Borough Market",cat:"international",cuisine:"Market",location:"England",note:"",been:false,fav:false,stars:0},
+  {name:"Madeira Island",cat:"international",cuisine:"Island",location:"Portugal",note:"",been:false,fav:false,stars:0},
+  {name:"East Nusa Tenggara",cat:"international",cuisine:"Destination",location:"Indonesia",note:"",been:false,fav:false,stars:0},
+  {name:"Socotra Island",cat:"international",cuisine:"Island",location:"Yemen",note:"Off NE African coast",been:false,fav:false,stars:0},
+  {name:"Cape Town",cat:"international",cuisine:"Destination",location:"South Africa",note:"",been:false,fav:false,stars:0},
+  {name:"Zanzibar",cat:"international",cuisine:"Island",location:"Tanzania",note:"",been:false,fav:false,stars:0},
+  {name:"Moab UT",cat:"international",cuisine:"Road Trip",location:"Utah",note:"",been:false,fav:false,stars:0},
+  {name:"Meow Wolf Omega Mart",cat:"international",cuisine:"Entertainment",location:"Las Vegas",note:"",been:false,fav:false,stars:0},
+  {name:"The Wave Arizona",cat:"international",cuisine:"Nature",location:"Arizona",note:"",been:false,fav:false,stars:0},
+  {name:"Mackinac Island",cat:"international",cuisine:"Island",location:"Michigan",note:"Northern Michigan",been:false,fav:false,stars:0},
+  {name:"Amazon Spheres Seattle",cat:"international",cuisine:"Attraction",location:"Seattle",note:"",been:false,fav:false,stars:0},
+];
+
+// Load any custom categories saved previously
+const SUPABASE_URL = 'https://rqmpvdbakzosifmtuvrd.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJxbXB2ZGJha3pvc2lmbXR1dnJkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5ODI5OTksImV4cCI6MjA5MDU1ODk5OX0.wjpMXNi9O_145jCPtvG4wXG2jbZXDNemCB46cPW4frg';
+
+async function sbFetch(method, path, body) {
+  const res = await fetch(SUPABASE_URL + '/rest/v1/' + path, {
+    method,
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': method === 'POST' ? 'return=representation' : 'return=minimal'
+    },
+    body: body ? JSON.stringify(body) : undefined
+  });
+  if (!res.ok) throw new Error(await res.text());
+  const text = await res.text();
+  return text ? JSON.parse(text) : null;
+}
+
+function loadCustomCats() {
+  try {
+    const saved = localStorage.getItem('our-list-cats');
+    if (!saved) return;
+    JSON.parse(saved).forEach(c => {
+      if (!CAT_MAP[c.key]) { CATS.push(c); FOOD_SUBS.push(c.key); CAT_MAP[c.key] = c; }
+    });
+  } catch(e) {}
+}
+
+let db = { spots: [] };
+
+async function loadFromSupabase() {
+  showLoading(true, 'Loading your list...');
+  // Timeout after 12 seconds - Supabase free tier can be slow to wake up
+  const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 30000));
+  try {
+    const rows = await Promise.race([
+      sbFetch('GET', 'spots?select=*&order=name.asc'),
+      timeout
+    ]);
+    if (rows && rows.length > 0) {
+      db.spots = rows;
+    } else {
+      showLoading(true, 'First run - seeding your list...');
+      await seedBaseSpots();
+      const seeded = await sbFetch('GET', 'spots?select=*&order=name.asc');
+      db.spots = seeded || [];
+    }
+    showLoading(false);
+    buildCatPills(); buildTypePills(); render();
+    startRealtime();
+  } catch(e) {
+    console.error('Load error:', e);
+    showLoading(false);
+    // Show retry screen
+    const msg = e.message === 'timeout'
+      ? 'Taking too long - database may be waking up'
+      : 'Connection error';
+    document.getElementById('loadingBar').style.display = 'flex';
+    document.getElementById('loadingBar').innerHTML = `
+      <div style="text-align:center;padding:20px;">
+        <div style="color:#e8b84b;font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:2px;margin-bottom:8px;">Our List</div>
+        <div style="color:#7a776e;font-size:0.82rem;margin-bottom:20px;">${msg}</div>
+        <button onclick="loadFromSupabase()" style="background:#e8b84b;color:#0f0e0d;border:none;padding:12px 28px;border-radius:8px;font-size:0.9rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">Try again</button>
+        <div style="color:#5a5750;font-size:0.74rem;margin-top:12px;">Supabase free tier sleeps after inactivity.<br>First load can take 10-20 seconds.</div>
+      </div>`;
+  }
+}
+
+async function seedBaseSpots() {
+  const batch = 50;
+  for (let i = 0; i < BASE.length; i += batch) {
+    const chunk = BASE.slice(i, i + batch).map(s => ({
+      name: s.name, cat: s.cat, cuisine: s.cuisine,
+      location: s.location || '', note: s.note || '', link: s.link || '',
+      stars: 0, fav: false, been: s.been || false, want: false, photo: '', collections: '', goback: null
+    }));
+    await sbFetch('POST', 'spots', chunk);
+  }
+}
+
+function showLoading(on, msg) {
+  const el = document.getElementById('loadingBar');
+  if (!el) return;
+  el.style.display = on ? 'flex' : 'none';
+  if (msg) el.querySelector('span').textContent = msg;
+}
+
+function showStatus(msg, isError) {
+  const el = document.getElementById('statusMsg');
+  if (!el) return;
+  el.textContent = msg;
+  el.style.cssText = 'display:block;text-align:center;padding:6px;font-size:0.8rem;color:' + (isError ? '#e84b4b' : '#4caf78');
+  setTimeout(() => { el.style.display = 'none'; }, 3000);
+}
+
+function startRealtime() {
+  // Poll every 8 seconds for changes from other users - simple and reliable
+  setInterval(async () => {
+    try {
+      const rows = await sbFetch('GET', 'spots?select=id,fav,been,stars,link,lat,lng,goback,area,visited_at&order=name.asc');
+      if (!rows) return;
+      let changed = false;
+      rows.forEach(r => {
+        const s = db.spots.find(x => x.id === r.id);
+        if (s && (s.fav !== r.fav || s.been !== r.been || s.stars !== r.stars || s.link !== r.link)) {
+          Object.assign(s, { fav: r.fav, been: r.been, stars: r.stars, link: r.link||'', lat: r.lat||null, lng: r.lng||null, goback: r.goback !== undefined ? r.goback : null, area: r.area||'', visited_at: r.visited_at||null });
+          changed = true;
+        }
+      });
+      if (changed) render();
+    } catch(e) {}
+  }, 8000);
+}
+let activeCategory = 'all';
+let activeCuisine  = 'All';
+let activeStar     = 0;
+let favOnly        = false;
+let beenOnly       = false;
+let wantOnly       = false;
+let randIncludeBeen = false;
+let activeView = 'active'; // active | archive | repeats
+let activeLocation = 'All'; // location filter
+let editingId      = null;
+let modalStars     = 0;
+
+// ---- CATEGORY COLORS ON CARDS ----
+function applyCardColors() {
+  document.querySelectorAll('.card[data-cat]').forEach(card => {
+    const color = catColor(card.dataset.cat);
+    card.style.setProperty('--card-color', color);
+    card.querySelector('::before'); // trigger repaint handled by CSS
+  });
+}
+
+// ---- SCROLL COLLAPSE ----
+let collapseThreshold = 100;
+function measureThreshold() {
+  const topRow = document.getElementById('topRow');
+  const bar = document.getElementById('stickyBar');
+  const barTop = bar.getBoundingClientRect().top + window.scrollY;
+  const rowBottom = topRow.getBoundingClientRect().bottom + window.scrollY;
+  collapseThreshold = Math.max(rowBottom - barTop + 10, 50);
+}
+
+const EXPAND_THRESHOLD = 20;
+
+let rafPending = false;
+let lastY = 0;
+let fullyCollapsed = false;
+let tabsVisible = false;
+
+function setCollapse(hideAll, hideTabs) {
+  document.getElementById('favBar').classList.toggle('gone', hideAll);
+  const topRow = document.getElementById('topRow');
+  if (topRow) topRow.classList.toggle('gone', hideAll);
+  document.getElementById('catRow').classList.toggle('gone', hideAll);
+  document.getElementById('filterRow').classList.toggle('gone', hideAll);
+  document.getElementById('starRow').classList.toggle('gone', hideAll);
+  document.getElementById('viewTabs').classList.toggle('gone', hideTabs);
+}
+
+window.addEventListener('scroll', () => {
+  if (rafPending) return;
+  rafPending = true;
+  requestAnimationFrame(() => {
+    rafPending = false;
+    const y = window.scrollY;
+    const scrollingDown = y > lastY;
+    lastY = y;
+
+    if (y <= 10) {
+      // At top - show everything
+      if (fullyCollapsed || tabsVisible) {
+        fullyCollapsed = false; tabsVisible = false;
+        setCollapse(false, false);
+      }
+    } else if (scrollingDown && y > 50 && !fullyCollapsed) {
+      // Scrolling down past 50px - collapse everything
+      fullyCollapsed = true; tabsVisible = false;
+      setCollapse(true, true);
+    } else if (!scrollingDown && fullyCollapsed) {
+      // Any upward pull - show tabs
+      tabsVisible = true;
+      setCollapse(true, false);
+    }
+  });
+}, { passive: true });
+
+// ---- BUILD CATEGORY PILLS ----
+// Top-level pills. Food pill opens a dropdown of subcategories.
+// Non-food cats that have multiple cuisine types also get a type dropdown.
+
+let _subDropdownAnchor = null; // stores the Food pill element for positioning
+
+function buildCatPills() {
+  const row = document.getElementById('catRow');
+  const topCats = CATS.filter(c => c.parent === null);
+  const foodActive = activeCategory === 'food' || FOOD_SUBS.includes(activeCategory);
+
+  const allBtn = `<button class="cat-pill${activeCategory==='all'?' active':''}" data-cat="all"
+    style="border-color:${activeCategory==='all'?'var(--accent)':'#ffffff22'};${activeCategory==='all'?'background:var(--accent);color:#0f0e0d;font-weight:600;':''}">
+    <span class="dot" style="background:var(--accent)"></span>All
+  </button>`;
+
+  const topPills = topCats.map(c => {
+    const isActive = activeCategory === c.key || (c.key==='food' && foodActive);
+    const hasSubs = c.key === 'food';
+    const activeSub = hasSubs && foodActive && activeCategory !== 'food'
+      ? ' · ' + catLabel(activeCategory) : '';
+    return `<button class="cat-pill${isActive?' active':''}" data-cat="${c.key}"
+      style="border-color:${isActive?c.color:c.color+'44'};${isActive?`background:${c.color};color:#0f0e0d;font-weight:600;`:`color:${c.color}cc;`}">
+      <span class="dot" style="background:${c.color}"></span>${c.label}${activeSub}${hasSubs?' ▾':''}
+    </button>`;
+  }).join('');
+
+  row.innerHTML = allBtn + topPills;
+
+  row.onclick = e => {
+    const btn = e.target.closest('.cat-pill');
+    if (!btn) return;
+    const newCat = btn.dataset.cat;
+    closeAllDropdowns();
+    if (newCat === 'food') {
+      // Open sub-category dropdown instead of setting category directly
+      openSubCatDropdown(btn);
+      return;
+    }
+    activeCategory = newCat;
+    activeCuisine = 'All';
+    buildCatPills();
+    buildTypePills();
+    render();
+  };
+}
+
+function openSubCatDropdown(anchorBtn) {
+  const menu = document.getElementById('subCatDropdown');
+  const rect = anchorBtn.getBoundingClientRect();
+  // Use viewport-relative positioning with fixed position
+  menu.style.top = (rect.bottom + 4) + 'px';
+  menu.style.left = Math.min(rect.left, window.innerWidth - 210) + 'px';
+  menu.style.maxHeight = (window.innerHeight - rect.bottom - 20) + 'px';
+
+  const foodActive = activeCategory === 'food' || FOOD_SUBS.includes(activeCategory);
+  const items = [
+    { key: 'food', label: 'All Food', color: catColor('food') },
+    ...FOOD_SUBS.map(k => ({ key: k, label: catLabel(k), color: catColor(k) }))
+  ];
+
+  menu.innerHTML = items.map(item => {
+    const isActive = (item.key === 'food' && activeCategory === 'food') || activeCategory === item.key;
+    return `<div class="cat-dropdown-item${isActive?' active':''}" data-cat="${item.key}">
+      <span class="dot" style="background:${item.color}"></span>
+      ${item.label}
+      ${isActive ? '<span class="check">✓</span>' : ''}
+    </div>`;
+  }).join('');
+
+  menu.style.display = 'block';
+  requestAnimationFrame(() => menu.classList.add('open'));
+
+  menu.onclick = e => {
+    const item = e.target.closest('.cat-dropdown-item');
+    if (!item) return;
+    activeCategory = item.dataset.cat;
+    activeCuisine = 'All';
+    closeAllDropdowns();
+    buildCatPills();
+    buildTypePills();
+    render();
+  };
+}
+
+function buildTypePills() {
+  const typeRow = document.getElementById('typeRow');
+  typeRow.innerHTML = '';
+
+  let spots;
+  if (activeCategory === 'all') {
+    spots = db.spots;
+  } else if (activeCategory === 'food') {
+    spots = db.spots.filter(s => isFood(s.cat));
+  } else {
+    spots = db.spots.filter(s => s.cat === activeCategory);
+  }
+  const types = Array.from(new Set(spots.map(s => s.cuisine))).sort();
+
+  // Show type dropdown only when a category is selected
+  const activeColor = catColor(activeCategory === 'food' ? 'food' : activeCategory);
+  let btn = null;
+  if (activeCategory !== 'all' && types.length) {
+    const label = activeCuisine === 'All' ? 'All types ▾' : activeCuisine + ' ▾';
+    btn = document.createElement('button');
+    btn.id = 'typeFilterBtn';
+    btn.className = 'cat-pill';
+    if (activeCuisine !== 'All') {
+      btn.style.cssText = `background:${activeColor}33;border-color:${activeColor};color:${activeColor};font-weight:500;flex-shrink:0;`;
+    } else {
+      btn.style.cssText = 'border-color:#ffffff22;flex-shrink:0;color:var(--muted);';
+    }
+    btn.textContent = label;
+    typeRow.appendChild(btn);
+  }
+
+  // Also add a "Been? filter" and "Want?" quick pills in this row
+  const beenPill = document.createElement('button');
+  beenPill.className = 'cat-pill' + (beenOnly ? ' active' : '');
+  beenPill.style.cssText = beenOnly
+    ? 'background:#0f2318;border-color:#2a6644;color:#4caf78;flex-shrink:0;'
+    : 'border-color:#ffffff22;flex-shrink:0;color:var(--muted);';
+  beenPill.textContent = '✓ Been';
+  beenPill.onclick = e => { e.stopPropagation(); toggleBeenOnly(); };
+  typeRow.appendChild(beenPill);
+
+  const wantPill = document.createElement('button');
+  wantPill.className = 'cat-pill' + (wantOnly ? ' active' : '');
+  wantPill.style.cssText = wantOnly
+    ? 'background:#2a1500;border-color:#e8784b;color:#e8784b;flex-shrink:0;'
+    : 'border-color:#ffffff22;flex-shrink:0;color:var(--muted);';
+  wantPill.textContent = '🔥 Want';
+  wantPill.onclick = e => { e.stopPropagation(); toggleWantOnly(); };
+  typeRow.appendChild(wantPill);
+
+  if (btn) btn.onclick = e => {
+    e.stopPropagation();
+    closeAllDropdowns();
+    openTypeDropdown(btn, types);
+  };
+
+  // Location filter button
+  const existingLoc = document.getElementById('locationFilterBtn');
+  if (existingLoc) existingLoc.remove();
+  const locations = Array.from(new Set(
+    db.spots.filter(s => s.area && s.area.trim()).map(s => s.area.trim())
+  )).sort();
+  const locBtn = document.createElement('button');
+  locBtn.id = 'locationFilterBtn';
+  locBtn.className = 'cat-pill';
+  locBtn.style.cssText = activeLocation !== 'All'
+    ? 'background:#1a1500;border-color:#e8b84b;color:#e8b84b;flex-shrink:0;font-size:0.7rem;'
+    : 'border-color:#ffffff22;flex-shrink:0;color:var(--muted);font-size:0.7rem;';
+  locBtn.textContent = activeLocation !== 'All' ? '📍 ' + activeLocation + ' ▾' : '📍 Area ▾';
+  typeRow.appendChild(locBtn);
+
+  locBtn.onclick = e => {
+    e.stopPropagation();
+    closeAllDropdowns();
+    openLocationDropdown(locBtn, locations);
+  };
+}
+
+function openTypeDropdown(anchorBtn, types) {
+  const menu = document.getElementById('typeDropdown');
+  const rect = anchorBtn.getBoundingClientRect();
+  menu.style.top = (rect.bottom + 4) + 'px';
+  menu.style.left = Math.min(rect.left, window.innerWidth - 190) + 'px';
+  menu.style.maxHeight = (window.innerHeight - rect.bottom - 20) + 'px';
+
+  const allTypes = ['All', ...types];
+  menu.innerHTML = allTypes.map(t => {
+    const isActive = activeCuisine === t;
+    return `<div class="cat-dropdown-item${isActive?' active':''}" data-type="${htmlAttr(t)}">
+      ${t}${isActive ? '<span class="check">✓</span>' : ''}
+    </div>`;
+  }).join('');
+
+  menu.style.display = 'block';
+  requestAnimationFrame(() => menu.classList.add('open'));
+
+  menu.onclick = e => {
+    const item = e.target.closest('.cat-dropdown-item');
+    if (!item) return;
+    activeCuisine = item.dataset.type;
+    closeAllDropdowns();
+    buildTypePills();
+    render();
+  };
+}
+
+function openLocationDropdown(anchorBtn, locations) {
+  const menu = document.getElementById('typeDropdown'); // reuse same dropdown
+  const rect = anchorBtn.getBoundingClientRect();
+  menu.style.top = (rect.bottom + 4) + 'px';
+  menu.style.left = Math.min(rect.left, window.innerWidth - 190) + 'px';
+  menu.style.maxHeight = (window.innerHeight - rect.bottom - 20) + 'px';
+
+  const allLocs = ['All', ...locations];
+  menu.innerHTML = allLocs.map(loc => {
+    const isActive = activeLocation === loc;
+    return `<div class="cat-dropdown-item${isActive?' active':''}" data-loc="${htmlAttr(loc)}">
+      ${loc === 'All' ? 'All areas' : '📍 ' + htmlText(loc)}
+      ${isActive ? '<span class="check">✓</span>' : ''}
+    </div>`;
+  }).join('');
+
+  menu.style.display = 'block';
+  requestAnimationFrame(() => menu.classList.add('open'));
+
+  menu.onclick = e => {
+    const item = e.target.closest('.cat-dropdown-item');
+    if (!item) return;
+    activeLocation = item.dataset.loc;
+    closeAllDropdowns();
+    buildTypePills();
+    render();
+  };
+}
+
+function closeAllDropdowns() {
+  ['subCatDropdown','typeDropdown'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.classList.remove('open'); el.style.display = 'none'; }
+  });
+}
+
+function htmlAttr(s) { return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;'); }
+function htmlText(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ---- STAR FILTER ----
+function setStarFilter(n, el) {
+  activeStar = n;
+  document.querySelectorAll('.star-pill').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  render();
+}
+
+function toggleFavOnly() {
+  favOnly = !favOnly;
+  document.getElementById('favOnlyBtn').classList.toggle('active-fav', favOnly);
+  render();
+}
+function clearFilters() {
+  activeCategory = 'all';
+  activeCuisine = 'All';
+  activeLocation = 'All';
+  activeStar = 0;
+  beenOnly = false;
+  wantOnly = false;
+  favOnly = false;
+  document.getElementById('searchInput').value = '';
+  buildCatPills();
+  buildTypePills();
+  render();
+}
+
+function anyFilterActive() {
+  return activeCategory !== 'all'
+    || activeCuisine !== 'All'
+    || activeLocation !== 'All'
+    || activeStar > 0
+    || beenOnly || wantOnly || favOnly
+    || document.getElementById('searchInput').value.trim() !== '';
+}
+
+function toggleBeenOnly() {
+  beenOnly = !beenOnly;
+  buildTypePills();
+  render();
+}
+function handleSortChange(sel) {
+  const val = sel.value;
+  if (val.startsWith('view-')) {
+    const view = val.replace('view-', '');
+    // Sync the tab UI
+    document.querySelectorAll('.view-tab').forEach(b => {
+      b.classList.toggle('active', b.dataset.view === view);
+    });
+    activeView = view;
+    render();
+  } else {
+    render();
+  }
+}
+
+function setView(view, el) {
+  activeView = view;
+  document.querySelectorAll('.view-tab').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  // Sync dropdown if it has a matching view option
+  const sel = document.getElementById('sortSelect');
+  const opt = sel.querySelector(`option[value="view-${view}"]`);
+  if (!opt) sel.value = sel.querySelector('option').value; // reset to first sort
+  render();
+}
+
+function toggleIncludeBeen() {
+  randIncludeBeen = !randIncludeBeen;
+  const btn = document.getElementById('includBeenBtn');
+  if (randIncludeBeen) {
+    btn.style.cssText = 'background:#0f2318;border:1px solid #2a6644;color:#4caf78;font-family:DM Sans,sans-serif;font-size:0.72rem;padding:5px 12px;border-radius:20px;cursor:pointer;text-transform:uppercase;letter-spacing:0.4px;';
+  } else {
+    btn.style.cssText = 'background:none;border:1px solid var(--border);color:var(--muted);font-family:DM Sans,sans-serif;font-size:0.72rem;padding:5px 12px;border-radius:20px;cursor:pointer;text-transform:uppercase;letter-spacing:0.4px;';
+  }
+  spinRandom();
+}
+
+function toggleWantOnly() {
+  wantOnly = !wantOnly;
+  buildTypePills();
+  render();
+}
+
+// ---- RANDOM PICKER ----
+function openRandom() {
+  // Default to spots not been to yet - more useful
+  const filtered = getFilteredList();
+  if (!filtered.length) return;
+  document.getElementById('randOverlay').classList.add('open');
+  spinRandom();
+}
+function getRandomPool() {
+  const filtered = getFilteredList();
+  if (randIncludeBeen) return filtered;
+  const notBeen = filtered.filter(s => !s.been);
+  return notBeen.length > 0 ? notBeen : filtered;
+}
+function closeRandom() { document.getElementById('randOverlay').classList.remove('open'); }
+
+let _currentRandSpot = null;
+
+function openRandMaps() {
+  const locEl = document.getElementById('randLoc');
+  const locText = locEl ? locEl.textContent.replace('📍 ','').trim() : '';
+  if (!locText) return;
+
+  let url;
+  if (_currentRandSpot && _currentRandSpot.lat && _currentRandSpot.lng) {
+    url = `https://www.google.com/maps/dir/?api=1&destination=${_currentRandSpot.lat},${_currentRandSpot.lng}`;
+  } else if (locText) {
+    url = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(locText)}`;
+  }
+  if (url) window.open(url, '_blank');
+}
+
+function spinRandom() {
+  const filtered = getRandomPool();
+  if (!filtered.length) return;
+  const card = document.getElementById('randCard');
+  card.classList.add('rand-spinning');
+  let ticks = 0;
+  const total = 12 + Math.floor(Math.random() * 8);
+  const tick = () => {
+    const s = filtered[Math.floor(Math.random() * filtered.length)];
+    document.getElementById('randName').textContent = s.name;
+    document.getElementById('randCat').textContent = catLabel(s.cat);
+    document.getElementById('randNote').textContent = s.note || '';
+    const locEl = document.getElementById('randLoc');
+    if (s.location) {
+      locEl.textContent = '📍 ' + s.location;
+      locEl.style.textDecoration = (s.lat && s.lng) || s.location ? 'underline' : 'none';
+      locEl.style.color = (s.lat && s.lng) || s.location ? 'var(--accent)' : 'var(--muted)';
+    } else {
+      locEl.textContent = '';
+    }
+    const color = catColor(s.cat);
+    document.getElementById('randBefore').textContent = `.rand-card::before { background: ${color}; }`;
+    ticks++;
+    if (ticks < total) {
+      setTimeout(tick, 60 + ticks * 15);
+    } else {
+      card.classList.remove('rand-spinning');
+      _currentRandSpot = s; // store final spot for maps link
+    }
+  };
+  tick();
+}
+
+// ---- MODAL ----
+function ensureMapsLoaded() {
+  // Maps loads eagerly on startup - this is just a safety check
+  if (window.google || MAPS_KEY === 'YOUR_GOOGLE_MAPS_KEY') return;
+  if (document.getElementById('gmaps-script')) return;
+  const script = document.createElement('script');
+  script.id = 'gmaps-script';
+  script.src = 'https://maps.googleapis.com/maps/api/js?key=' + MAPS_KEY + '&libraries=places,marker&loading=async&callback=_mapLoaded';
+  script.async = true;
+  document.head.appendChild(script);
+}
+
+function openAdd() {
+  ensureMapsLoaded();
+  populateAreaList();
+  editingId = null; modalStars = 0;
+  document.getElementById('modalTitle').textContent = 'Add a spot';
+  hideDeleteConfirm();
+  document.getElementById('mName').value = '';
+  clearPin();
+  document.getElementById('mCategory').value = '';
+  document.getElementById('mSubCat').value = '';
+  document.getElementById('mCuisine').value = '';
+  document.getElementById('subCatField').style.display = 'none';
+  document.getElementById('mLocation').value = '';
+  document.getElementById('mArea').value = '';
+  document.getElementById('mNote').value = '';
+  document.getElementById('mLink').value = '';
+  document.getElementById('mCollections').value = '';
+  removePhoto();
+  document.getElementById('photoUploadStatus').style.display = 'none';
+  document.getElementById('deleteBtn').style.display = 'none';
+  renderStarPicker(0);
+  ensureMapsLoaded();
+  document.getElementById('modal').classList.add('open');
+}
+
+function openEdit(id) {
+  const s = db.spots.find(x => x.id === id);
+  if (!s) return;
+  ensureMapsLoaded();
+  populateAreaList();
+  editingId = id; modalStars = s.stars || 0;
+  hideDeleteConfirm();
+  document.getElementById('modalTitle').textContent = 'Edit spot';
+  document.getElementById('mName').value = s.name;
+  // If spot is a food sub, show Food in category and sub in subcategory
+  const catInfo = CAT_MAP[s.cat];
+  if (catInfo && catInfo.parent === 'food') {
+    document.getElementById('mCategory').value = 'Food';
+    document.getElementById('mSubCat').value = catInfo.label;
+    document.getElementById('subCatField').style.display = '';
+  } else {
+    document.getElementById('mCategory').value = catLabel(s.cat);
+    document.getElementById('mSubCat').value = '';
+    document.getElementById('subCatField').style.display = 'none';
+  }
+  document.getElementById('mCuisine').value = s.cuisine;
+  document.getElementById('mLocation').value = s.location || '';
+  document.getElementById('mArea').value = s.area || '';
+  document.getElementById('mPlaceSearch').value = s.lat && s.lng ? (s.location || s.name) : '';
+  document.getElementById('mLat').value = s.lat || '';
+  document.getElementById('mLng').value = s.lng || '';
+  try {
+    if (s.lat && s.lng) {
+      document.getElementById('pinStatus').style.display = 'block';
+      if (window.google) setPinFromCoords(s.lat, s.lng, s.name);
+      else document.getElementById('miniMapWrap').style.display = 'none';
+    } else {
+      clearPin();
+    }
+  } catch(e) { console.warn('Pin restore error:', e); clearPin(); }
+  document.getElementById('mNote').value = s.note || '';
+  document.getElementById('mLink').value = s.link || '';
+  document.getElementById('mPhoto').value = s.photo || '';
+  if (s.photo) {
+    showPhotoPreview(s.photo);
+  } else {
+    removePhoto();
+  }
+  document.getElementById('mCollections').value = s.collections || '';
+  document.getElementById('deleteBtn').style.display = '';
+  renderStarPicker(modalStars);
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal() {
+  _acWidget = null;
+  document.getElementById('modal').classList.remove('open');
+  const _nr = document.getElementById('nameResults'); if(_nr) _nr.style.display='none';
+  document.querySelectorAll('.ac-list').forEach(l => l.classList.remove('open'));
+  if (document.activeElement) document.activeElement.blur();
+}
+function pickStar(n) { modalStars = n; renderStarPicker(n); }
+function renderStarPicker(n) {
+  document.querySelectorAll('.sp').forEach((el,i) => el.classList.toggle('lit', i < n));
+}
+function saveSpot() {
+  const name = document.getElementById('mName').value.trim();
+  if (!name) { document.getElementById('mName').focus(); return; }
+  const catInput = document.getElementById('mCategory').value.trim().toLowerCase();
+  const subInput = document.getElementById('mSubCat').value.trim().toLowerCase();
+  // If subcategory is filled, use that as the cat key (it's a food sub)
+  // Otherwise use the category field directly
+  let cat;
+  if (subInput) {
+    let existing = CATS.find(c => c.label.toLowerCase() === subInput && c.parent === 'food');
+    if (existing) {
+      cat = existing.key;
+    } else {
+      // New dynamic subcategory - create it on the fly
+      const newKey = subInput.replace(/[^a-z0-9]/g, '');
+      const newLabel = document.getElementById('mSubCat').value.trim();
+      const EXTRA_COLORS = ['#e84b4b','#4be8b4','#e8784b','#784be8','#4bb4e8','#e8b44b','#b4e84b','#e84b78'];
+      const usedColors = CATS.map(c => c.color);
+      const newColor = EXTRA_COLORS.find(c => !usedColors.includes(c)) || '#aaaaaa';
+      const newCat = { key: newKey, label: newLabel, color: newColor, parent: 'food' };
+      CATS.push(newCat);
+      FOOD_SUBS.push(newKey);
+      CAT_MAP[newKey] = newCat;
+      // Persist new categories to localStorage
+      try { localStorage.setItem('our-list-cats', JSON.stringify(CATS.filter(c => c.parent === 'food' && !['brunch','italian','asian','latino','american','fusion','bars','coffee','dessert','carts','finedining','seafood','greek','african'].includes(c.key)))); } catch(e) {}
+      cat = newKey;
+    }
+  } else {
+    cat = CATS.find(c => c.label.toLowerCase() === catInput || c.key === catInput)?.key || 'other';
+  }
+  const cuisine     = document.getElementById('mCuisine').value.trim() || 'Other';
+  const location    = document.getElementById('mLocation').value.trim();
+  const lat         = parseFloat(document.getElementById('mLat').value) || null;
+  const lng         = parseFloat(document.getElementById('mLng').value) || null;
+  const note        = document.getElementById('mNote').value.trim();
+  const link        = document.getElementById('mLink').value.trim();
+  const photo       = document.getElementById('mPhoto').value.trim();
+  const collections = document.getElementById('mCollections').value.trim();
+  const area        = document.getElementById('mArea') ? document.getElementById('mArea').value.trim() : '';
+  // Read ALL values before closing modal - closing can wipe DOM on iOS
+  closeModal();
+  if (editingId !== null) {
+    const s = db.spots.find(x => x.id === editingId);
+    if (s) {
+      Object.assign(s, { name, cat, cuisine, location, area: area||'', note, link: link||'', photo: photo||'', collections: collections||'', stars: modalStars, lat: lat||null, lng: lng||null });
+      render();
+      sbFetch('PATCH', 'spots?id=eq.' + editingId, { name, cat, cuisine, location, area: area||'', note, link: link||'', photo: photo||'', collections: collections||'', stars: modalStars, lat: lat||null, lng: lng||null, goback: s.goback||null })
+        .then(() => showStatus('Saved'))
+        .catch(() => showStatus('Save failed', true));
+    }
+  } else {
+    const newSpot = { name, cat, cuisine, location, area: area||'', note, link: link||'', photo: photo||'', collections: collections||'', stars: modalStars, fav: false, been: false, want: false, lat, lng, goback: null };
+    sbFetch('POST', 'spots', newSpot)
+      .then(res => {
+        if (res && res[0]) { db.spots.push(res[0]); render(); }
+        showStatus('Added');
+        buildCatPills(); buildTypePills();
+      })
+      .catch(() => showStatus('Add failed', true));
+  }
+  setTimeout(measureThreshold, 150);
+}
+function showDeleteConfirm() {
+  document.getElementById('modalBtnsNormal').style.display = 'none';
+  document.getElementById('modalBtnsConfirm').style.display = '';
+}
+function hideDeleteConfirm() {
+  document.getElementById('modalBtnsNormal').style.display = '';
+  document.getElementById('modalBtnsConfirm').style.display = 'none';
+}
+function deleteSpot() {
+  if (editingId === null) return;
+  const idToDel = editingId;
+  db.spots = db.spots.filter(x => x.id !== idToDel);
+  closeModal(); render();
+  sbFetch('DELETE', 'spots?id=eq.' + idToDel)
+    .then(() => { showStatus('Deleted'); buildCatPills(); buildTypePills(); })
+    .catch(() => showStatus('Delete failed', true));
+  setTimeout(measureThreshold, 150);
+}
+
+// ---- INTERACTIONS ----
+function setSpotStars(id, n) {
+  const s = db.spots.find(x => x.id === id);
+  if (!s) return;
+  s.stars = s.stars === n ? 0 : n; render();
+  sbFetch('PATCH', 'spots?id=eq.' + id, { stars: s.stars }).catch(() => {});
+}
+function toggleFav(id) {
+  const s = db.spots.find(x => x.id === id);
+  if (!s) return;
+  s.fav = !s.fav; render();
+  sbFetch('PATCH', 'spots?id=eq.' + id, { fav: s.fav }).catch(() => {});
+}
+function gobackNo(id) {
+  const s = db.spots.find(x => x.id === id);
+  if (!s) return;
+  s.goback = s.goback === false ? null : false;
+  render();
+  sbFetch('PATCH', 'spots?id=eq.' + id, { goback: s.goback }).catch(() => {});
+}
+
+function gobackYes(id) {
+  const s = db.spots.find(x => x.id === id);
+  if (!s) return;
+  s.goback = s.goback === true ? null : true;
+  render();
+  sbFetch('PATCH', 'spots?id=eq.' + id, { goback: s.goback }).catch(() => {});
+}
+function gobackNo(id) {
+  const s = db.spots.find(x => x.id === id);
+  if (!s) return;
+  s.goback = s.goback === false ? null : false;
+  render();
+  sbFetch('PATCH', 'spots?id=eq.' + id, { goback: s.goback }).catch(() => {});
+}
+
+let _beenPopupId = null;
+
+function toggleBeen(id) {
+  const s = db.spots.find(x => x.id === id);
+  if (!s) return;
+  s.been = !s.been;
+  if (s.been) {
+    // Show popup asking go back or no thanks
+    _beenPopupId = id;
+    document.getElementById('beenPopupName').textContent = s.name;
+    const bp = document.getElementById('beenPopup');
+    bp.style.display = 'flex';
+    bp.style.pointerEvents = 'auto';
+  } else {
+    s.goback = null;
+    activeView = 'active';
+    document.querySelectorAll('.view-tab').forEach(b => {
+      b.classList.toggle('active', b.dataset.view === 'active');
+    });
+  }
+  // Stamp visited_at BEFORE render so card shows the date immediately
+  const now = s.been ? new Date().toISOString() : null;
+  s.visited_at = now;
+  render();
+  sbFetch('PATCH', 'spots?id=eq.' + id, { been: s.been, goback: s.goback || null, visited_at: now }).catch(() => {});
+}
+
+function cancelBeen() {
+  // Undo the been mark entirely
+  const bpEl2 = document.getElementById('beenPopup');
+  bpEl2.style.display = 'none'; bpEl2.style.pointerEvents = 'none';
+  if (_beenPopupId === null) return;
+  const s = db.spots.find(x => x.id === _beenPopupId);
+  if (s) {
+    s.been = false;
+    s.goback = null;
+    activeView = 'active';
+    document.querySelectorAll('.view-tab').forEach(b => {
+      b.classList.toggle('active', b.dataset.view === 'active');
+    });
+    render();
+    sbFetch('PATCH', 'spots?id=eq.' + _beenPopupId, { been: false, goback: null }).catch(() => {});
+  }
+  _beenPopupId = null;
+}
+
+function undoBeen() {
+  // X - accidental tap, revert been to false, close popup, stay on current list
+  const bpEl2 = document.getElementById('beenPopup');
+  bpEl2.style.display = 'none'; bpEl2.style.pointerEvents = 'none';
+  if (_beenPopupId === null) return;
+  const s = db.spots.find(x => x.id === _beenPopupId);
+  if (s) {
+    s.been = false;
+    s.goback = null;
+    render();
+    sbFetch('PATCH', 'spots?id=eq.' + _beenPopupId, { been: false, goback: null }).catch(() => {});
+  }
+  _beenPopupId = null;
+}
+
+function setBeenDecision(goback) {
+  const bpEl = document.getElementById('beenPopup');
+  bpEl.style.display = 'none'; bpEl.style.pointerEvents = 'none';
+  if (_beenPopupId === null) return;
+  const s = db.spots.find(x => x.id === _beenPopupId);
+  if (s) {
+    s.goback = goback;
+    render();
+    sbFetch('PATCH', 'spots?id=eq.' + _beenPopupId, { goback }).catch(() => {});
+  }
+  _beenPopupId = null;
+}
+function toggleWant(id) {
+  const s = db.spots.find(x => x.id === id);
+  if (!s) return;
+  s.want = !s.want; render();
+  sbFetch('PATCH', 'spots?id=eq.' + id, { want: s.want }).catch(() => {});
+}
+function filterByCuisineTag(cuisine) {
+  activeCuisine = cuisine;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  buildTypePills();
+  render();
+}
+
+// ---- RENDER ----
+function getFilteredList() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  return db.spots.filter(s => {
+    // VIEW FILTER
+    if (activeView === 'archive') {
+      if (!s.been || s.goback !== null) return false; // archive = been + no decision yet (decide later)
+    } else if (activeView === 'repeats') {
+      if (!s.been || s.goback !== true) return false;
+    } else if (activeView === 'noback') {
+      if (!s.been || s.goback !== false) return false;
+    } else {
+      if (s.been) return false; // active list = unvisited only
+    }
+    if (activeCategory !== 'all') {
+      if (activeCategory === 'food') {
+        if (!isFood(s.cat)) return false;
+      } else if (s.cat !== activeCategory) return false;
+    }
+    if (activeCuisine !== 'All' && s.cuisine !== activeCuisine) return false;
+    if (activeStar === 5 && (s.stars||0) !== 5) return false;
+    if (activeStar > 0 && activeStar < 5 && (s.stars||0) < activeStar) return false;
+    if (favOnly && !s.fav) return false;
+    if (beenOnly && !s.been) return false;
+    if (wantOnly && !s.want) return false;
+    if (activeLocation !== 'All' && (s.area || s.location) !== activeLocation) return false;
+    if (q) {
+      const hay = `${s.name} ${s.cuisine} ${s.cat} ${s.note||''} ${s.location||''}`.toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+}
+
+function render() {
+  const sortVal = document.getElementById('sortSelect').value;
+  const sort = activeView === 'repeats' ? 'stars-desc' : sortVal.startsWith('view-') ? 'newest' : sortVal;
+  let list = getFilteredList();
+  if (sort==='newest')       list.sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0));
+  else if (sort==='alpha')        list.sort((a,b)=>a.name.localeCompare(b.name));
+  else if (sort==='alpha-desc') list.sort((a,b)=>b.name.localeCompare(a.name));
+  else if (sort==='stars-desc') list.sort((a,b)=>(b.stars||0)-(a.stars||0)||a.name.localeCompare(b.name));
+  else if (sort==='stars-asc')  list.sort((a,b)=>(a.stars||0)-(b.stars||0)||a.name.localeCompare(b.name));
+
+  const favs = db.spots.filter(s=>s.fav).length;
+  const beens = db.spots.filter(s=>s.been).length;
+  // Category counts
+  const foodCount  = db.spots.filter(s => isFood(s.cat)).length;
+  const hikeCount  = db.spots.filter(s => s.cat === 'hikes').length;
+  const actCount   = db.spots.filter(s => s.cat === 'activities').length;
+  const getCount   = db.spots.filter(s => s.cat === 'getaways').length;
+  const intlCount  = db.spots.filter(s => s.cat === 'international').length;
+  const shopCount  = db.spots.filter(s => s.cat === 'shopping').length;
+  const otherCount = db.spots.filter(s => s.cat === 'other').length;
+  const catBreakdown = [
+    foodCount  ? `🍜 ${foodCount}`  : '',
+    hikeCount  ? `🥾 ${hikeCount}`  : '',
+    actCount   ? `⚡ ${actCount}`   : '',
+    getCount   ? `✈️ ${getCount}`   : '',
+    intlCount  ? `🌍 ${intlCount}`  : '',
+    shopCount  ? `🛍 ${shopCount}`  : '',
+    otherCount ? `• ${otherCount}`  : '',
+  ].filter(Boolean).join(' · ');
+  document.getElementById('totalCount').textContent = `${db.spots.length} spots · ${beens} been · ${favs} ❤`;
+  const breakdownEl = document.getElementById('catBreakdown');
+  if (breakdownEl) breakdownEl.textContent = catBreakdown;
+  document.getElementById('countBar').textContent = `Showing ${list.length} spot${list.length!==1?'s':''}${activeView !== 'active' ? ' · ' + activeView : ''}`.replace('repeats','worth it').replace('noback','one & done').replace('archive','decide later');
+  // Show/hide clear filters button
+  let clearBtn = document.getElementById('clearFiltersBtn');
+  if (anyFilterActive()) {
+    if (!clearBtn) {
+      clearBtn = document.createElement('button');
+      clearBtn.id = 'clearFiltersBtn';
+      clearBtn.onclick = clearFilters;
+      clearBtn.style.cssText = 'background:none;border:1px solid #e84b4b;color:#e84b4b;font-family:"DM Sans",sans-serif;font-size:0.72rem;padding:3px 10px;border-radius:20px;cursor:pointer;white-space:nowrap;margin-left:8px;';
+      clearBtn.textContent = '✕ Clear filters';
+      document.getElementById('countBar').appendChild(clearBtn);
+    }
+  } else if (clearBtn) {
+    clearBtn.remove();
+  }
+
+  const grid = document.getElementById('grid');
+  if (!list.length) { grid.innerHTML = '<div class="empty">No spots match that filter.</div>'; return; }
+
+  grid.innerHTML = list.map(s => {
+    const color = catColor(s.cat);
+    const stars = [1,2,3,4,5].map(n =>
+      `<span class="s${(s.stars||0)>=n?' lit':''}" data-action="star" data-id="${s.id}" data-n="${n}">★</span>`
+    ).join('');
+        const mapsUrl = s.lat && s.lng
+      ? `https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}`
+      : s.location
+        ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(s.location)}`
+        : null;
+    const locText = s.location || '';
+    const loc = locText
+      ? `<div class="card-location">${mapsUrl
+          ? `<a href="${mapsUrl}" target="_blank" rel="noopener"
+              style="color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:4px;"
+              onclick="event.stopPropagation()">📍 ${htmlText(locText)}</a>`
+          : `📍 ${htmlText(locText)}`
+        }</div>`
+      : s.lat && s.lng
+        ? `<div class="card-location"><a href="${mapsUrl}" target="_blank" rel="noopener"
+            style="color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:4px;"
+            onclick="event.stopPropagation()">📍 View on map</a></div>`
+        : '';
+    const note = s.note ? `<div class="card-note">${htmlText(s.note)}</div>` : '';
+    const visitedLabel = s.been && s.visited_at && activeView !== 'active'
+      ? `<div style="font-size:0.68rem;color:var(--muted);margin-bottom:4px;">🕐 Visited ${timeAgo(s.visited_at)}</div>` : '';
+    const favStyle = s.fav ? 'opacity:1;color:#e84b4b' : 'opacity:0.3';
+    const viewBadge = '';
+    const photo = s.photo ? `<img class="card-photo" src="${htmlAttr(s.photo)}" alt="" loading="lazy" onerror="this.style.display='none'">` : '';
+    const colls = s.collections ? s.collections.split(',').map(c => c.trim()).filter(Boolean).map(c => `<span class="coll-tag">${htmlText(c)}</span>`).join('') : '';
+    return `
+    <div class="card" data-cat="${s.cat}" style="--card-color:${color}; border-top: 3px solid ${color}22;">
+      ${photo}
+      <div class="card-top">
+        <div class="card-name">${htmlText(s.name)}</div>
+        <div class="card-actions">
+          <button class="want-btn${s.want?' on':''}" data-action="want" data-id="${s.id}" title="Want to go">🔥</button>
+          <button class="icon-btn" data-action="edit" data-id="${s.id}" title="Edit">✏️</button>
+          <button onclick="event.stopPropagation();shareSpot('${s.id}')" title="Share" style="background:none;border:none;cursor:pointer;font-size:0.85rem;padding:2px 4px;color:#e8b84b;opacity:0.8;line-height:1;">↗</button>
+          <button class="icon-btn fav-btn-card${s.fav?' on':''}" data-action="fav" data-id="${s.id}" style="${favStyle}">♥</button>
+        </div>
+      </div>
+      ${loc}${note}
+      ${colls ? `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;">${colls}</div>` : ''}
+      <div class="card-footer">
+        <div class="card-stars">${stars}</div>
+        <div class="card-badges">
+          <span class="ctag" data-action="filter" data-cuisine="${htmlAttr(s.cuisine)}" style="border-color:${color}55;color:${color}cc;background:${color}11;">${htmlText(s.cuisine)}</span>
+          <button class="been-btn${s.been?' on':''}" data-action="been" data-id="${s.id}">${s.been?'✓ Been':'Been?'}</button>
+          ${s.been ? `
+            <button class="goback-btn${s.goback===true?' yes':''}" data-action="goback-yes" data-id="${s.id}" title="Worth it">👍</button>
+            <button class="goback-btn${s.goback===false?' no':''}" data-action="goback-no" data-id="${s.id}" title="Once was enough">✗</button>
+          ` : ''}
+          ${s.link ? `<a class="link-btn" href="${htmlAttr(s.link)}" target="_blank" rel="noopener" title="Open link">🔗</a>` : ''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ---- AUTO TAG AREAS ----
+async function autoTagAreas() {
+  const btn = document.getElementById('autoTagBtn');
+
+  // Ensure Maps is loaded before geocoding
+  if (!window.google) {
+    btn.textContent = '⏳ Loading Maps...';
+    btn.style.opacity = '0.6';
+    btn.style.pointerEvents = 'none';
+    await new Promise((resolve, reject) => {
+      const existing = document.getElementById('gmaps-script');
+      if (existing) {
+        // Script already added, just wait
+      } else {
+        const script = document.createElement('script');
+        script.id = 'gmaps-script';
+        script.src = 'https://maps.googleapis.com/maps/api/js?key=' + MAPS_KEY + '&libraries=places&callback=_mapsReadyForTag';
+        script.async = true;
+        document.head.appendChild(script);
+      }
+      window._mapsReadyForTag = resolve;
+      setTimeout(reject, 10000); // 10s timeout
+    }).catch(() => null);
+
+    if (!window.google) {
+      showStatus('Could not load Maps - check connection');
+      btn.textContent = '📍 Auto-tag areas';
+      btn.style.opacity = '1';
+      btn.style.pointerEvents = 'auto';
+      return;
+    }
+  }
+
+  const pinned = db.spots.filter(s => s.lat && s.lng && (!s.area || !s.area.trim()));
+  if (!pinned.length) {
+    showStatus('All pinned spots already have areas tagged');
+    return;
+  }
+  btn.textContent = '⏳ Tagging...';
+  btn.style.opacity = '0.6';
+  btn.style.pointerEvents = 'none';
+
+  let tagged = 0;
+  let failed = 0;
+
+  for (const spot of pinned) {
+    try {
+      await new Promise((resolve) => {
+        const geocoder = new google.maps.Geocoder();
+        geocoder.geocode({ location: { lat: spot.lat, lng: spot.lng } }, async (results, status) => {
+          if (status === 'OK' && results && results.length) {
+            const area = extractArea(results[0].address_components);
+            if (area) {
+              spot.area = area;
+              try {
+                await sbFetch('PATCH', 'spots?id=eq.' + spot.id, { area });
+                tagged++;
+              } catch(e) { failed++; }
+            }
+          }
+          resolve();
+        });
+      });
+      await new Promise(r => setTimeout(r, 200)); // Rate limit
+    } catch(e) {
+      failed++;
+      console.warn('Tag error for', spot.name, e);
+    }
+  }
+
+  btn.textContent = '📍 Auto-tag areas';
+  btn.style.opacity = '1';
+  btn.style.pointerEvents = 'auto';
+  showStatus(`Tagged ${tagged} spots${failed ? ', ' + failed + ' failed' : ''}`);
+  buildTypePills();
+  render();
+}
+
+// ---- PLACE SEARCH + MINI MAP ----
+let autocompleteService = null;
+let placesService = null;
+
+function initPlacesServices() {
+  if (!window.google || autocompleteService) return;
+  autocompleteService = new google.maps.places.AutocompleteService();
+  placesService = new google.maps.places.PlacesService(document.createElement('div'));
+}
+let miniMapInstance = null;
+let miniMapMarker = null;
+
+async function searchPlace(query) {
+  if (!query || query.length < 3) {
+    document.getElementById('placeResults').style.display = 'none';
+    return;
+  }
+  ensureMapsLoaded();
+  if (!window.google) {
+    // Maps not loaded yet - try again in 1 second
+    setTimeout(() => searchPlace(query), 1000);
+    return;
+  }
+  try {
+    const { AutocompleteSuggestion } = await google.maps.importLibrary('places');
+    const { suggestions } = await AutocompleteSuggestion.fetchAutocompleteSuggestions({
+      input: query,
+      locationBias: new google.maps.Circle({ center: { lat: 45.5051, lng: -122.6750 }, radius: 50000 }),
+    });
+    const res = document.getElementById('placeResults');
+    if (!suggestions || !suggestions.length) { res.style.display = 'none'; return; }
+    res.innerHTML = suggestions.slice(0,5).map(s => {
+      const text = s.placePrediction.text.toString();
+      const pid = s.placePrediction.placeId;
+      return `<div class="place-result-item"
+        data-pid="${pid}"
+        data-desc="${text.replace(/"/g,'&quot;')}"
+        style="padding:10px 14px;cursor:pointer;font-size:0.84rem;color:var(--text);border-bottom:1px solid var(--border);"
+        onmouseover="this.style.background='#2a2820'" onmouseout="this.style.background=''">
+        ${text}
+      </div>`;
+    }).join('');
+    res.onclick = e => {
+      const item = e.target.closest('.place-result-item');
+      if (!item) return;
+      selectPlace(item.dataset.pid, item.dataset.desc.replace(/&quot;/g,'"'));
+    };
+    res.style.display = 'block';
+  } catch(e) {
+    console.warn('Search error:', e);
+    document.getElementById('placeResults').style.display = 'none';
+  }
+}
+
+// Map Google place types to our categories
+async function searchPlaceFromName(query) {
+  const res = document.getElementById('nameResults');
+  if (!query || query.length < 2) { res.style.display = 'none'; return; }
+  ensureMapsLoaded();
+  if (!window.google) {
+    setTimeout(() => searchPlaceFromName(query), 500);
+    return;
+  }
+  try {
+    const { AutocompleteSuggestion } = await google.maps.importLibrary('places');
+    const { suggestions } = await AutocompleteSuggestion.fetchAutocompleteSuggestions({
+      input: query,
+      locationBias: new google.maps.Circle({ center: { lat: 45.5051, lng: -122.6750 }, radius: 50000 }),
+    });
+    if (!suggestions || !suggestions.length) { res.style.display = 'none'; return; }
+    res.innerHTML = suggestions.slice(0,5).map(s => {
+      const text = s.placePrediction.text.toString();
+      const pid = s.placePrediction.placeId;
+      return `<div class="name-result-item"
+        data-pid="${pid}"
+        data-desc="${text.replace(/"/g,'&quot;')}"
+        style="padding:10px 14px;cursor:pointer;font-size:0.84rem;color:var(--text);border-bottom:1px solid var(--border);"
+        onmouseover="this.style.background='#2a2820'" onmouseout="this.style.background=''">
+        ${text}
+      </div>`;
+    }).join('');
+    res.style.display = 'block';
+    res.onclick = e => {
+      const item = e.target.closest('.name-result-item');
+      if (!item) return;
+      res.style.display = 'none';
+      const fullDesc = item.dataset.desc.replace(/&quot;/g, '"');
+      const placeName = fullDesc.split(',')[0].trim();
+      document.getElementById('mName').value = placeName;
+      selectPlace(item.dataset.pid, fullDesc);
+    };
+  } catch(e) {
+    console.warn('Name search error:', e);
+    res.style.display = 'none';
+  }
+}
+
+function populateAreaList() {
+  const areas = Array.from(new Set(db.spots.map(s => s.area).filter(Boolean))).sort();
+  const dl = document.getElementById('areaList');
+  if (dl) dl.innerHTML = areas.map(a => `<option value="${htmlAttr(a)}">`).join('');
+}
+
+function googleTypeToCategory(types) {
+  if (!types) return null;
+  const t = types.join(',');
+  if (t.includes('restaurant') || t.includes('food') || t.includes('meal') || t.includes('bakery') || t.includes('cafe') || t.includes('coffee') || t.includes('bar') || t.includes('night_club') || t.includes('pizza') || t.includes('sushi') || t.includes('ramen')) return 'food';
+  if (t.includes('lodging') || t.includes('hotel') || t.includes('resort')) return 'getaways';
+  if (t.includes('park') || t.includes('gym') || t.includes('stadium') || t.includes('amusement') || t.includes('bowling') || t.includes('spa')) return 'activities';
+  if (t.includes('natural_feature') || t.includes('campground') || t.includes('trail')) return 'hikes';
+  if (t.includes('store') || t.includes('shop') || t.includes('market') || t.includes('mall') || t.includes('clothing') || t.includes('book_store') || t.includes('furniture') || t.includes('jewelry')) return 'shopping';
+  if (t.includes('tourist_attraction') || t.includes('museum') || t.includes('art_gallery') || t.includes('place_of_worship') || t.includes('zoo') || t.includes('aquarium')) return 'activities';
+  return null;
+}
+
+function googleTypeToCuisine(types) {
+  if (!types) return '';
+  const t = types.join(',');
+  if (t.includes('bar') || t.includes('night_club')) return 'Bar';
+  if (t.includes('cafe') || t.includes('coffee')) return 'Coffee';
+  if (t.includes('bakery')) return 'Bakery';
+  if (t.includes('pizza')) return 'Pizza';
+  if (t.includes('japanese') || t.includes('sushi') || t.includes('ramen')) return 'Japanese';
+  if (t.includes('chinese')) return 'Chinese';
+  if (t.includes('mexican')) return 'Mexican';
+  if (t.includes('italian')) return 'Italian';
+  if (t.includes('thai')) return 'Thai';
+  if (t.includes('vietnamese')) return 'Vietnamese';
+  if (t.includes('indian')) return 'Indian';
+  if (t.includes('korean')) return 'Korean';
+  if (t.includes('spa')) return 'Spa';
+  if (t.includes('gym') || t.includes('fitness')) return 'Fitness';
+  if (t.includes('museum')) return 'Museum';
+  if (t.includes('hotel') || t.includes('lodging')) return 'Hotel';
+  return '';
+}
+
+async function selectPlace(placeId, description) {
+  document.getElementById('placeResults').style.display = 'none';
+  document.getElementById('mPlaceSearch').value = description;
+  if (!window.google) return;
+  try {
+    const { Place } = await google.maps.importLibrary('places');
+    const place = new Place({ id: placeId });
+    await place.fetchFields({ fields: ['location','displayName','formattedAddress','types'] });
+    const lat = place.location.lat();
+    const lng = place.location.lng();
+    setPinFromCoords(lat, lng, place.displayName);
+
+    // Auto-fill name if empty
+    if (!document.getElementById('mName').value && place.displayName) {
+      document.getElementById('mName').value = place.displayName;
+    }
+
+    // Auto-fill address
+    if (place.formattedAddress) {
+      document.getElementById('mLocation').value = place.formattedAddress;
+    }
+
+    // Auto-fill category if empty
+    const catEl = document.getElementById('mCategory');
+    if (!catEl.value && place.types) {
+      const guessedCat = googleTypeToCategory(place.types);
+      if (guessedCat) {
+        const catInfo = CAT_MAP[guessedCat];
+        if (catInfo) {
+          if (catInfo.parent === 'food') {
+            catEl.value = 'Food';
+            document.getElementById('mSubCat').value = catInfo.label;
+            document.getElementById('subCatField').style.display = '';
+          } else {
+            catEl.value = catInfo.label;
+          }
+        }
+      }
+    }
+
+    // Auto-fill cuisine/type if empty
+    const cuisineEl = document.getElementById('mCuisine');
+    if (!cuisineEl.value && place.types) {
+      const guessedCuisine = googleTypeToCuisine(place.types);
+      if (guessedCuisine) cuisineEl.value = guessedCuisine;
+    }
+
+    // Auto-fill area from reverse geocoding
+    showStatus('Location pinned - fields auto-filled');
+    reverseGeocodeArea(lat, lng);
+  } catch(e) { console.warn('Place error:', e); }
+}
+
+function reverseGeocodeArea(lat, lng) {
+  // Use Google Maps Geocoder (uses loaded Maps JS, respects API key restrictions)
+  if (!window.google) return;
+  const geocoder = new google.maps.Geocoder();
+  geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+    console.log('Geocode status:', status);
+    if (status !== 'OK' || !results || !results.length) return;
+    console.log('Components:', JSON.stringify(results[0].address_components));
+    const area = extractArea(results[0].address_components);
+    console.log('Extracted area:', area);
+    if (area) {
+      const el = document.getElementById('mArea');
+      if (el) { el.value = area; console.log('Area field set to:', area); }
+    }
+  });
+}
+
+function extractArea(components) {
+  const locality    = components.find(c => c.types.includes('locality'));
+  const neighborhood = components.find(c => c.types.includes('neighborhood'));
+  const sublocality  = components.find(c => c.types.includes('sublocality_level_1') || c.types.includes('sublocality'));
+  // Portland proper - use neighborhood for specificity (Pearl District, Nob Hill etc)
+  if (locality && locality.long_name === 'Portland') {
+    if (neighborhood) return neighborhood.long_name;
+    if (sublocality) return sublocality.long_name;
+    return 'Portland';
+  }
+  // Suburbs - Beaverton, Tigard, Lake Oswego etc
+  if (locality) return locality.long_name;
+  if (neighborhood) return neighborhood.long_name;
+  return null;
+}
+
+function setPinFromCoords(lat, lng, name) {
+  document.getElementById('mLat').value = lat;
+  document.getElementById('mLng').value = lng;
+  document.getElementById('pinStatus').style.display = 'block';
+  document.getElementById('miniMapWrap').style.display = 'block';
+
+  if (!window.google) return;
+  initPlacesServices();
+
+  const mapDiv = document.getElementById('miniMap');
+  const pos = { lat: parseFloat(lat), lng: parseFloat(lng) };
+
+  if (!miniMapInstance) {
+    miniMapInstance = new google.maps.Map(mapDiv, {
+      zoom: 15, center: pos,
+      styles: [
+        {elementType:'geometry',stylers:[{color:'#1a1916'}]},
+        {elementType:'labels.text.fill',stylers:[{color:'#f0ede6'}]},
+        {featureType:'road',elementType:'geometry',stylers:[{color:'#2e2c28'}]},
+        {featureType:'water',elementType:'geometry',stylers:[{color:'#0d1b2a'}]},
+        {featureType:'poi',stylers:[{visibility:'off'}]},
+      ],
+      mapTypeControl:false, streetViewControl:false, fullscreenControl:false, zoomControl:false
+    });
+  } else {
+    miniMapInstance.setCenter(pos);
+  }
+
+  if (miniMapMarker) miniMapMarker.setMap(null);
+  miniMapMarker = new google.maps.Marker({
+    position: pos, map: miniMapInstance, draggable: true, title: name,
+    icon: { path: google.maps.SymbolPath.CIRCLE, scale: 10,
+      fillColor: '#e8b84b', fillOpacity: 1, strokeColor: '#0f0e0d', strokeWeight: 2 }
+  });
+
+  // Update coords if pin is dragged
+  miniMapMarker.addListener('dragend', () => {
+    const p = miniMapMarker.getPosition();
+    document.getElementById('mLat').value = p.lat();
+    document.getElementById('mLng').value = p.lng();
+  });
+}
+
+function clearPin() {
+  try {
+    const ids = ['mLat','mLng','mPlaceSearch'];
+    ids.forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+    ['pinStatus','miniMapWrap','placeResults'].forEach(id => {
+      const el = document.getElementById(id); if(el) el.style.display = 'none';
+    });
+    if (miniMapMarker) { try { miniMapMarker.setMap(null); } catch(e){} miniMapMarker = null; }
+    miniMapInstance = null;
+  } catch(e) { console.warn('clearPin:', e); }
+}
+
+// ---- PHOTO UPLOAD + CROP ----
+let _cropImg = null;   // the loaded Image object
+let _cropSrc = '';     // base64 data URL
+let _cropFile = null;
+let _cx = 0, _cy = 0, _cScale = 1;
+let _dragging = false, _lastX = 0, _lastY = 0;
+
+function handlePhotoCrop(input) {
+  const file = input.files[0];
+  if (!file) return;
+  _cropFile = file;
+  input.value = '';
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    _cropSrc = e.target.result;
+    const img = new Image();
+    img.onload = () => {
+      _cropImg = img;
+      // Fill frame completely (no black bars) - centered so you can drag to reposition
+      const frame = document.getElementById('cropFrame');
+      const fw = frame.offsetWidth || 300;
+      const fh = 150;
+      _cScale = Math.max(fw / img.width, fh / img.height);
+      // Center the image
+      _cx = (fw - img.width * _cScale) / 2;
+      _cy = (fh - img.height * _cScale) / 2;
+      // Set slider to match initial fill scale
+      setTimeout(() => {
+        const slider = document.getElementById('zoomSlider');
+        if (slider) {
+          const minS = Math.min(fw / img.width, fh / img.height);
+          const fillS = Math.max(fw / img.width, fh / img.height);
+          const maxS = fillS * 3;
+          slider.value = Math.round(((fillS - minS) / (maxS - minS)) * 100);
+        }
+      }, 50);
+
+      // Show the img element
+      const cropImgEl = document.getElementById('cropImg');
+      cropImgEl.src = _cropSrc;
+      cropImgEl.style.width = (img.width * _cScale) + 'px';
+      cropImgEl.style.height = (img.height * _cScale) + 'px';
+      cropImgEl.style.transform = `translate(${_cx}px, ${_cy}px)`;
+
+      document.getElementById('cropWrap').style.display = 'block';
+      document.getElementById('photoUploadBtn').style.display = 'none';
+      document.getElementById('photoPreviewWrap').style.display = 'none';
+      drawPreview();
+      attachCropEvents();
+    };
+    img.src = _cropSrc;
+  };
+  reader.readAsDataURL(file);
+}
+
+function attachCropEvents() {
+  const frame = document.getElementById('cropFrame');
+  // Remove old listeners by cloning
+  const newFrame = frame.cloneNode(true);
+  frame.parentNode.replaceChild(newFrame, frame);
+  // Re-attach img ref
+  document.getElementById('cropImg').src = _cropSrc;
+  updateCropImgStyle();
+
+  // Touch
+  let _pinchDist = 0;
+
+  newFrame.addEventListener('touchstart', e => {
+    if (e.touches.length === 1) {
+      _dragging = true;
+      _lastX = e.touches[0].clientX;
+      _lastY = e.touches[0].clientY;
+    } else if (e.touches.length === 2) {
+      _dragging = false;
+      _pinchDist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+    }
+  }, { passive: true });
+
+  newFrame.addEventListener('touchmove', e => {
+    e.preventDefault();
+    if (e.touches.length === 1 && _dragging) {
+      const dx = e.touches[0].clientX - _lastX;
+      const dy = e.touches[0].clientY - _lastY;
+      _lastX = e.touches[0].clientX;
+      _lastY = e.touches[0].clientY;
+      moveCrop(dx, dy);
+    } else if (e.touches.length === 2) {
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      if (_pinchDist > 0) {
+        zoomCrop(dist / _pinchDist);
+      }
+      _pinchDist = dist;
+    }
+  }, { passive: false });
+
+  newFrame.addEventListener('touchend', e => {
+    _pinchDist = 0;
+    // If one finger still on screen after pinch, prep for drag immediately
+    if (e.touches.length === 1) {
+      _dragging = true;
+      _lastX = e.touches[0].clientX;
+      _lastY = e.touches[0].clientY;
+    } else {
+      _dragging = false;
+    }
+  });
+
+  // Mouse
+  newFrame.addEventListener('mousedown', e => {
+    _dragging = true; _lastX = e.clientX; _lastY = e.clientY;
+    newFrame.style.cursor = 'grabbing';
+  });
+  document.addEventListener('mousemove', e => {
+    if (!_dragging) return;
+    moveCrop(e.clientX - _lastX, e.clientY - _lastY);
+    _lastX = e.clientX; _lastY = e.clientY;
+  });
+  document.addEventListener('mouseup', () => {
+    _dragging = false;
+    const f = document.getElementById('cropFrame');
+    if (f) f.style.cursor = 'grab';
+  });
+}
+
+function moveCrop(dx, dy) {
+  if (!_cropImg) return;
+  const frame = document.getElementById('cropFrame');
+  const fw = frame.offsetWidth, fh = 150;
+  const iw = _cropImg.width * _cScale, ih = _cropImg.height * _cScale;
+  // When image smaller than frame allow free movement, when larger clamp to edges
+  _cx = iw >= fw ? Math.min(0, Math.max(fw - iw, _cx + dx)) : Math.max(0, Math.min(fw - iw, _cx + dx));
+  _cy = ih >= fh ? Math.min(0, Math.max(fh - ih, _cy + dy)) : Math.max(0, Math.min(fh - ih, _cy + dy));
+  updateCropImgStyle();
+  drawPreview();
+}
+
+function zoomCrop(ratio) {
+  if (!_cropImg) return;
+  const frame = document.getElementById('cropFrame');
+  const fw = frame.offsetWidth, fh = 150;
+  const minScale = Math.min(fw / _cropImg.width, fh / _cropImg.height); // allow full zoom out to see whole image
+  const newScale = Math.max(minScale, Math.min(_cScale * ratio, minScale * 4));
+  // Zoom toward center of frame
+  const centerX = fw / 2, centerY = fh / 2;
+  _cx = centerX - (centerX - _cx) * (newScale / _cScale);
+  _cy = centerY - (centerY - _cy) * (newScale / _cScale);
+  _cScale = newScale;
+  // Clamp after zoom
+  const iw = _cropImg.width * _cScale, ih = _cropImg.height * _cScale;
+  _cx = Math.min(0, Math.max(fw - iw, _cx));
+  _cy = Math.min(0, Math.max(fh - ih, _cy));
+  updateCropImgStyle();
+  drawPreview();
+  // Sync slider position to current scale
+  const slider = document.getElementById('zoomSlider');
+  if (slider && _cropImg) {
+    const minS = Math.min(fw / _cropImg.width, fh / _cropImg.height);
+    const fillS = Math.max(fw / _cropImg.width, fh / _cropImg.height);
+    const maxS = fillS * 3;
+    slider.value = Math.round(Math.max(0, Math.min(100, ((_cScale - minS) / (maxS - minS)) * 100)));
+  }
+}
+
+function updateCropImgStyle() {
+  const el = document.getElementById('cropImg');
+  if (!el || !_cropImg) return;
+  el.style.width  = (_cropImg.width  * _cScale) + 'px';
+  el.style.height = (_cropImg.height * _cScale) + 'px';
+  el.style.transform = `translate(${_cx}px, ${_cy}px)`;
+}
+
+function drawPreview() {
+  if (!_cropImg) return;
+  const canvas = document.getElementById('cropPreviewCanvas');
+  if (!canvas) return;
+  const frame = document.getElementById('cropFrame');
+  const fw = frame.offsetWidth || 300;
+  const fh = 150;
+  canvas.width  = fw * 2;
+  canvas.height = fh * 2;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  // Source: what's visible in the crop frame mapped back to original image coords
+  const srcX = -_cx / _cScale;
+  const srcY = -_cy / _cScale;
+  const srcW =  fw  / _cScale;
+  const srcH =  fh  / _cScale;
+  ctx.drawImage(_cropImg, srcX, srcY, srcW, srcH, 0, 0, canvas.width, canvas.height);
+}
+
+function sliderZoom(val) {
+  if (!_cropImg) return;
+  const frame = document.getElementById('cropFrame');
+  const fw = frame.offsetWidth, fh = 150;
+  const minScale = Math.min(fw / _cropImg.width, fh / _cropImg.height); // fully zoomed out
+  const fillScale = Math.max(fw / _cropImg.width, fh / _cropImg.height); // fills frame
+  const maxScale = fillScale * 3; // max zoom
+  // Slider 0 = fully out, 50 = fills frame, 100 = max zoom
+  const t = val / 100;
+  const targetScale = minScale + t * (maxScale - minScale);
+  zoomCrop(targetScale / _cScale);
+}
+
+function cancelCrop() {
+  _cropFile = null; _cropImg = null;
+  document.getElementById('cropWrap').style.display = 'none';
+  document.getElementById('photoUploadBtn').style.display = 'flex';
+}
+
+async function confirmCrop() {
+  if (!_cropImg) return;
+  const btn = document.getElementById('confirmCropBtn');
+  btn.textContent = 'Uploading...'; btn.style.opacity = '0.6';
+
+  try {
+    const frame = document.getElementById('cropFrame');
+    const fw = frame.offsetWidth || 300;
+    const fh = 150;
+    const canvas = document.createElement('canvas');
+    canvas.width = fw * 2; canvas.height = fh * 2;
+    const ctx = canvas.getContext('2d');
+    const srcX = -_cx / _cScale;
+    const srcY = -_cy / _cScale;
+    const srcW =  fw  / _cScale;
+    const srcH =  fh  / _cScale;
+    ctx.drawImage(_cropImg, srcX, srcY, srcW, srcH, 0, 0, canvas.width, canvas.height);
+    const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.88));
+    const filename = 'photo-' + Date.now() + '.jpg';
+
+    const res = await fetch(SUPABASE_URL + '/storage/v1/object/spot-photos/' + filename, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'Content-Type': 'image/jpeg',
+        'x-upsert': 'true'
+      },
+      body: blob
+    });
+
+    if (!res.ok) throw new Error(await res.text());
+
+    const publicUrl = SUPABASE_URL + '/storage/v1/object/public/spot-photos/' + filename;
+    document.getElementById('mPhoto').value = publicUrl;
+    document.getElementById('cropWrap').style.display = 'none';
+    showPhotoPreview(publicUrl);
+    const status = document.getElementById('photoUploadStatus');
+    status.style.display = 'block';
+    status.textContent = '✓ Photo saved';
+    status.style.color = '#4caf78';
+  } catch(e) {
+    console.error(e);
+    const status = document.getElementById('photoUploadStatus');
+    status.style.display = 'block';
+    status.textContent = 'Upload failed - try again';
+    status.style.color = '#e84b4b';
+  }
+  btn.textContent = 'Use photo'; btn.style.opacity = '1';
+  _cropFile = null; _cropImg = null;
+}
+
+function compressImage(file, maxWidth, quality) {
+  return new Promise(resolve => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let w = img.width, h = img.height;
+        if (w > maxWidth) { h = h * maxWidth / w; w = maxWidth; }
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        canvas.toBlob(resolve, 'image/jpeg', quality);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function compressImage(file, maxWidth, quality) {
+  return new Promise(resolve => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let w = img.width, h = img.height;
+        if (w > maxWidth) { h = h * maxWidth / w; w = maxWidth; }
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        canvas.toBlob(resolve, 'image/jpeg', quality);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function showPhotoPreview(url) {
+  document.getElementById('photoPreview').src = url;
+  document.getElementById('photoPreviewWrap').style.display = 'block';
+  document.getElementById('photoUploadBtn').style.display = 'none';
+}
+
+function removePhoto() {
+  document.getElementById('mPhoto').value = '';
+  document.getElementById('photoPreviewWrap').style.display = 'none';
+  document.getElementById('photoUploadBtn').style.display = 'flex';
+  document.getElementById('photoUploadStatus').style.display = 'none';
+}
+
+// ---- MAP VIEW ----
+const MAPS_KEY = 'AIzaSyAn2Bpv623J3Q7M8wAkG4i73MKltg4levY'; // Replace with your key
+let mapInstance = null;
+let mapMarkers = [];
+
+let _mapAllSpots = [];
+
+function openMapView() {
+  _mapAllSpots = getFilteredList();
+  document.getElementById('mapView').classList.add('open');
+
+  // Populate location filter
+  const locSelect = document.getElementById('mapLocFilter');
+  const locs = Array.from(new Set(_mapAllSpots.filter(s=>s.area && s.area.trim()).map(s=>s.area.trim()))).sort();
+  locSelect.innerHTML = '<option value="All">All areas</option>' +
+    locs.map(l => `<option value="${htmlAttr(l)}">📍 ${htmlText(l)}</option>`).join('');
+
+  filterMapSpots();
+}
+
+function filterMapSpots() {
+  const q = (document.getElementById('mapSearch').value || '').toLowerCase();
+  const loc = document.getElementById('mapLocFilter').value;
+  const cat = document.getElementById('mapCatFilter').value;
+  const filtered = _mapAllSpots.filter(s => {
+    if (cat !== 'all') {
+      if (cat === 'food' && !isFood(s.cat)) return false;
+      if (cat !== 'food' && s.cat !== cat) return false;
+    }
+    if (loc !== 'All' && (s.area||s.location) !== loc) return false;
+    if (q && !`${s.name} ${s.location||''}`.toLowerCase().includes(q)) return false;
+    return true;
+  });
+  const pinned = filtered.filter(s => s.lat && s.lng);
+  document.getElementById('mapCount').textContent = pinned.length + ' pinned · ' + (filtered.length - pinned.length) + ' unpinned';
+  renderMapSpotList(pinned, filtered.filter(s => !s.lat || !s.lng));
+  initMap(filtered);
+}
+
+function closeMapView() {
+  document.getElementById('mapView').classList.remove('open');
+}
+
+function renderMapSpotList(pinned, unpinned) {
+  const list = document.getElementById('mapSpotList');
+  let html = '';
+
+  if (pinned.length) {
+    html += `<div style="padding:8px 16px 4px;font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">📍 Pinned (${pinned.length})</div>`;
+    html += pinned.map((s,i) => `
+      <div class="map-spot-item" onclick="focusMarker(${i})">
+        <span class="dot" style="background:${catColor(s.cat)}"></span>
+        <div>
+          <div class="spot-name">${htmlText(s.name)}</div>
+          <div class="spot-loc">${htmlText(s.location||'')}</div>
+        </div>
+      </div>`).join('');
+  }
+
+  if (unpinned.length) {
+    html += `<div style="padding:8px 16px 4px;font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;border-top:1px solid var(--border);">Not pinned yet (${unpinned.length}) - edit to add location</div>`;
+    html += unpinned.map(s => `
+      <div class="map-spot-item" style="opacity:0.45;">
+        <span class="dot" style="background:${catColor(s.cat)}"></span>
+        <div>
+          <div class="spot-name">${htmlText(s.name)}</div>
+          <div class="spot-loc">${s.location ? htmlText(s.location) : 'No location set'}</div>
+        </div>
+      </div>`).join('');
+  }
+
+  if (!pinned.length && !unpinned.length) {
+    html = '<div style="padding:20px;color:var(--muted);font-size:0.84rem;text-align:center;">No spots in this filter</div>';
+  }
+
+  list.innerHTML = html;
+}
+
+function initMap(spots) {
+  const container = document.getElementById('mapContainer');
+  if (MAPS_KEY === 'YOUR_GOOGLE_MAPS_KEY') {
+    container.innerHTML = `
+      <div style="height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;padding:30px;text-align:center;">
+        <div style="font-size:3rem;">🗺️</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:2px;color:var(--accent);">Map coming soon</div>
+        <div style="color:var(--muted);font-size:0.84rem;line-height:1.6;">Add your Google Maps API key to enable.<br>Pin spots via the edit modal to show them here.</div>
+      </div>`;
+    return;
+  }
+  if (!window.google) {
+    const script = document.createElement('script');
+    script.src = 'https://maps.googleapis.com/maps/api/js?key=' + MAPS_KEY + '&libraries=places&callback=_mapLoaded';
+    script.async = true;
+    window._mapPendingSpots = spots;
+    document.head.appendChild(script);
+    return;
+  }
+  // Wait for DOM to render before initialising map
+  setTimeout(() => _renderGoogleMap(spots), 100);
+}
+
+window._mapLoaded = function() {
+  initPlacesServices();
+  if (window._mapPendingSpots) {
+    setTimeout(() => _renderGoogleMap(window._mapPendingSpots), 100);
+    window._mapPendingSpots = null;
+  }
+};
+
+function _renderGoogleMap(spots) {
+  mapMarkers = [];
+  const container = document.getElementById('mapContainer');
+
+  // Only show spots with pinned coordinates
+  const pinned = spots.filter(s => s.lat && s.lng);
+  const unpinned = spots.filter(s => !s.lat || !s.lng);
+
+  const map = new google.maps.Map(container, {
+    zoom: pinned.length ? 12 : 11,
+    center: pinned.length
+      ? { lat: pinned[0].lat, lng: pinned[0].lng }
+      : { lat: 45.5051, lng: -122.6750 },
+    styles: [
+      {elementType:'geometry',stylers:[{color:'#1a1916'}]},
+      {elementType:'labels.text.fill',stylers:[{color:'#f0ede6'}]},
+      {elementType:'labels.text.stroke',stylers:[{color:'#0f0e0d'}]},
+      {featureType:'road',elementType:'geometry',stylers:[{color:'#2e2c28'}]},
+      {featureType:'road',elementType:'labels.text.fill',stylers:[{color:'#7a776e'}]},
+      {featureType:'water',elementType:'geometry',stylers:[{color:'#0d1b2a'}]},
+      {featureType:'poi',stylers:[{visibility:'off'}]},
+      {featureType:'transit',stylers:[{visibility:'off'}]},
+    ],
+    mapTypeControl: false, streetViewControl: false, fullscreenControl: false,
+  });
+  mapInstance = map;
+
+  if (pinned.length === 0) {
+    // Show message overlay on map
+    const div = document.createElement('div');
+    div.style.cssText = 'position:absolute;bottom:0;left:0;right:0;background:rgba(15,14,13,0.88);padding:14px 18px;text-align:center;font-size:0.82rem;color:#7a776e;';
+    div.innerHTML = 'Pin spots by searching their location in the edit modal to show them here.';
+    container.style.position = 'relative';
+    container.appendChild(div);
+  }
+
+  // Fit map to all pinned spots
+  if (pinned.length > 1) {
+    const bounds = new google.maps.LatLngBounds();
+    pinned.forEach(s => bounds.extend({ lat: s.lat, lng: s.lng }));
+    map.fitBounds(bounds, { top: 40, right: 40, bottom: 40, left: 40 });
+  }
+
+  pinned.forEach((s, i) => {
+    const marker = new google.maps.Marker({
+      position: { lat: s.lat, lng: s.lng },
+      map, title: s.name,
+      icon: {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: 9,
+        fillColor: catColor(s.cat),
+        fillOpacity: 1,
+        strokeColor: '#0f0e0d',
+        strokeWeight: 2
+      }
+    });
+    const infoContent = (() => {
+        const mUrl = s.lat && s.lng
+          ? `https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}`
+          : s.location ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(s.location)}` : null;
+        return `
+      <div style="background:#1a1916;padding:10px 12px;border-radius:8px;color:#f0ede6;font-family:'DM Sans',sans-serif;max-width:220px;">
+        <div style="font-weight:500;font-size:0.92rem;margin-bottom:3px;">${s.name}</div>
+        ${s.location ? `<div style="font-size:0.76rem;margin-bottom:3px;">${mUrl ? `<a href="${mUrl}" target="_blank" style="color:#e8b84b;text-decoration:none;">📍 ${s.location}</a>` : `<span style="color:#7a776e;">📍 ${s.location}</span>`}</div>` : ''}
+        ${s.note ? `<div style="font-size:0.78rem;color:#7a776e;margin-bottom:4px;">${s.note}</div>` : ''}
+        ${s.link ? `<a href="${s.link}" target="_blank" style="font-size:0.74rem;color:#e8b84b;">Open link 🔗</a>` : ''}
+      </div>`;
+      })()
+    const info = new google.maps.InfoWindow({ content: infoContent });
+    marker.addListener('click', () => {
+      mapMarkers.forEach(m => m && m.info.close());
+      info.open(map, marker);
+    });
+    mapMarkers[i] = { marker, info };
+  });
+
+  // Update spot list to show pinned vs unpinned
+  renderMapSpotList(pinned, unpinned);
+}
+
+function focusMarker(i) {
+  if (!mapInstance || !mapMarkers[i]) return;
+  const { marker, info } = mapMarkers[i];
+  mapInstance.panTo(marker.getPosition());
+  mapInstance.setZoom(15);
+  info.open(mapInstance, marker);
+}
+
+// grid delegation
+document.getElementById('grid').addEventListener('click', e => {
+  const el = e.target.closest('[data-action]');
+  if (!el) return;
+  const { action, id, n, cuisine } = el.dataset;
+  if (action==='edit')   openEdit(id);
+  else if (action==='fav')    toggleFav(id);
+  else if (action==='been')   toggleBeen(id);
+  else if (action==='want')   toggleWant(id);
+  else if (action==='goback-yes') gobackYes(id);
+  else if (action==='goback-no')  gobackNo(id);
+  else if (action==='goback-no')  gobackNo(id);
+
+  else if (action==='star')   setSpotStars(id, parseInt(n));
+  else if (action==='filter') filterByCuisineTag(cuisine);
+});
+
+// ---- AUTOCOMPLETE ----
+const AC_OPTS = {
+  topcategory: CATS.filter(c => c.parent === null).map(c => c.label),
+  subcategory: CATS.filter(c => c.parent === 'food').map(c => c.label),
+  cuisine: [],
+  location: LOCATION_OPTS,
+  collections: ['Date Night','Quick Lunch','Special Occasion','Weekend Vibes','Brunch Club','Happy Hour','Bucket List','With Friends','Just Us','Rainy Day']
+};
+
+// Called when category input changes - show/hide subcategory field
+function onCategoryInput(input) {
+  acShow(input, 'topcategory');
+  updateSubCatVisibility(input.value);
+}
+
+function updateSubCatVisibility(catValue) {
+  const isFood = catValue.trim().toLowerCase() === 'food';
+  const subField = document.getElementById('subCatField');
+  subField.style.display = isFood ? '' : 'none';
+  if (!isFood) document.getElementById('mSubCat').value = '';
+}
+
+function acShow(input, type) {
+  const q = input.value.toLowerCase().trim();
+  const listId = { topcategory:'acCategory', subcategory:'acSubCat', cuisine:'acCuisine', location:'acLocation', collections:'acCollections' }[type];
+  const list = document.getElementById(listId);
+  if (!list) return;
+  let opts = type==='cuisine'
+    ? Array.from(new Set(db.spots.map(s=>s.cuisine))).sort()
+    : AC_OPTS[type];
+
+  const matches = q ? opts.filter(o => o.toLowerCase().includes(q)) : [];
+  const rest    = q ? opts.filter(o => !o.toLowerCase().includes(q)) : opts;
+  const sorted  = [...matches, ...rest];
+
+  if (!sorted.length) { list.classList.remove('open'); return; }
+  list.innerHTML = sorted.map(o => {
+    const safe = htmlAttr(o);
+    const hi = q && o.toLowerCase().includes(q);
+    return `<div class="ac-item${hi?' highlighted':''}" data-val="${safe}">${htmlText(o)}</div>`;
+  }).join('');
+  list.classList.add('open');
+  list._inputRef = input;
+}
+
+function acBlur() {
+  setTimeout(() => {
+    const focused = document.activeElement;
+    if (!focused || !focused.closest('.ac-wrap')) {
+      document.querySelectorAll('.ac-list').forEach(l => l.classList.remove('open'));
+    }
+  }, 200);
+}
+
+// touch tracking
+let _ty = 0, _tx = 0, _moved = false;
+document.addEventListener('touchstart', e => { _ty=e.touches[0].clientY; _tx=e.touches[0].clientX; _moved=false; }, {passive:true});
+document.addEventListener('touchmove', e => { if(Math.abs(e.touches[0].clientY-_ty)>8||Math.abs(e.touches[0].clientX-_tx)>8) _moved=true; }, {passive:true});
+document.addEventListener('touchend', e => {
+  if (_moved) return;
+  const item = e.target.closest('.ac-item');
+  if (item) {
+    e.preventDefault();
+    const list = item.closest('.ac-list');
+    const inp = list?._inputRef;
+    if (inp) { inp.value = item.dataset.val; inp.dispatchEvent(new Event('input')); }
+    document.querySelectorAll('.ac-list').forEach(l => l.classList.remove('open'));
+    return;
+  }
+  if (!e.target.closest('.ac-wrap')) document.querySelectorAll('.ac-list').forEach(l => l.classList.remove('open'));
+}, {passive:false});
+document.addEventListener('mousedown', e => {
+  const item = e.target.closest('.ac-item');
+  if (item) {
+    e.preventDefault();
+    const list = item.closest('.ac-list');
+    const inp = list?._inputRef;
+    if (inp) inp.value = item.dataset.val;
+    document.querySelectorAll('.ac-list').forEach(l => l.classList.remove('open'));
+    return;
+  }
+  if (!e.target.closest('.ac-wrap')) document.querySelectorAll('.ac-list').forEach(l => l.classList.remove('open'));
+});
+
+document.getElementById('modal').addEventListener('click', function(e) { if(e.target===this) closeModal(); });
+document.addEventListener('click', e => {
+  if (!e.target.closest('.cat-pill') && !e.target.closest('.cat-dropdown-menu')) {
+    closeAllDropdowns();
+  }
+  if (!e.target.closest('#mName') && !e.target.closest('#nameResults')) {
+    const nr = document.getElementById('nameResults'); if(nr) nr.style.display='none';
+  }
+});
+document.getElementById('randOverlay').addEventListener('click', function(e) { if(e.target===this) closeRandom(); });
+
+// Init
+loadCustomCats();
+loadFromSupabase();
+requestAnimationFrame(() => requestAnimationFrame(measureThreshold));
+</script>
+
+<!-- dynamic style for random card accent line -->
+<style id="randBefore">.rand-card::before { background: var(--accent); }.field input, .field select, .field textarea, input[type="text"], input[type="url"] { font-size: 16px !important; }
+
+/* Prevent iOS auto-zoom - inputs must be >= 16px */
+.modal input, .modal textarea, .modal select,
+.field input, .field textarea, .field select {
+  font-size: 16px !important;
+}
+/* Nuclear iOS zoom prevention */
+input, textarea, select {
+  font-size: 16px !important;
+  -webkit-text-size-adjust: 100%;
+}
+</style>
+
+</body>
+</html>
