@@ -1690,25 +1690,30 @@ function setCollapse(hideAll, hideTabs) {
 
 let _scrollTicking = false;
 let _lastScrollY = 0;
+let _scrollDir = 0;
 
 window.addEventListener('scroll', function() {
+  const y = window.scrollY;
+  _scrollDir = y > _lastScrollY ? 1 : -1;
+  _lastScrollY = y;
   if (_scrollTicking) return;
   _scrollTicking = true;
   requestAnimationFrame(function() {
-    const y = window.scrollY;
-    if (y > 80 && !fullyCollapsed) {
+    if (window.scrollY > 120 && !fullyCollapsed) {
       fullyCollapsed = true;
       tabsVisible = false;
       setCollapse(true, true);
-    } else if (y <= 10 && fullyCollapsed) {
+    } else if (window.scrollY < 20 && fullyCollapsed) {
       fullyCollapsed = false;
       tabsVisible = false;
       setCollapse(false, false);
-    } else if (y < _lastScrollY - 20 && fullyCollapsed && !tabsVisible) {
+    } else if (_scrollDir < 0 && fullyCollapsed && !tabsVisible && window.scrollY > 120) {
       tabsVisible = true;
       setCollapse(true, false);
+    } else if (_scrollDir > 0 && tabsVisible && fullyCollapsed) {
+      tabsVisible = false;
+      setCollapse(true, true);
     }
-    _lastScrollY = y;
     _scrollTicking = false;
   });
 }, { passive: true });
@@ -3541,21 +3546,22 @@ function toggleSortMenu(e) {
   menu.classList.toggle('open');
 }
 
-document.querySelectorAll('.custom-sort-item').forEach(item => {
-  item.addEventListener('click', function() {
-    const val = this.dataset.sort;
-    const labels = { newest:'Newest first', az:'A - Z', za:'Z - A', top:'Top rated', lowest:'Lowest rated', ourlist:'Our List', worthit:'👍 Worth it', onedone:'One & Done', decide:'Decide Later' };
-    const sortMap = { newest:'newest', az:'alpha', za:'alpha-desc', top:'stars-desc', lowest:'stars-asc', ourlist:'view-active', worthit:'view-repeats', onedone:'view-noback', decide:'view-archive' };
-    document.getElementById('customSortLabel').textContent = labels[val];
-    document.getElementById('customSortMenu').classList.remove('open');
-    document.querySelectorAll('.custom-sort-item').forEach(i => i.classList.remove('active'));
-    this.classList.add('active');
-    const sel = document.getElementById('sortSelect');
-    if (sel && sortMap[val]) {
-      sel.value = sortMap[val];
-      handleSortChange(sel);
-    }
-  });
+document.getElementById('customSortMenu').addEventListener('click', function(e) {
+  e.stopPropagation();
+  const item = e.target.closest('.custom-sort-item');
+  if (!item) return;
+  const val = item.dataset.sort;
+  const labels = { newest:'Newest first', az:'A - Z', za:'Z - A', top:'Top rated', lowest:'Lowest rated', ourlist:'Our List', worthit:'👍 Worth it', onedone:'One & Done', decide:'Decide Later' };
+  const sortMap = { newest:'newest', az:'alpha', za:'alpha-desc', top:'stars-desc', lowest:'stars-asc', ourlist:'view-active', worthit:'view-repeats', onedone:'view-noback', decide:'view-archive' };
+  document.getElementById('customSortLabel').textContent = labels[val] || 'Newest first';
+  document.getElementById('customSortMenu').classList.remove('open');
+  document.querySelectorAll('.custom-sort-item').forEach(i => i.classList.remove('active'));
+  item.classList.add('active');
+  const sel = document.getElementById('sortSelect');
+  if (sel && sortMap[val]) {
+    sel.value = sortMap[val];
+    handleSortChange(sel);
+  }
 });
 
 // Visual effects via JS (CSP compatible)
