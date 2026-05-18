@@ -173,11 +173,14 @@ header .sub {
 .cat-dropdown-menu {
   display: none;
   position: absolute; top: calc(100% + 6px); left: 0;
-  background: #1a1916; border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 12px; z-index: 50;
+  background: rgba(20,18,14,0.95) !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+  border-radius: 12px !important;
+  z-index: 50;
   min-width: 200px; max-height: 320px; overflow-y: auto;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.8);
-  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.8) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
   color: var(--text);
   scrollbar-width: none; -webkit-overflow-scrolling: touch;
   padding: 6px;
@@ -201,11 +204,14 @@ header .sub {
 #typeDropdownMenu {
   display: none;
   position: absolute; top: calc(100% + 6px); left: 0;
-  background: #1a1916; border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 12px; z-index: 50;
+  background: rgba(20,18,14,0.95) !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+  border-radius: 12px !important;
+  z-index: 50;
   min-width: 180px; max-height: 280px; overflow-y: auto;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.8);
-  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.8) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
   color: var(--text);
   scrollbar-width: none; padding: 6px;
 }
@@ -805,7 +811,7 @@ input, textarea, select {
       </svg>
       <input type="text" id="searchInput" placeholder="Search everything..." oninput="render()">
     </div>
-    <select id="sortSelect" onchange="handleSortChange(this)">
+    <select id="sortSelect" onchange="handleSortChange(this)" style="display:none;">
       <optgroup label="Sort">
         <option value="newest">Newest first</option>
         <option value="alpha">A - Z</option>
@@ -820,6 +826,26 @@ input, textarea, select {
         <option value="view-archive">Decide Later</option>
       </optgroup>
     </select>
+    <div id="sortDropdownWrap" style="position:relative;display:inline-block;flex-shrink:0;">
+      <button id="sortDropdownBtn" onclick="toggleSortDropdown()" style="background:rgba(22,20,16,0.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.82rem;padding:8px 10px;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap;line-height:1;">
+        <span id="sortDropdownLabel">Newest first</span>
+        <svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div id="sortDropdownMenu" style="display:none;position:absolute;top:calc(100% + 6px);left:0;min-width:160px;background:rgba(20,18,14,0.95);border:1px solid rgba(255,255,255,0.1);border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.8);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);z-index:200;padding:6px;">
+        <div style="padding:4px 10px 2px;font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;color:var(--muted);font-weight:500;">Sort</div>
+        <div class="sort-opt" data-val="newest" data-label="Newest first" onclick="setSortOption(this)" style="padding:8px 12px;border-radius:8px;cursor:pointer;font-size:0.84rem;color:var(--text);font-family:'DM Sans',sans-serif;font-weight:500;white-space:nowrap;">Newest first</div>
+        <div class="sort-opt" data-val="alpha" data-label="A – Z" onclick="setSortOption(this)" style="padding:8px 12px;border-radius:8px;cursor:pointer;font-size:0.84rem;color:var(--text);font-family:'DM Sans',sans-serif;font-weight:300;white-space:nowrap;">A – Z</div>
+        <div class="sort-opt" data-val="alpha-desc" data-label="Z – A" onclick="setSortOption(this)" style="padding:8px 12px;border-radius:8px;cursor:pointer;font-size:0.84rem;color:var(--text);font-family:'DM Sans',sans-serif;font-weight:300;white-space:nowrap;">Z – A</div>
+        <div class="sort-opt" data-val="stars-desc" data-label="Top rated" onclick="setSortOption(this)" style="padding:8px 12px;border-radius:8px;cursor:pointer;font-size:0.84rem;color:var(--text);font-family:'DM Sans',sans-serif;font-weight:300;white-space:nowrap;">Top rated</div>
+        <div class="sort-opt" data-val="stars-asc" data-label="Lowest rated" onclick="setSortOption(this)" style="padding:8px 12px;border-radius:8px;cursor:pointer;font-size:0.84rem;color:var(--text);font-family:'DM Sans',sans-serif;font-weight:300;white-space:nowrap;">Lowest rated</div>
+        <div style="height:1px;background:rgba(255,255,255,0.06);margin:4px 0;"></div>
+        <div style="padding:4px 10px 2px;font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;color:var(--muted);font-weight:500;">View</div>
+        <div class="sort-opt" data-val="view-active" data-label="Our List" onclick="setSortOption(this)" style="padding:8px 12px;border-radius:8px;cursor:pointer;font-size:0.84rem;color:var(--text);font-family:'DM Sans',sans-serif;font-weight:300;white-space:nowrap;">Our List</div>
+        <div class="sort-opt" data-val="view-repeats" data-label="👍 Worth it" onclick="setSortOption(this)" style="padding:8px 12px;border-radius:8px;cursor:pointer;font-size:0.84rem;color:var(--text);font-family:'DM Sans',sans-serif;font-weight:300;white-space:nowrap;">👍 Worth it</div>
+        <div class="sort-opt" data-val="view-noback" data-label="One &amp; Done" onclick="setSortOption(this)" style="padding:8px 12px;border-radius:8px;cursor:pointer;font-size:0.84rem;color:var(--text);font-family:'DM Sans',sans-serif;font-weight:300;white-space:nowrap;">One &amp; Done</div>
+        <div class="sort-opt" data-val="view-archive" data-label="Decide Later" onclick="setSortOption(this)" style="padding:8px 12px;border-radius:8px;cursor:pointer;font-size:0.84rem;color:var(--text);font-family:'DM Sans',sans-serif;font-weight:300;white-space:nowrap;">Decide Later</div>
+      </div>
+    </div>
     <button class="add-btn" onclick="openAdd()">+ Add spot</button>
   </div>
 
@@ -1969,6 +1995,11 @@ function setView(view, el) {
   const sel = document.getElementById('sortSelect');
   const opt = sel.querySelector(`option[value="view-${view}"]`);
   if (!opt) sel.value = sel.querySelector('option').value; // reset to first sort
+  const labelEl = document.getElementById('sortDropdownLabel');
+  if (labelEl) {
+    const activeOpt = sel.options[sel.selectedIndex];
+    if (activeOpt) labelEl.textContent = activeOpt.text;
+  }
   render();
 }
 
@@ -3474,6 +3505,10 @@ document.addEventListener('click', e => {
   if (!e.target.closest('.cat-pill') && !e.target.closest('.cat-dropdown-menu')) {
     closeAllDropdowns();
   }
+  if (!e.target.closest('#sortDropdownWrap')) {
+    const m = document.getElementById('sortDropdownMenu');
+    if (m) m.style.display = 'none';
+  }
   if (!e.target.closest('#mName') && !e.target.closest('#nameResults')) {
     const nr = document.getElementById('nameResults'); if(nr) nr.style.display='none';
   }
@@ -3484,48 +3519,37 @@ document.getElementById('randOverlay').addEventListener('click', function(e) { i
 loadCustomCats();
 loadFromSupabase();
 
+function toggleSortDropdown() {
+  const menu = document.getElementById('sortDropdownMenu');
+  if (!menu) return;
+  menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+}
+
+function setSortOption(el) {
+  const val = el.dataset.val;
+  const label = el.dataset.label || el.textContent.trim();
+  document.getElementById('sortDropdownLabel').textContent = label;
+  document.querySelectorAll('.sort-opt').forEach(o => {
+    o.style.fontWeight = o === el ? '500' : '300';
+  });
+  document.getElementById('sortDropdownMenu').style.display = 'none';
+  const sel = document.getElementById('sortSelect');
+  sel.value = val;
+  handleSortChange(sel);
+}
+
 // Visual effects via JS (CSP compatible)
 (function() {
-  // Gold glow background
   const glow = document.createElement('div');
-  glow.id = 'bgGlow';
-  glow.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(ellipse 70% 50% at 85% 10%, rgba(232,184,75,0.18), transparent 65%),radial-gradient(ellipse 50% 60% at 15% 85%, rgba(180,140,60,0.10), transparent 65%);filter:blur(40px);animation:bgDrift 36s ease-in-out infinite alternate;';
-  document.body.appendChild(glow);
+  glow.setAttribute('style', 'position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:0;background:radial-gradient(ellipse 70% 50% at 85% 10%, rgba(232,184,75,0.15) 0%, transparent 60%), radial-gradient(ellipse 60% 60% at 15% 85%, rgba(180,140,60,0.08) 0%, transparent 60%);');
+  document.body.insertBefore(glow, document.body.firstChild);
 
-  // Film grain
-  const grain = document.createElement('canvas');
-  grain.id = 'bgGrain';
-  grain.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:1;opacity:0.035;width:100%;height:100%;';
-  const ctx = grain.getContext('2d');
-  function drawGrain() {
-    grain.width = window.innerWidth;
-    grain.height = window.innerHeight;
-    const imageData = ctx.createImageData(grain.width, grain.height);
-    for (let i = 0; i < imageData.data.length; i += 4) {
-      const v = Math.random() * 255;
-      imageData.data[i] = v;
-      imageData.data[i+1] = v;
-      imageData.data[i+2] = v;
-      imageData.data[i+3] = 20;
-    }
-    ctx.putImageData(imageData, 0, 0);
-  }
-  drawGrain();
-  document.body.appendChild(grain);
+  const grain = document.createElement('div');
+  grain.setAttribute('style', 'position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:1;opacity:0.04;background-image:url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noise%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.9%22 numOctaves=%224%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noise)%22 opacity=%221%22/%3E%3C/svg%3E");background-size:150px 150px;');
+  document.body.insertBefore(grain, document.body.firstChild);
 
-  // Make sure all main content is above the glow
-  const header = document.querySelector('header');
-  const stickyBar = document.getElementById('stickyBar');
-  const main = document.querySelector('.grid') || document.getElementById('cardGrid');
-  if (header) header.style.position = 'relative';
-  if (stickyBar) stickyBar.style.position = 'relative';
-
-  // FAB pulse
   const fab = document.querySelector('.fab');
-  if (fab) {
-    fab.style.animation = 'fabPulse 3s ease-in-out infinite';
-    fab.style.transition = 'transform 0.15s, box-shadow 0.15s';
-  }
+  if (fab) fab.style.cssText += ';box-shadow:0 4px 20px rgba(232,184,75,0.5),0 2px 8px rgba(0,0,0,0.5);';
 })();
 </script>
 
