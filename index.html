@@ -698,32 +698,6 @@ input, textarea, select {
   -webkit-text-size-adjust: 100%;
 }
 
-/* === VISUAL ENHANCEMENTS === */
-
-/* 1 — Ambient background wash */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background:
-    radial-gradient(ellipse 70% 50% at 85% 10%, rgba(232,184,75,0.18), transparent 65%),
-    radial-gradient(ellipse 50% 60% at 15% 85%, rgba(180,140,60,0.10), transparent 65%);
-  filter: blur(40px);
-  pointer-events: none;
-  z-index: 0;
-  animation: bgDrift 36s ease-in-out infinite alternate;
-}
-
-/* 2 — Film grain overlay */
-body::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='3' height='3'%3E%3Crect width='1' height='1' fill='rgba(255,255,255,0.025)'/%3E%3C/svg%3E");
-  pointer-events: none;
-  z-index: 0;
-}
-
 /* Keyframes */
 @keyframes bgDrift {
   0%   { transform: scale(1) translate(0,0); }
@@ -3509,6 +3483,50 @@ document.getElementById('randOverlay').addEventListener('click', function(e) { i
 // Init
 loadCustomCats();
 loadFromSupabase();
+
+// Visual effects via JS (CSP compatible)
+(function() {
+  // Gold glow background
+  const glow = document.createElement('div');
+  glow.id = 'bgGlow';
+  glow.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(ellipse 70% 50% at 85% 10%, rgba(232,184,75,0.18), transparent 65%),radial-gradient(ellipse 50% 60% at 15% 85%, rgba(180,140,60,0.10), transparent 65%);filter:blur(40px);animation:bgDrift 36s ease-in-out infinite alternate;';
+  document.body.appendChild(glow);
+
+  // Film grain
+  const grain = document.createElement('canvas');
+  grain.id = 'bgGrain';
+  grain.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:1;opacity:0.035;width:100%;height:100%;';
+  const ctx = grain.getContext('2d');
+  function drawGrain() {
+    grain.width = window.innerWidth;
+    grain.height = window.innerHeight;
+    const imageData = ctx.createImageData(grain.width, grain.height);
+    for (let i = 0; i < imageData.data.length; i += 4) {
+      const v = Math.random() * 255;
+      imageData.data[i] = v;
+      imageData.data[i+1] = v;
+      imageData.data[i+2] = v;
+      imageData.data[i+3] = 20;
+    }
+    ctx.putImageData(imageData, 0, 0);
+  }
+  drawGrain();
+  document.body.appendChild(grain);
+
+  // Make sure all main content is above the glow
+  const header = document.querySelector('header');
+  const stickyBar = document.getElementById('stickyBar');
+  const main = document.querySelector('.grid') || document.getElementById('cardGrid');
+  if (header) header.style.position = 'relative';
+  if (stickyBar) stickyBar.style.position = 'relative';
+
+  // FAB pulse
+  const fab = document.querySelector('.fab');
+  if (fab) {
+    fab.style.animation = 'fabPulse 3s ease-in-out infinite';
+    fab.style.transition = 'transform 0.15s, box-shadow 0.15s';
+  }
+})();
 </script>
 
 <!-- Floating action button -->
@@ -3529,23 +3547,6 @@ input, textarea, select {
 }
 
 /* ===== VISUAL OVERRIDES ===== */
-body::before {
-  content: '' !important;
-  position: fixed !important;
-  inset: 0 !important;
-  background: radial-gradient(ellipse 70% 50% at 85% 10%, rgba(232,184,75,0.2), transparent 65%), radial-gradient(ellipse 50% 60% at 15% 85%, rgba(180,140,60,0.12), transparent 65%) !important;
-  filter: blur(40px) !important;
-  pointer-events: none !important;
-  z-index: 0 !important;
-}
-body::after {
-  content: '' !important;
-  position: fixed !important;
-  inset: 0 !important;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='3' height='3'%3E%3Crect width='1' height='1' fill='rgba(255,255,255,0.03)'/%3E%3C/svg%3E") !important;
-  pointer-events: none !important;
-  z-index: 0 !important;
-}
 header {
   background: rgba(12,11,9,0.88) !important;
   backdrop-filter: blur(20px) saturate(1.2) !important;
