@@ -771,6 +771,23 @@ input, textarea, select {
 </style>
 </head>
 <body>
+<svg class="icon-sprite" aria-hidden="true">
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4.2-4.2"></path></symbol>
+  <symbol id="i-map" viewBox="0 0 24 24"><path d="m8 18-5 3V6l5-3 8 3 5-3v15l-5 3-8-3Z"></path><path d="M8 3v15"></path><path d="M16 6v15"></path></symbol>
+  <symbol id="i-dice" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"></rect><path d="M8.5 8.5h.01M15.5 8.5h.01M12 12h.01M8.5 15.5h.01M15.5 15.5h.01"></path></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14"></path><path d="M5 12h14"></path></symbol>
+  <symbol id="i-filter" viewBox="0 0 24 24"><path d="M4 6h16"></path><path d="M7 12h10"></path><path d="M10 18h4"></path></symbol>
+  <symbol id="i-heart" viewBox="0 0 24 24"><path d="M20.8 8.6c0 5.4-8.8 10.4-8.8 10.4S3.2 14 3.2 8.6A4.6 4.6 0 0 1 12 6.7a4.6 4.6 0 0 1 8.8 1.9Z"></path></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s7-6.1 7-12A7 7 0 0 0 5 9c0 5.9 7 12 7 12Z"></path><circle cx="12" cy="9" r="2.4"></circle></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9L12 3Z"></path></symbol>
+  <symbol id="i-share" viewBox="0 0 24 24"><path d="M14 4h6v6"></path><path d="M10 14 20 4"></path><path d="M20 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h4"></path></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5Z"></path></symbol>
+  <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.1 0l2-2a5 5 0 0 0-7.1-7.1l-1.1 1.1"></path><path d="M14 11a5 5 0 0 0-7.1 0l-2 2a5 5 0 0 0 7.1 7.1l1.1-1.1"></path></symbol>
+  <symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 22c4 0 7-2.8 7-6.8 0-2.8-1.5-5-4.4-7.1.2 2.1-.7 3.4-2 4.2.2-3.2-1-5.9-4.1-9.3C8.8 7.2 5 9.6 5 15.2 5 19.2 8 22 12 22Z"></path></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4.5 4.5L19 7"></path></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><path d="M4 4h7v7H4z"></path><path d="M13 4h7v7h-7z"></path><path d="M4 13h7v7H4z"></path><path d="M13 13h7v7h-7z"></path></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></symbol>
+</svg>
 
 <div id="loadingBar" style="display:none;position:fixed;inset:0;background:rgba(15,14,13,0.92);z-index:999;align-items:center;justify-content:center;flex-direction:column;gap:14px;">
   <div style="width:40px;height:40px;border:3px solid #2e2c28;border-top-color:#e8b84b;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
@@ -798,30 +815,50 @@ input, textarea, select {
 }
 </style>
 
-<header>
+<div class="app-shell" id="app">
+<header class="topbar">
   <div class="header-inner">
     <h1>Our List</h1>
     <span class="sub">Portland &amp; Beyond</span>
   </div>
+  <div class="header-actions">
+    <button class="premium-icon-btn" onclick="openMapView()" title="Map">
+      <svg class="ui-icon"><use href="#i-map"></use></svg>
+    </button>
+    <button class="premium-icon-btn" onclick="openRandom()" title="Surprise me">
+      <svg class="ui-icon"><use href="#i-dice"></use></svg>
+    </button>
+    <button class="premium-icon-btn primary" onclick="openAdd()" title="Add spot">
+      <svg class="ui-icon"><use href="#i-plus"></use></svg>
+    </button>
+  </div>
 </header>
 
-<div id="stickyBar">
+<div id="stickyBar" class="command-surface">
   <div id="favBar">
     <span id="totalCount">0 spots</span><div id="catBreakdown" style="font-size:0.68rem;color:var(--muted);padding:2px 20px 4px;letter-spacing:0.3px;display:block;"></div>
-    <button class="toggle-btn" id="favOnlyBtn" onclick="toggleFavOnly()">❤ Favorites</button>
-    <button class="toggle-btn" id="beenOnlyBtn" onclick="toggleBeenOnly()">✓ Been here</button>
-    <button class="toggle-btn" id="wantOnlyBtn" onclick="toggleWantOnly()">🔥 Want to go</button>
-    <button class="random-btn" id="randBtn" onclick="openRandom()">🎲 Surprise me</button>
-    <button class="map-btn" onclick="openMapView()">🗺 Map</button>
-    <button class="map-btn" id="autoTagBtn" onclick="autoTagAreas()">📍 Auto-tag areas</button>
+    <button class="toggle-btn" id="favOnlyBtn" onclick="toggleFavOnly()"><svg class="ui-icon"><use href="#i-heart"></use></svg> Favorites</button>
+    <button class="toggle-btn" id="beenOnlyBtn" onclick="toggleBeenOnly()"><svg class="ui-icon"><use href="#i-check"></use></svg> Been here</button>
+    <button class="toggle-btn" id="wantOnlyBtn" onclick="toggleWantOnly()"><svg class="ui-icon"><use href="#i-flame"></use></svg> Want to go</button>
+    <button class="random-btn" id="randBtn" onclick="openRandom()"><svg class="ui-icon"><use href="#i-dice"></use></svg> Surprise me</button>
+    <button class="map-btn" onclick="openMapView()"><svg class="ui-icon"><use href="#i-map"></use></svg> Map</button>
+    <button class="map-btn" id="autoTagBtn" onclick="autoTagAreas()"><svg class="ui-icon"><use href="#i-pin"></use></svg> Auto-tag areas</button>
   </div>
 
-  <div id="topRow">
+  <div id="topRow" class="command-row">
     <div class="search-wrap">
       <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
         <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
       </svg>
       <input type="text" id="searchInput" placeholder="Search everything..." oninput="render()">
+    </div>
+    <button class="filter-panel-btn" id="filterPanelBtn" onclick="toggleFilterPanel()">
+      <svg class="ui-icon"><use href="#i-filter"></use></svg>
+      <span>Filters</span>
+    </button>
+    <div class="segmented" aria-label="View mode">
+      <button class="seg-btn active" type="button" data-layout="gallery" onclick="setLayoutMode('gallery', this)">Gallery</button>
+      <button class="seg-btn" type="button" data-layout="list" onclick="setLayoutMode('list', this)">List</button>
     </div>
     <select id="sortSelect" onchange="handleSortChange(this)" style="display:none;">
       <optgroup label="Sort">
@@ -845,6 +882,10 @@ input, textarea, select {
       </button>
     </div>
     <button class="add-btn" onclick="openAdd()">+ Add spot</button>
+  </div>
+  <div class="active-row live-active-row">
+    <div class="chips" id="activeFilterChips" aria-label="Active filters"></div>
+    <div class="result-count" id="resultCount">0 spots</div>
   </div>
 
   <div id="catRow" style="display:flex;gap:6px;align-items:center;padding:0 14px 6px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;transition:max-height 0.3s cubic-bezier(0.4,0,0.2,1),opacity 0.25s ease,padding 0.3s cubic-bezier(0.4,0,0.2,1);max-height:60px;opacity:1;white-space:nowrap;"></div>
@@ -884,8 +925,68 @@ input, textarea, select {
   <div id="stickyBorder"></div>
 </div>
 
-<div id="countBar"></div>
-<div class="grid" id="grid"></div>
+<div class="content">
+  <main class="main-column">
+    <section class="feature-grid" aria-label="Featured spots">
+      <article class="feature-card" id="featureCard">
+        <div class="feature-copy">
+          <div>
+            <div class="eyebrow"><span class="dot"></span><span id="featureEyebrow">Tonight's front-runner</span></div>
+            <h2 id="featureName">Our List</h2>
+            <p id="featureNote">Loading your saved spots...</p>
+            <div class="feature-meta" id="featureMeta"></div>
+          </div>
+          <div class="feature-score">
+            <a class="feature-route" id="featureRoute" href="#" target="_blank" rel="noopener">
+              <svg class="ui-icon"><use href="#i-map"></use></svg>
+              Route
+            </a>
+            <div class="mini-map" aria-label="Mini map preview"></div>
+          </div>
+        </div>
+      </article>
+
+      <aside class="tonight-panel">
+        <div>
+          <div class="eyebrow"><span class="dot"></span>Surprise me</div>
+          <h2>Low-friction decision</h2>
+          <p>Use the same synced list, but make choosing the next spot feel polished instead of busy.</p>
+        </div>
+        <div class="choice-card">
+          <div class="choice-name" id="choiceName">Surprise me</div>
+          <div class="choice-detail" id="choiceDetail">Spin from the currently filtered list.</div>
+        </div>
+        <div class="panel-actions">
+          <button class="text-btn primary-action" type="button" onclick="openRandom()"><svg class="ui-icon"><use href="#i-dice"></use></svg> Spin</button>
+          <button class="text-btn" type="button" onclick="openMapView()"><svg class="ui-icon"><use href="#i-map"></use></svg> Map</button>
+        </div>
+      </aside>
+    </section>
+
+    <section class="spots-section">
+      <div class="section-head">
+        <div>
+          <h2>Saved Spots</h2>
+          <p id="sectionSubhead">Cleaner cards, calmer color, and the same live data.</p>
+        </div>
+        <div id="countBar"></div>
+      </div>
+      <div class="grid spots-grid" id="grid"></div>
+    </section>
+  </main>
+
+  <aside class="side-column">
+    <section class="side-panel">
+      <h2>Worth It</h2>
+      <div class="side-list" id="worthItList"></div>
+    </section>
+    <section class="side-panel">
+      <h2>Quick View</h2>
+      <div class="side-list" id="quickStats"></div>
+    </section>
+  </aside>
+</div>
+</div>
 
 <!-- MAP VIEW -->
 <div id="mapView">
@@ -1094,6 +1195,43 @@ input, textarea, select {
     </div>
   </div>
 </div>
+
+<aside class="drawer" id="filterDrawer" aria-label="Filters" aria-hidden="true">
+  <div class="drawer-head">
+    <h2>Filters</h2>
+    <button class="drawer-close" type="button" onclick="toggleFilterPanel(false)" title="Close filters">
+      <svg class="ui-icon"><use href="#i-x"></use></svg>
+    </button>
+  </div>
+  <div class="filter-group">
+    <h3>Status</h3>
+    <div class="filter-grid" id="drawerStatusFilters"></div>
+  </div>
+  <div class="filter-group">
+    <h3>Category</h3>
+    <div class="filter-grid" id="drawerCategoryFilters"></div>
+    <div class="filter-grid drawer-sub-grid" id="drawerSubcategoryFilters"></div>
+  </div>
+  <div class="filter-group" id="drawerTypeGroup">
+    <h3>Type</h3>
+    <div class="filter-grid" id="drawerTypeFilters"></div>
+  </div>
+  <div class="filter-group" id="drawerAreaGroup">
+    <h3>Area</h3>
+    <div class="filter-grid" id="drawerAreaFilters"></div>
+  </div>
+  <div class="filter-group">
+    <h3>Rating</h3>
+    <div class="filter-grid" id="drawerRatingFilters"></div>
+  </div>
+  <div class="filter-group drawer-footer">
+    <button class="text-btn drawer-clear" type="button" onclick="clearFilters()">
+      <svg class="ui-icon"><use href="#i-filter"></use></svg>
+      Clear filters
+    </button>
+  </div>
+</aside>
+<div class="drawer-backdrop" id="drawerBackdrop" onclick="toggleFilterPanel(false)"></div>
 
 <script>
 const KEY = 'our-list-v2';
@@ -1679,10 +1817,12 @@ let fullyCollapsed = false;
 let tabsVisible = false;
 
 function setCollapse(hideAll, hideTabs) {
+  if (document.getElementById('app')) return;
   document.getElementById('favBar').classList.toggle('gone', hideAll);
   const topRow = document.getElementById('topRow');
   if (topRow) topRow.classList.toggle('gone', hideAll);
   document.getElementById('catRow').classList.toggle('gone', hideAll);
+  document.getElementById('subCatRow').classList.toggle('gone', hideAll);
   document.getElementById('filterRow').classList.toggle('gone', hideAll);
   document.getElementById('starRow').classList.toggle('gone', hideAll);
   document.getElementById('viewTabs').classList.toggle('gone', hideTabs);
@@ -1716,10 +1856,55 @@ window.addEventListener('scroll', function() {
 
 let _subDropdownAnchor = null; // stores the Food pill element for positioning
 
+function buildFoodSubPills() {
+  const row = document.getElementById('subCatRow');
+  if (!row) return;
+  const activeCat = CAT_MAP[activeCategory];
+  let parentKey = null;
+  if (CATS.some(c => c.parent === activeCategory)) {
+    parentKey = activeCategory;
+  } else if (activeCat && activeCat.parent) {
+    parentKey = activeCat.parent;
+  }
+
+  if (!parentKey) {
+    row.innerHTML = '';
+    row.classList.remove('has-subcategories');
+    return;
+  }
+
+  const parent = CAT_MAP[parentKey];
+  const children = CATS.filter(c => c.parent === parentKey);
+  const items = [
+    { key: parentKey, label: `All ${parent ? parent.label : catLabel(parentKey)}`, color: catColor(parentKey) },
+    ...children.map(c => ({ key: c.key, label: c.label, color: c.color }))
+  ];
+
+  row.innerHTML = items.map(item => {
+    const isActive = (item.key === parentKey && activeCategory === parentKey) || activeCategory === item.key;
+    return `<button class="cat-pill food-sub-pill${isActive?' active':''}" data-cat="${item.key}"
+      style="border-color:${isActive?item.color:item.color+'44'};${isActive?`background:${item.color};color:#0f0e0d;font-weight:600;`:`color:${item.color}cc;`}">
+      <span class="dot" style="background:${item.color}"></span>${item.label}
+    </button>`;
+  }).join('');
+
+  row.classList.add('has-subcategories');
+  row.onclick = e => {
+    const btn = e.target.closest('.food-sub-pill');
+    if (!btn) return;
+    activeCategory = btn.dataset.cat;
+    activeCuisine = 'All';
+    closeAllDropdowns();
+    buildCatPills();
+    buildTypePills();
+    render();
+  };
+}
+
 function buildCatPills() {
   const row = document.getElementById('catRow');
   const topCats = CATS.filter(c => c.parent === null);
-  const foodActive = activeCategory === 'food' || FOOD_SUBS.includes(activeCategory);
+  const activeParent = CAT_MAP[activeCategory]?.parent || activeCategory;
 
   const allBtn = `<button class="cat-pill${activeCategory==='all'?' active':''}" data-cat="all"
     style="border-color:${activeCategory==='all'?'var(--accent)':'#ffffff22'};${activeCategory==='all'?'background:var(--accent);color:#0f0e0d;font-weight:600;':''}">
@@ -1727,9 +1912,9 @@ function buildCatPills() {
   </button>`;
 
   const topPills = topCats.map(c => {
-    const isActive = activeCategory === c.key || (c.key==='food' && foodActive);
-    const hasSubs = c.key === 'food';
-    const activeSub = hasSubs && foodActive && activeCategory !== 'food'
+    const isActive = activeCategory === c.key || activeParent === c.key;
+    const hasSubs = CATS.some(child => child.parent === c.key);
+    const activeSub = hasSubs && CAT_MAP[activeCategory]?.parent === c.key
       ? ' · ' + catLabel(activeCategory) : '';
     return `<button class="cat-pill${isActive?' active':''}" data-cat="${c.key}"
       style="border-color:${isActive?c.color:c.color+'44'};${isActive?`background:${c.color};color:#0f0e0d;font-weight:600;`:`color:${c.color}cc;`}">
@@ -1738,17 +1923,13 @@ function buildCatPills() {
   }).join('');
 
   row.innerHTML = allBtn + topPills;
+  buildFoodSubPills();
 
   row.onclick = e => {
     const btn = e.target.closest('.cat-pill');
     if (!btn) return;
     const newCat = btn.dataset.cat;
     closeAllDropdowns();
-    if (newCat === 'food') {
-      // Open sub-category dropdown instead of setting category directly
-      openSubCatDropdown(btn);
-      return;
-    }
     activeCategory = newCat;
     activeCuisine = 'All';
     buildCatPills();
@@ -1967,6 +2148,181 @@ function clearFilters() {
   render();
 }
 
+function activeSubcategoryParent() {
+  const activeCat = CAT_MAP[activeCategory];
+  if (CATS.some(c => c.parent === activeCategory)) return activeCategory;
+  if (activeCat && activeCat.parent) return activeCat.parent;
+  return null;
+}
+
+function drawerChip(label, action, value, active, color) {
+  const style = color ? ` style="--chip-color:${htmlAttr(color)}"` : '';
+  return `<button class="chip drawer-chip${active ? ' selected' : ''}" type="button"
+    data-filter-action="${htmlAttr(action)}" data-filter-value="${htmlAttr(value || '')}"${style}>
+    <span class="dot"></span>${htmlText(label)}
+  </button>`;
+}
+
+function renderFilterDrawer() {
+  const drawer = document.getElementById('filterDrawer');
+  if (!drawer) return;
+
+  const status = document.getElementById('drawerStatusFilters');
+  if (status) {
+    status.innerHTML = [
+      drawerChip('Want to go', 'flag', 'want', wantOnly, '#e47679'),
+      drawerChip('Favorites', 'flag', 'fav', favOnly, '#e47679'),
+      drawerChip('Been', 'flag', 'been', beenOnly, '#83c98d'),
+      drawerChip('Our List', 'view', 'active', activeView === 'active', '#efc45a'),
+      drawerChip('Worth it', 'view', 'repeats', activeView === 'repeats', '#83c98d'),
+      drawerChip('One & Done', 'view', 'noback', activeView === 'noback', '#e47679'),
+      drawerChip('Decide Later', 'view', 'archive', activeView === 'archive', '#7fb2d9')
+    ].join('');
+  }
+
+  const cats = document.getElementById('drawerCategoryFilters');
+  if (cats) {
+    cats.innerHTML = [
+      drawerChip('All', 'category', 'all', activeCategory === 'all', '#efc45a'),
+      ...CATS.filter(c => c.parent === null).map(c => {
+        const activeParent = CAT_MAP[activeCategory]?.parent || activeCategory;
+        const hasSubs = CATS.some(child => child.parent === c.key);
+        const label = `${c.label}${hasSubs ? ' +' : ''}`;
+        return drawerChip(label, 'category', c.key, activeCategory === c.key || activeParent === c.key, c.color);
+      })
+    ].join('');
+  }
+
+  const sub = document.getElementById('drawerSubcategoryFilters');
+  if (sub) {
+    const parentKey = activeSubcategoryParent();
+    if (parentKey) {
+      const parent = CAT_MAP[parentKey];
+      const children = CATS.filter(c => c.parent === parentKey);
+      sub.innerHTML = [
+        drawerChip(`All ${parent ? parent.label : catLabel(parentKey)}`, 'category', parentKey, activeCategory === parentKey, catColor(parentKey)),
+        ...children.map(c => drawerChip(c.label, 'category', c.key, activeCategory === c.key, c.color))
+      ].join('');
+      sub.style.display = 'flex';
+    } else {
+      sub.innerHTML = '';
+      sub.style.display = 'none';
+    }
+  }
+
+  let scopedSpots;
+  if (activeCategory === 'all') scopedSpots = db.spots;
+  else if (activeCategory === 'food') scopedSpots = db.spots.filter(s => isFood(s.cat));
+  else scopedSpots = db.spots.filter(s => s.cat === activeCategory);
+
+  const typeGroup = document.getElementById('drawerTypeGroup');
+  const types = Array.from(new Set(scopedSpots.map(s => s.cuisine).filter(Boolean))).sort();
+  const typeGrid = document.getElementById('drawerTypeFilters');
+  if (typeGroup && typeGrid) {
+    if (activeCategory !== 'all' && types.length) {
+      typeGrid.innerHTML = [
+        drawerChip('All types', 'type', 'All', activeCuisine === 'All', '#efc45a'),
+        ...types.map(t => drawerChip(t, 'type', t, activeCuisine === t, catColor(activeCategory)))
+      ].join('');
+      typeGroup.style.display = '';
+    } else {
+      typeGrid.innerHTML = '';
+      typeGroup.style.display = 'none';
+    }
+  }
+
+  const areas = Array.from(new Set(db.spots.filter(s => s.area && s.area.trim()).map(s => s.area.trim()))).sort();
+  const areaGroup = document.getElementById('drawerAreaGroup');
+  const areaGrid = document.getElementById('drawerAreaFilters');
+  if (areaGroup && areaGrid) {
+    areaGrid.innerHTML = [
+      drawerChip('All areas', 'area', 'All', activeLocation === 'All', '#efc45a'),
+      ...areas.slice(0, 18).map(a => drawerChip(a, 'area', a, activeLocation === a, '#7fb2d9'))
+    ].join('');
+    areaGroup.style.display = areas.length ? '' : 'none';
+  }
+
+  const rating = document.getElementById('drawerRatingFilters');
+  if (rating) {
+    rating.innerHTML = [
+      drawerChip('All ratings', 'rating', '0', activeStar === 0, '#efc45a'),
+      drawerChip('3+ stars', 'rating', '3', activeStar === 3, '#efc45a'),
+      drawerChip('4+ stars', 'rating', '4', activeStar === 4, '#efc45a'),
+      drawerChip('5 stars', 'rating', '5', activeStar === 5, '#efc45a')
+    ].join('');
+  }
+}
+
+function handleDrawerFilter(action, value) {
+  if (action === 'category') {
+    activeCategory = value;
+    activeCuisine = 'All';
+    buildCatPills();
+    buildTypePills();
+  } else if (action === 'type') {
+    activeCuisine = value || 'All';
+    buildTypePills();
+  } else if (action === 'area') {
+    activeLocation = value || 'All';
+    buildTypePills();
+  } else if (action === 'rating') {
+    activeStar = parseInt(value, 10) || 0;
+    document.querySelectorAll('.star-pill').forEach((btn, i) => btn.classList.toggle('active', i === activeStar));
+  } else if (action === 'view') {
+    activeView = value || 'active';
+    document.querySelectorAll('.view-tab').forEach(btn => btn.classList.toggle('active', btn.dataset.view === activeView));
+    const sel = document.getElementById('sortSelect');
+    if (sel) sel.value = 'view-' + activeView;
+  } else if (action === 'flag') {
+    if (value === 'want') wantOnly = !wantOnly;
+    if (value === 'fav') favOnly = !favOnly;
+    if (value === 'been') beenOnly = !beenOnly;
+  }
+  render();
+}
+
+function wireFilterDrawer() {
+  const drawer = document.getElementById('filterDrawer');
+  if (!drawer || drawer.dataset.wired) return;
+  drawer.dataset.wired = 'true';
+  drawer.addEventListener('click', e => {
+    const btn = e.target.closest('[data-filter-action]');
+    if (!btn) return;
+    handleDrawerFilter(btn.dataset.filterAction, btn.dataset.filterValue);
+  });
+}
+
+function toggleFilterPanel(forceOpen) {
+  const bar = document.getElementById('stickyBar');
+  const btn = document.getElementById('filterPanelBtn');
+  const drawer = document.getElementById('filterDrawer');
+  const backdrop = document.getElementById('drawerBackdrop');
+  if (!bar && !drawer) return;
+  const open = typeof forceOpen === 'boolean'
+    ? forceOpen
+    : !(drawer ? drawer.classList.contains('open') : bar.classList.contains('filters-open'));
+  if (drawer) {
+    renderFilterDrawer();
+    drawer.classList.toggle('open', open);
+    drawer.setAttribute('aria-hidden', open ? 'false' : 'true');
+  }
+  if (backdrop) backdrop.classList.toggle('open', open);
+  if (bar) bar.classList.toggle('filters-open', false);
+  if (btn) btn.classList.toggle('active', open);
+  if (open && window.innerWidth <= 760) {
+    setCollapse(false, false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+function syncFilterPanelState() {
+  const bar = document.getElementById('stickyBar');
+  const btn = document.getElementById('filterPanelBtn');
+  if (!bar || !btn) return;
+  const drawer = document.getElementById('filterDrawer');
+  btn.classList.toggle('active', (drawer && drawer.classList.contains('open')) || anyFilterActive());
+}
+
 function anyFilterActive() {
   return activeCategory !== 'all'
     || activeCuisine !== 'All'
@@ -2082,7 +2438,8 @@ function spinRandom() {
       locEl.textContent = '';
     }
     const color = catColor(s.cat);
-    document.getElementById('randBefore').textContent = `.rand-card::before { background: ${color}; }`;
+    const randAccentStyle = document.getElementById('randAccentStyle') || document.getElementById('randBefore');
+    if (randAccentStyle) randAccentStyle.textContent = `.rand-card::before { background: ${color}; }`;
     ticks++;
     if (ticks < total) {
       setTimeout(tick, 60 + ticks * 15);
@@ -2425,6 +2782,104 @@ function getFilteredList() {
   });
 }
 
+function spotMapsUrl(s) {
+  if (!s) return '';
+  if (s.lat && s.lng) return `https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}`;
+  if (s.location) return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(s.location)}`;
+  return '';
+}
+
+function setLayoutMode(mode, el) {
+  const app = document.getElementById('app');
+  if (app) app.classList.toggle('list-mode', mode === 'list');
+  document.querySelectorAll('.seg-btn').forEach(btn => btn.classList.toggle('active', btn === el || btn.dataset.layout === mode));
+}
+
+function renderActiveFilterChips(list) {
+  const row = document.getElementById('activeFilterChips');
+  const count = document.getElementById('resultCount');
+  if (count) count.textContent = `${list.length} spot${list.length !== 1 ? 's' : ''}`;
+  if (!row) return;
+
+  const chips = [];
+  if (activeView !== 'active') chips.push(activeView.replace('repeats','Worth it').replace('noback','One & Done').replace('archive','Decide Later'));
+  if (activeCategory !== 'all') chips.push(catLabel(activeCategory));
+  if (activeCuisine !== 'All') chips.push(activeCuisine);
+  if (activeLocation !== 'All') chips.push(activeLocation);
+  if (activeStar > 0) chips.push(activeStar === 5 ? '5 stars' : `${activeStar}+ stars`);
+  if (favOnly) chips.push('Favorites');
+  if (beenOnly) chips.push('Been');
+  if (wantOnly) chips.push('Want');
+  const q = document.getElementById('searchInput')?.value.trim();
+  if (q) chips.push(`Search: ${q}`);
+
+  row.innerHTML = (chips.length ? chips : ['All spots']).map(label =>
+    `<button class="chip${chips.length ? ' selected' : ''}" type="button"><span class="dot"></span>${htmlText(label)}</button>`
+  ).join('');
+}
+
+function updatePreviewPanels(list) {
+  renderActiveFilterChips(list);
+
+  const featured = list.find(s => s.want || s.fav || (s.stars || 0) >= 4) || list[0] || db.spots[0];
+  const featureName = document.getElementById('featureName');
+  const featureNote = document.getElementById('featureNote');
+  const featureMeta = document.getElementById('featureMeta');
+  const featureRoute = document.getElementById('featureRoute');
+  const featureCard = document.getElementById('featureCard');
+  if (featured && featureName) {
+    const route = spotMapsUrl(featured);
+    featureName.textContent = featured.name;
+    featureNote.textContent = featured.note || featured.location || 'A saved spot from your shared list.';
+    if (featureMeta) {
+      featureMeta.innerHTML = [
+        featured.cuisine || catLabel(featured.cat),
+        featured.area || featured.location || '',
+        featured.want ? 'Want to go' : featured.been ? 'Been' : 'Saved'
+      ].filter(Boolean).slice(0,3).map(v => `<span class="meta-pill">${htmlText(v)}</span>`).join('');
+    }
+    if (featureRoute) {
+      featureRoute.href = route || '#';
+      featureRoute.style.display = route ? 'inline-flex' : 'none';
+    }
+    if (featureCard) featureCard.style.setProperty('--feature-color', catColor(featured.cat));
+  }
+
+  const choice = list[1] || list[0] || db.spots[0];
+  if (choice) {
+    const choiceName = document.getElementById('choiceName');
+    const choiceDetail = document.getElementById('choiceDetail');
+    if (choiceName) choiceName.textContent = choice.name;
+    if (choiceDetail) choiceDetail.textContent = choice.note || choice.location || catLabel(choice.cat);
+  }
+
+  const worth = document.getElementById('worthItList');
+  if (worth) {
+    const top = db.spots
+      .filter(s => s.goback === true || s.fav || (s.stars || 0) >= 4)
+      .sort((a,b)=>(b.stars||0)-(a.stars||0)||a.name.localeCompare(b.name))
+      .slice(0,3);
+    worth.innerHTML = (top.length ? top : db.spots.slice(0,3)).map((s,i) =>
+      `<div class="side-item"><span class="side-number">${i+1}</span><div><strong>${htmlText(s.name)}</strong><span>${htmlText(s.cuisine || catLabel(s.cat))}${s.location ? ' - ' + htmlText(s.location.split(',')[0]) : ''}</span></div></div>`
+    ).join('');
+  }
+
+  const stats = document.getElementById('quickStats');
+  if (stats) {
+    const active = db.spots.filter(s => !s.been).length;
+    const want = db.spots.filter(s => s.want).length;
+    const favs = db.spots.filter(s => s.fav).length;
+    stats.innerHTML = [
+      ['Saved', db.spots.length + ' total spots'],
+      ['To Try', active + ' not visited yet'],
+      ['Want', want + ' marked want'],
+      ['Favorites', favs + ' favorites']
+    ].map((item,i) => `<div class="side-item"><span class="side-number">${i+1}</span><div><strong>${item[0]}</strong><span>${item[1]}</span></div></div>`).join('');
+  }
+
+  renderFilterDrawer();
+}
+
 function render() {
   const sortVal = document.getElementById('sortSelect').value;
   const sort = activeView === 'repeats' ? 'stars-desc' : sortVal.startsWith('view-') ? 'newest' : sortVal;
@@ -2472,16 +2927,19 @@ function render() {
   } else if (clearBtn) {
     clearBtn.remove();
   }
+  syncFilterPanelState();
+  updatePreviewPanels(list);
 
   const grid = document.getElementById('grid');
   if (!list.length) { grid.innerHTML = '<div class="empty">No spots match that filter.</div>'; return; }
 
-  grid.innerHTML = list.map(s => {
+  grid.innerHTML = list.map((s, index) => {
     const color = catColor(s.cat);
+    const rating = s.stars || 0;
     const stars = [1,2,3,4,5].map(n =>
-      `<span class="s${(s.stars||0)>=n?' lit':''}" data-action="star" data-id="${s.id}" data-n="${n}">★</span>`
+      `<span class="s${rating>=n?' lit':''}" data-action="star" data-id="${s.id}" data-n="${n}" title="${n} star${n>1?'s':''}">★</span>`
     ).join('');
-        const mapsUrl = s.lat && s.lng
+    const mapsUrl = s.lat && s.lng
       ? `https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}`
       : s.location
         ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(s.location)}`
@@ -2490,49 +2948,53 @@ function render() {
     const loc = locText
       ? `<div class="card-location">${mapsUrl
           ? `<a href="${mapsUrl}" target="_blank" rel="noopener"
-              style="color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:4px;"
-              onclick="event.stopPropagation()">📍 ${htmlText(locText)}</a>`
-          : `📍 ${htmlText(locText)}`
+              class="card-location-link"
+              onclick="event.stopPropagation()"><svg class="ui-icon"><use href="#i-pin"></use></svg><span>${htmlText(locText)}</span></a>`
+          : `<span class="card-location-link static"><svg class="ui-icon"><use href="#i-pin"></use></svg><span>${htmlText(locText)}</span></span>`
         }</div>`
       : s.lat && s.lng
         ? `<div class="card-location"><a href="${mapsUrl}" target="_blank" rel="noopener"
-            style="color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:4px;"
-            onclick="event.stopPropagation()">📍 View on map</a></div>`
+            class="card-location-link"
+            onclick="event.stopPropagation()"><svg class="ui-icon"><use href="#i-pin"></use></svg><span>View on map</span></a></div>`
         : '';
-    const note = s.note ? `<div class="card-note">${htmlText(s.note)}</div>` : '';
+    const note = s.note ? `<p class="spot-note">${htmlText(s.note)}</p>` : '';
     const visitedLabel = s.been && s.visited_at && activeView !== 'active'
-      ? `<div style="font-size:0.68rem;color:var(--muted);margin-bottom:4px;">🕐 Visited ${timeAgo(s.visited_at)}</div>` : '';
-    const favStyle = s.fav ? 'opacity:1;color:#e84b4b' : 'opacity:0.3';
-    const viewBadge = '';
-    const photo = s.photo ? `<img class="card-photo" src="${htmlAttr(s.photo)}" alt="" loading="lazy" onerror="this.style.display='none'">` : '';
-    const colls = s.collections ? s.collections.split(',').map(c => c.trim()).filter(Boolean).map(c => `<span class="coll-tag">${htmlText(c)}</span>`).join('') : '';
+      ? `<div class="visited-label">Visited ${timeAgo(s.visited_at)}</div>` : '';
+    const photo = s.photo
+      ? `<div class="spot-photo has-image"><img src="${htmlAttr(s.photo)}" alt="" loading="lazy" onerror="this.closest('.spot-photo').classList.add('photo-${(index % 3) + 1}');this.remove();"></div>`
+      : `<div class="spot-photo photo-${(index % 3) + 1}"></div>`;
+    const colls = s.collections ? s.collections.split(',').map(c => c.trim()).filter(Boolean).map(c => `<span class="tag">${htmlText(c)}</span>`).join('') : '';
+    const cuisineLabel = s.cuisine || catLabel(s.cat) || 'Spot';
     return `
-    <div class="card" data-cat="${s.cat}" style="--card-color:${color}; border-top: 3px solid ${color}22;">
+    <article class="spot-card card${s.photo?' has-photo':' no-photo'}" data-cat="${s.cat}" style="--card-color:${color};">
       ${photo}
       <div class="card-top">
-        <div class="card-name">${htmlText(s.name)}</div>
+        <div class="card-title-block">
+          <div class="card-name">${htmlText(s.name)}</div>
+          ${visitedLabel}
+        </div>
         <div class="card-actions">
-          <button class="want-btn${s.want?' on':''}" data-action="want" data-id="${s.id}" title="Want to go">🔥</button>
-          <button class="icon-btn" data-action="edit" data-id="${s.id}" title="Edit">✏️</button>
-          <button onclick="event.stopPropagation();shareSpot('${s.id}')" title="Share" style="background:none;border:none;cursor:pointer;font-size:0.85rem;padding:2px 4px;color:#e8b84b;opacity:0.8;line-height:1;">↗</button>
-          <button class="icon-btn fav-btn-card${s.fav?' on':''}" data-action="fav" data-id="${s.id}" style="${favStyle}">♥</button>
+          <button class="want-btn${s.want?' on':''}" data-action="want" data-id="${s.id}" title="Want to go"><svg class="ui-icon"><use href="#i-flame"></use></svg></button>
+          <button class="icon-btn" data-action="edit" data-id="${s.id}" title="Edit"><svg class="ui-icon"><use href="#i-edit"></use></svg></button>
+          <button class="icon-btn" data-action="share" data-id="${s.id}" title="Share"><svg class="ui-icon"><use href="#i-share"></use></svg></button>
+          <button class="icon-btn fav-btn-card${s.fav?' on':''}" data-action="fav" data-id="${s.id}" title="Favorite"><svg class="ui-icon"><use href="#i-heart"></use></svg></button>
         </div>
       </div>
       ${loc}${note}
-      ${colls ? `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;">${colls}</div>` : ''}
+      ${colls ? `<div class="card-collections">${colls}</div>` : ''}
       <div class="card-footer">
-        <div class="card-stars">${stars}</div>
+        <div class="card-stars${rating ? ' rated' : ' unrated'}" aria-label="${rating ? rating + ' star rating' : 'Tap to rate'}">${stars}</div>
         <div class="card-badges">
-          <span class="ctag" data-action="filter" data-cuisine="${htmlAttr(s.cuisine)}" style="border-color:${color}55;color:${color}cc;background:${color}11;">${htmlText(s.cuisine)}</span>
+          <span class="ctag" data-action="filter" data-cuisine="${htmlAttr(cuisineLabel)}" style="--tag-color:${color};">${htmlText(cuisineLabel)}</span>
           <button class="been-btn${s.been?' on':''}" data-action="been" data-id="${s.id}">${s.been?'✓ Been':'Been?'}</button>
           ${s.been ? `
-            <button class="goback-btn${s.goback===true?' yes':''}" data-action="goback-yes" data-id="${s.id}" title="Worth it">👍</button>
-            <button class="goback-btn${s.goback===false?' no':''}" data-action="goback-no" data-id="${s.id}" title="Once was enough">✗</button>
+            <button class="goback-btn${s.goback===true?' yes':''}" data-action="goback-yes" data-id="${s.id}" title="Worth it">✓</button>
+            <button class="goback-btn${s.goback===false?' no':''}" data-action="goback-no" data-id="${s.id}" title="Once was enough">×</button>
           ` : ''}
-          ${s.link ? `<a class="link-btn" href="${htmlAttr(s.link)}" target="_blank" rel="noopener" title="Open link">🔗</a>` : ''}
+          ${s.link ? `<a class="link-btn" href="${htmlAttr(s.link)}" target="_blank" rel="noopener" title="Open link" onclick="event.stopPropagation()"><svg class="ui-icon"><use href="#i-link"></use></svg></a>` : ''}
         </div>
       </div>
-    </div>`;
+    </article>`;
   }).join('');
 }
 
@@ -3417,6 +3879,7 @@ document.getElementById('grid').addEventListener('click', e => {
   else if (action==='fav')    toggleFav(id);
   else if (action==='been')   toggleBeen(id);
   else if (action==='want')   toggleWant(id);
+  else if (action==='share')  shareSpot(id);
   else if (action==='goback-yes') gobackYes(id);
   else if (action==='goback-no')  gobackNo(id);
   else if (action==='goback-no')  gobackNo(id);
@@ -3525,6 +3988,7 @@ document.addEventListener('click', e => {
 document.getElementById('randOverlay').addEventListener('click', function(e) { if(e.target===this) closeRandom(); });
 
 // Init
+wireFilterDrawer();
 loadCustomCats();
 loadFromSupabase();
 
@@ -3570,9 +4034,35 @@ function selectSortOption(val) {
 </script>
 
 <!-- Floating action button -->
-<button class="fab" onclick="openAdd()">+</button>
+<button class="fab" onclick="openAdd()" title="Add spot">
+  <svg class="ui-icon"><use href="#i-plus"></use></svg>
+</button>
+
+<nav class="mobile-nav" aria-label="Main actions">
+  <button class="mobile-nav-btn active" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+    <svg class="ui-icon"><use href="#i-grid"></use></svg>
+    <span>List</span>
+  </button>
+  <button class="mobile-nav-btn" onclick="openMapView()">
+    <svg class="ui-icon"><use href="#i-map"></use></svg>
+    <span>Map</span>
+  </button>
+  <button class="mobile-nav-btn" onclick="openRandom()">
+    <svg class="ui-icon"><use href="#i-dice"></use></svg>
+    <span>Spin</span>
+  </button>
+  <button class="mobile-nav-btn" onclick="toggleFilterPanel(true)">
+    <svg class="ui-icon"><use href="#i-filter"></use></svg>
+    <span>Filter</span>
+  </button>
+  <button class="mobile-nav-btn" onclick="openAdd()">
+    <svg class="ui-icon"><use href="#i-plus"></use></svg>
+    <span>Add</span>
+  </button>
+</nav>
 
 <!-- dynamic style for random card accent line -->
+<style id="randAccentStyle">.rand-card::before { background: var(--accent); }</style>
 <style id="randBefore">.rand-card::before { background: var(--accent); }.field input, .field select, .field textarea, input[type="text"], input[type="url"] { font-size: 16px !important; }
 
 /* Prevent iOS auto-zoom - inputs must be >= 16px */
@@ -3625,6 +4115,1869 @@ header {
 @keyframes fabPulse {
   0%, 100% { box-shadow: 0 4px 20px rgba(232,184,75,0.5), 0 2px 8px rgba(0,0,0,0.5); }
   50% { box-shadow: 0 4px 32px rgba(232,184,75,0.8), 0 2px 8px rgba(0,0,0,0.5); }
+}
+
+/* ===== LIVE DESIGN REFRESH ===== */
+.icon-sprite { display: none; }
+.ui-icon {
+  width: 1.05em;
+  height: 1.05em;
+  display: block;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex: 0 0 auto;
+}
+
+:root {
+  --bg: #0c0b09;
+  --card: #181612;
+  --card-hover: #211e18;
+  --border: rgba(242,237,228,0.1);
+  --border-subtle: rgba(242,237,228,0.065);
+  --text: #f4efe6;
+  --muted: #817a70;
+  --muted-light: #b6aea2;
+  --tag-bg: rgba(255,255,255,0.035);
+  --accent: #efc45a;
+  --accent-dim: rgba(239,196,90,0.12);
+  --accent-glow: rgba(239,196,90,0.32);
+}
+
+body {
+  background:
+    radial-gradient(circle at 12% -8%, rgba(239,196,90,0.12), transparent 34rem),
+    radial-gradient(circle at 100% 12%, rgba(128,70,44,0.16), transparent 30rem),
+    linear-gradient(180deg, #0f0d0a 0%, #0b0a08 46%, #090807 100%) !important;
+  font-weight: 300;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.2;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+  background-size: 38px 38px;
+  mask-image: linear-gradient(to bottom, black, transparent 82%);
+}
+
+header {
+  position: relative !important;
+  top: auto !important;
+  z-index: 10 !important;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 24px 22px 22px !important;
+  background: rgba(12,11,9,0.68) !important;
+  border-bottom: 1px solid var(--border-subtle) !important;
+}
+
+.header-inner {
+  min-width: 0;
+}
+
+header h1 {
+  color: var(--accent) !important;
+  font-size: clamp(2.55rem, 6vw, 4.6rem) !important;
+  letter-spacing: 0.16em !important;
+  text-shadow: 0 0 60px rgba(239,196,90,0.18) !important;
+}
+
+header .sub {
+  color: var(--muted) !important;
+  letter-spacing: 0.32em !important;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.premium-icon-btn,
+.filter-panel-btn {
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.035);
+  color: var(--muted-light);
+  cursor: pointer;
+  transition: transform 0.16s ease, background 0.16s ease, border-color 0.16s ease, color 0.16s ease;
+}
+
+.premium-icon-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.premium-icon-btn.primary {
+  background: linear-gradient(180deg, #f4cf74, #dcae3f);
+  color: #151006;
+  border-color: transparent;
+  box-shadow: 0 12px 30px rgba(239,196,90,0.22);
+}
+
+.premium-icon-btn:hover,
+.filter-panel-btn:hover {
+  color: var(--text);
+  border-color: rgba(239,196,90,0.36);
+  background: rgba(239,196,90,0.08);
+}
+
+#stickyBar {
+  top: 0 !important;
+  z-index: 40 !important;
+  background: rgba(12,11,9,0.86) !important;
+  border-bottom: 1px solid var(--border-subtle);
+  backdrop-filter: blur(22px) saturate(1.25) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(1.25) !important;
+}
+
+#favBar {
+  gap: 8px !important;
+  padding: 12px 16px 8px !important;
+  border-bottom-color: transparent !important;
+}
+
+.toggle-btn,
+.random-btn,
+.map-btn,
+.cat-pill,
+.pill,
+.star-pill,
+.view-tab,
+.custom-sort-btn,
+.filter-panel-btn {
+  min-height: 34px;
+  border: 1px solid var(--border) !important;
+  border-radius: 999px !important;
+  background: rgba(255,255,255,0.035) !important;
+  color: var(--muted-light) !important;
+  letter-spacing: 0.05em !important;
+  text-transform: none !important;
+}
+
+.toggle-btn,
+.random-btn,
+.map-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 7px !important;
+}
+
+.toggle-btn:hover,
+.random-btn:hover,
+.map-btn:hover,
+.cat-pill:hover,
+.pill:hover,
+.star-pill:hover,
+.view-tab:hover,
+.custom-sort-btn:hover {
+  color: var(--text) !important;
+  border-color: rgba(239,196,90,0.35) !important;
+  background: rgba(239,196,90,0.08) !important;
+}
+
+.toggle-btn.active-fav,
+.toggle-btn.active-been,
+.star-pill.active,
+.view-tab.active,
+.pill.active,
+.cat-pill.active,
+.filter-panel-btn.active {
+  color: var(--accent) !important;
+  border-color: rgba(239,196,90,0.46) !important;
+  background: rgba(239,196,90,0.13) !important;
+  box-shadow: none !important;
+}
+
+#autoTagBtn {
+  opacity: 0.55;
+}
+
+#topRow {
+  display: grid !important;
+  grid-template-columns: minmax(180px, 1fr) auto auto;
+  gap: 9px !important;
+  padding: 8px 16px 12px !important;
+  border-bottom: 0 !important;
+}
+
+.search-wrap {
+  min-width: 0 !important;
+}
+
+input[type="text"],
+.custom-sort-btn {
+  background: rgba(24,22,18,0.72) !important;
+  border-color: var(--border) !important;
+}
+
+.filter-panel-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 15px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+#subCatRow {
+  display: flex !important;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 6px;
+  max-height: 50px;
+  padding: 2px 16px 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  white-space: nowrap;
+  transition: max-height 0.3s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease, padding 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+
+#subCatRow::-webkit-scrollbar {
+  display: none;
+}
+
+#stickyBar:not(.filters-open) #catRow,
+#stickyBar:not(.filters-open) #subCatRow,
+#stickyBar:not(.filters-open) #typeRow,
+#stickyBar:not(.filters-open) #starRow,
+#stickyBar:not(.filters-open) #viewTabs {
+  max-height: 0 !important;
+  min-height: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  overflow: hidden !important;
+  border-bottom: 0 !important;
+}
+
+#stickyBar.filters-open #catRow,
+#stickyBar.filters-open #subCatRow,
+#stickyBar.filters-open #typeRow,
+#stickyBar.filters-open #starRow,
+#stickyBar.filters-open #viewTabs {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+#stickyBar.filters-open #catRow { padding: 8px 16px 4px !important; }
+#stickyBar.filters-open #subCatRow { padding: 2px 16px 8px !important; }
+#stickyBar.filters-open #typeRow { padding: 2px 16px 8px !important; }
+#stickyBar.filters-open #starRow { padding: 4px 16px 8px !important; }
+#stickyBar.filters-open #viewTabs { padding: 8px 16px 12px !important; }
+
+#countBar {
+  padding: 10px 20px 6px !important;
+  color: var(--muted) !important;
+}
+
+.grid {
+  grid-template-columns: repeat(auto-fill, minmax(288px, 1fr)) !important;
+  gap: 16px !important;
+  padding: 14px 20px 104px !important;
+}
+
+.card {
+  min-height: 196px;
+  background:
+    linear-gradient(160deg, color-mix(in srgb, var(--card-color) 8%, transparent), transparent 46%),
+    rgba(24,22,18,0.86) !important;
+  border: 1px solid var(--border) !important;
+  border-left: 3px solid color-mix(in srgb, var(--card-color) 64%, transparent) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 20px 70px rgba(0,0,0,0.22);
+  cursor: default !important;
+}
+
+.card:hover {
+  transform: translateY(-2px) !important;
+  background:
+    linear-gradient(160deg, color-mix(in srgb, var(--card-color) 11%, transparent), transparent 46%),
+    rgba(32,29,23,0.92) !important;
+  border-color: rgba(239,196,90,0.24) !important;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.34), 0 10px 24px rgba(239,196,90,0.06) !important;
+}
+
+.card:not(.has-photo)::before {
+  width: 64% !important;
+  opacity: 0.055 !important;
+  background: linear-gradient(to left, var(--card-color), transparent) !important;
+}
+
+.card.has-photo {
+  border-left: 1px solid var(--border) !important;
+}
+
+.card-photo,
+.card.has-photo .card-photo {
+  height: 168px !important;
+  border-radius: 0 !important;
+}
+
+.card.has-photo .card-top {
+  margin-top: 0 !important;
+  background: linear-gradient(180deg, rgba(12,11,9,0.08), rgba(24,22,18,0.96)) !important;
+}
+
+.card-top {
+  gap: 12px;
+  position: relative;
+  display: block !important;
+  padding: 16px 16px 7px !important;
+}
+
+.card-title-block {
+  min-width: 0;
+  padding-right: 112px;
+}
+
+.card-name {
+  font-size: 1.06rem !important;
+  font-weight: 600 !important;
+  color: var(--text) !important;
+  line-height: 1.24 !important;
+  padding-right: 0 !important;
+  overflow-wrap: anywhere;
+}
+
+.visited-label {
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 0.68rem;
+}
+
+.card-actions {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  gap: 3px !important;
+  opacity: 0.7;
+  transition: opacity 0.16s ease;
+}
+
+.card:hover .card-actions,
+.card:focus-within .card-actions {
+  opacity: 1;
+}
+
+.icon-btn,
+.want-btn,
+.fav-btn-card,
+.link-btn,
+.goback-btn {
+  width: 27px !important;
+  height: 27px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  border: 1px solid transparent !important;
+  border-radius: 999px !important;
+  background: transparent !important;
+  color: var(--muted) !important;
+  opacity: 0.82 !important;
+  text-decoration: none !important;
+}
+
+.icon-btn:hover,
+.want-btn:hover,
+.fav-btn-card:hover,
+.link-btn:hover,
+.goback-btn:hover {
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+  background: rgba(255,255,255,0.045) !important;
+}
+
+.want-btn.on {
+  color: #e8784b !important;
+  background: rgba(232,120,75,0.1) !important;
+  border-color: rgba(232,120,75,0.22) !important;
+}
+
+.fav-btn-card.on {
+  color: #e47679 !important;
+  background: rgba(228,118,121,0.1) !important;
+  border-color: rgba(228,118,121,0.24) !important;
+}
+
+.card-location {
+  padding: 0 16px 8px !important;
+}
+
+.card-location-link {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 6px;
+  max-width: 100%;
+  color: var(--muted-light) !important;
+  text-decoration: none !important;
+  font-size: 0.76rem;
+  line-height: 1.35;
+}
+
+.card-location-link .ui-icon {
+  width: 13px;
+  height: 13px;
+  margin-top: 1px;
+  color: var(--accent);
+}
+
+.card-location-link:hover {
+  color: var(--accent) !important;
+  text-decoration: underline !important;
+  text-underline-offset: 3px;
+}
+
+.card-note {
+  padding: 0 16px 10px !important;
+  color: var(--soft, #b6aea2) !important;
+  opacity: 0.92 !important;
+  line-height: 1.5 !important;
+}
+
+.card-collections {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  padding: 0 16px 8px;
+}
+
+.coll-tag {
+  border-radius: 999px !important;
+  background: rgba(255,255,255,0.035) !important;
+  border-color: var(--border) !important;
+  color: var(--muted-light) !important;
+}
+
+.card-footer {
+  padding: 5px 16px 15px !important;
+  align-items: flex-end !important;
+}
+
+.card-stars {
+  min-height: 24px;
+  display: flex;
+  align-items: center;
+  gap: 1px !important;
+}
+
+.card-stars .s {
+  color: rgba(244,239,230,0.15) !important;
+  font-size: 0.92rem !important;
+  text-shadow: none !important;
+}
+
+.card-stars .s.lit {
+  color: var(--accent) !important;
+  text-shadow: 0 0 10px rgba(239,196,90,0.28) !important;
+}
+
+.card-stars.unrated .s {
+  opacity: 0.38;
+}
+
+.card:hover .card-stars.unrated .s {
+  opacity: 0.72;
+}
+
+.ctag {
+  border-radius: 999px !important;
+  border-color: color-mix(in srgb, var(--tag-color, var(--accent)) 42%, transparent) !important;
+  background: color-mix(in srgb, var(--tag-color, var(--accent)) 10%, transparent) !important;
+  color: color-mix(in srgb, var(--tag-color, var(--accent)) 78%, white) !important;
+}
+
+.been-btn {
+  border-radius: 999px !important;
+  min-height: 24px;
+  background: rgba(255,255,255,0.025) !important;
+}
+
+.been-btn.on,
+.goback-btn.yes {
+  color: #83c98d !important;
+  border-color: rgba(131,201,141,0.26) !important;
+  background: rgba(131,201,141,0.08) !important;
+}
+
+.goback-btn.no {
+  color: #e47679 !important;
+  border-color: rgba(228,118,121,0.26) !important;
+  background: rgba(228,118,121,0.08) !important;
+}
+
+.fab {
+  width: 58px !important;
+  height: 58px !important;
+  background: linear-gradient(180deg, #f4cf74, #dcae3f) !important;
+  color: #151006 !important;
+  animation: none !important;
+  box-shadow: 0 16px 40px rgba(239,196,90,0.24), 0 12px 30px rgba(0,0,0,0.48) !important;
+}
+
+.fab .ui-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.mobile-nav {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  body {
+    padding-bottom: 82px;
+  }
+
+  header {
+    padding: 18px 14px 16px !important;
+  }
+
+  .header-inner {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  header h1 {
+    font-size: 2.8rem !important;
+    letter-spacing: 0.13em !important;
+  }
+
+  header .sub {
+    font-size: 0.58rem !important;
+    letter-spacing: 0.2em !important;
+  }
+
+  .header-actions {
+    display: none;
+  }
+
+  #favBar {
+    display: none !important;
+  }
+
+  #topRow {
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    padding: 10px 12px !important;
+  }
+
+  .custom-sort-wrap {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .custom-sort-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .filter-panel-btn span {
+    display: none;
+  }
+
+  #stickyBar:not(.filters-open) #catRow,
+  #stickyBar:not(.filters-open) #subCatRow,
+  #stickyBar:not(.filters-open) #typeRow,
+  #stickyBar:not(.filters-open) #starRow,
+  #stickyBar:not(.filters-open) #viewTabs {
+    display: flex !important;
+  }
+
+  #countBar {
+    padding: 8px 14px 4px !important;
+  }
+
+  .grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+    padding: 10px 14px 102px !important;
+  }
+
+  .card {
+    min-height: 0;
+  }
+
+  .card-actions {
+    opacity: 1;
+  }
+
+  .icon-btn,
+  .want-btn,
+  .fav-btn-card,
+  .link-btn,
+  .goback-btn {
+    width: 30px !important;
+    height: 30px !important;
+  }
+
+  .card-title-block {
+    padding-right: 126px;
+  }
+
+  .card-top {
+    padding: 15px 14px 7px !important;
+  }
+
+  .card-location,
+  .card-note,
+  .card-collections,
+  .card-footer {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+
+  .fab {
+    display: none !important;
+  }
+
+  .mobile-nav {
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    z-index: 120;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 4px;
+    padding: 6px;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background: rgba(18,16,12,0.94);
+    box-shadow: 0 18px 70px rgba(0,0,0,0.5);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  .mobile-nav-btn {
+    min-width: 0;
+    height: 48px;
+    border: 0;
+    border-radius: 14px;
+    background: transparent;
+    color: var(--muted);
+    display: grid;
+    place-items: center;
+    gap: 2px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.64rem;
+  }
+
+  .mobile-nav-btn .ui-icon {
+    width: 17px;
+    height: 17px;
+  }
+
+  .mobile-nav-btn.active {
+    background: rgba(239,196,90,0.14);
+    color: var(--accent);
+  }
+}
+/* ===== DESIGN PREVIEW LIVE LAYOUT ===== */
+:root {
+  --bg-soft: #12100d;
+  --panel: rgba(24, 22, 18, 0.82);
+  --panel-solid: #181612;
+  --panel-lift: #211e18;
+  --line: rgba(242, 237, 228, 0.08);
+  --line-strong: rgba(242, 237, 228, 0.14);
+  --soft: #b5aea3;
+  --dim: #514b43;
+  --gold: #efc45a;
+  --rose: #e47679;
+  --green: #83c98d;
+  --blue: #7fb2d9;
+  --violet: #b78ae6;
+  --shadow: 0 24px 80px rgba(0, 0, 0, 0.42);
+  --radius: 8px;
+  --serif: "Playfair Display", Georgia, serif;
+}
+
+.app-shell {
+  width: min(1440px, 100%);
+  margin: 0 auto;
+  padding: 18px 22px 110px;
+  position: relative;
+  z-index: 2;
+}
+
+header.topbar {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  gap: 20px !important;
+  align-items: center !important;
+  padding: 16px 0 20px !important;
+  margin: 0 !important;
+  border-bottom: 1px solid var(--line) !important;
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.topbar .header-inner {
+  display: flex !important;
+  align-items: baseline !important;
+  gap: 18px !important;
+  min-width: 0;
+}
+
+.topbar h1 {
+  margin: 0 !important;
+  color: var(--gold) !important;
+  font-family: 'Bebas Neue', sans-serif !important;
+  font-size: clamp(2.6rem, 6vw, 4.7rem) !important;
+  line-height: 0.86 !important;
+  letter-spacing: 0.16em !important;
+  text-shadow: 0 0 60px rgba(239, 196, 90, 0.18) !important;
+}
+
+.topbar .sub {
+  margin: 0 !important;
+  color: var(--muted) !important;
+  font-size: 0.72rem !important;
+  letter-spacing: 0.32em !important;
+  text-transform: uppercase !important;
+  white-space: nowrap;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.premium-icon-btn,
+.text-btn,
+.filter-panel-btn,
+.seg-btn,
+.chip,
+.spot-action,
+.feature-route {
+  border: 1px solid var(--line-strong);
+  background: rgba(255, 255, 255, 0.035);
+  color: var(--soft);
+  cursor: pointer;
+  transition: transform 160ms ease, border-color 160ms ease, color 160ms ease, background 160ms ease, opacity 160ms ease;
+}
+
+.premium-icon-btn {
+  width: 42px !important;
+  height: 42px !important;
+  border-radius: 999px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.premium-icon-btn.primary,
+.primary-action {
+  border-color: rgba(239, 196, 90, 0.5) !important;
+  background: linear-gradient(180deg, #f1ca6c, #dcae3f) !important;
+  color: #151006 !important;
+  box-shadow: 0 12px 30px rgba(239, 196, 90, 0.22);
+}
+
+#stickyBar {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 40 !important;
+  margin: 0 -22px !important;
+  padding: 14px 22px 12px !important;
+  border-bottom: 1px solid var(--line) !important;
+  background: rgba(12, 11, 9, 0.82) !important;
+  backdrop-filter: blur(22px) saturate(1.25) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(1.25) !important;
+}
+
+#favBar,
+.custom-sort-wrap,
+#stickyBorder {
+  display: none !important;
+}
+
+#topRow {
+  display: grid !important;
+  grid-template-columns: minmax(240px, 1fr) auto auto !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 0 !important;
+  max-height: none !important;
+  overflow: visible !important;
+  border: 0 !important;
+}
+
+.search-wrap {
+  height: 46px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 0 14px !important;
+  border: 1px solid var(--line-strong) !important;
+  border-radius: var(--radius) !important;
+  background: rgba(24, 22, 18, 0.68) !important;
+}
+
+.search-wrap svg {
+  position: static !important;
+  transform: none !important;
+  color: var(--muted) !important;
+  flex: 0 0 auto;
+}
+
+.search-wrap input {
+  width: 100% !important;
+  border: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  color: var(--text) !important;
+  font-size: 1rem !important;
+  padding: 0 !important;
+  min-width: 0;
+}
+
+.filter-panel-btn,
+.text-btn {
+  height: 46px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 9px !important;
+  padding: 0 16px !important;
+  border-radius: var(--radius) !important;
+  white-space: nowrap;
+}
+
+.segmented {
+  height: 46px;
+  display: inline-grid;
+  grid-template-columns: repeat(2, minmax(82px, 1fr));
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: rgba(24, 22, 18, 0.68);
+}
+
+.seg-btn {
+  border: 0 !important;
+  border-radius: 6px !important;
+  background: transparent !important;
+  color: var(--muted) !important;
+  font-size: 0.82rem !important;
+}
+
+.seg-btn.active {
+  color: #151006 !important;
+  background: var(--gold) !important;
+  font-weight: 600 !important;
+}
+
+.live-active-row,
+.active-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 12px;
+}
+
+.chips {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.chips::-webkit-scrollbar { display: none; }
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 30px;
+  padding: 0 11px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.chip.selected {
+  border-color: rgba(239, 196, 90, 0.45);
+  background: rgba(239, 196, 90, 0.14);
+  color: var(--gold);
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: currentColor;
+  opacity: 0.88;
+  flex: 0 0 auto;
+}
+
+.result-count {
+  color: var(--muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+#catRow,
+#subCatRow,
+#typeRow,
+#starRow,
+#viewTabs {
+  margin-top: 8px;
+}
+
+#subCatRow:not(.has-subcategories) {
+  display: none !important;
+}
+
+.content {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 22px;
+  padding-top: 22px;
+}
+
+.main-column {
+  min-width: 0;
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(280px, 0.85fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.feature-card,
+.tonight-panel,
+.side-panel {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.feature-card {
+  min-height: 360px;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  background:
+    linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.12) 42%, rgba(8, 7, 5, 0.94) 100%),
+    radial-gradient(circle at 25% 28%, color-mix(in srgb, var(--feature-color, var(--gold)) 35%, #fff2bf) 0 6%, transparent 7%),
+    radial-gradient(circle at 66% 30%, rgba(186, 67, 57, 0.74) 0 11%, transparent 12%),
+    radial-gradient(circle at 58% 58%, rgba(43, 97, 70, 0.9) 0 13%, transparent 14%),
+    linear-gradient(135deg, #2d1d13, #6a3824 38%, #17100d 39%, #11100e 100%);
+}
+
+.feature-card::before,
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.26;
+  background:
+    linear-gradient(90deg, transparent 0 12%, rgba(255,255,255,0.18) 12.3% 12.8%, transparent 13% 100%),
+    radial-gradient(circle at 68% 23%, rgba(255,255,255,0.5), transparent 10rem);
+  mix-blend-mode: soft-light;
+  pointer-events: none;
+}
+
+.feature-copy {
+  width: 100%;
+  position: relative;
+  padding: 26px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 20px;
+  align-items: end;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  color: var(--gold);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.feature-copy h2 {
+  max-width: 720px;
+  margin: 0;
+  font-family: var(--serif);
+  font-size: clamp(2rem, 5vw, 4.5rem);
+  line-height: 0.94;
+  letter-spacing: 0;
+}
+
+.feature-copy p,
+.tonight-panel p {
+  color: var(--soft);
+  line-height: 1.6;
+}
+
+.feature-copy p {
+  max-width: 540px;
+  margin: 12px 0 0;
+  font-size: 1rem;
+}
+
+.feature-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.meta-pill {
+  display: inline-flex;
+  min-height: 28px;
+  align-items: center;
+  padding: 0 10px;
+  border: 1px solid rgba(255,255,255,0.13);
+  border-radius: 999px;
+  background: rgba(0,0,0,0.28);
+  color: var(--soft);
+  font-size: 0.74rem;
+}
+
+.feature-score {
+  display: grid;
+  gap: 8px;
+  justify-items: end;
+  color: var(--soft);
+}
+
+.feature-route {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  text-decoration: none;
+}
+
+.mini-map {
+  width: 164px;
+  aspect-ratio: 1.45;
+  position: relative;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(110deg, transparent 0 31%, rgba(239,196,90,0.24) 31.4% 32.4%, transparent 33% 100%),
+    linear-gradient(15deg, transparent 0 47%, rgba(255,255,255,0.12) 47.4% 48.2%, transparent 48.8% 100%),
+    radial-gradient(circle at 46% 52%, var(--rose) 0 4px, transparent 5px),
+    radial-gradient(circle at 72% 38%, var(--green) 0 3px, transparent 4px),
+    radial-gradient(circle at 24% 68%, var(--blue) 0 3px, transparent 4px),
+    #15130f;
+}
+
+.tonight-panel {
+  padding: 22px;
+  min-height: 360px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background:
+    linear-gradient(160deg, rgba(239,196,90,0.08), transparent 44%),
+    rgba(24, 22, 18, 0.82);
+}
+
+.tonight-panel h2,
+.side-panel h2 {
+  margin: 0;
+  font-family: 'Bebas Neue', sans-serif;
+  color: var(--gold);
+  font-size: 2rem;
+  letter-spacing: 0.1em;
+  line-height: 0.95;
+}
+
+.choice-card {
+  margin: 26px 0;
+  padding: 18px;
+  border: 1px solid rgba(239,196,90,0.22);
+  border-radius: var(--radius);
+  background: rgba(239,196,90,0.06);
+}
+
+.choice-name {
+  font-family: var(--serif);
+  font-size: 1.55rem;
+  line-height: 1;
+}
+
+.choice-detail {
+  margin-top: 10px;
+  color: var(--soft);
+  line-height: 1.5;
+}
+
+.panel-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+}
+
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 18px;
+  margin: 0 0 12px;
+}
+
+.section-head h2 {
+  margin: 0;
+  font-family: 'Bebas Neue', sans-serif;
+  color: var(--text);
+  font-size: 2rem;
+  letter-spacing: 0.11em;
+  line-height: 1;
+}
+
+.section-head p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+#countBar {
+  padding: 0 !important;
+  white-space: nowrap;
+}
+
+.spots-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 16px !important;
+  padding: 0 0 90px !important;
+}
+
+.card {
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  border: 1px solid var(--line) !important;
+  border-radius: var(--radius) !important;
+  background: var(--panel) !important;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  transition: transform 170ms ease, border-color 170ms ease, background 170ms ease;
+  padding: 0 !important;
+}
+
+.card:hover {
+  transform: translateY(-2px) !important;
+  border-color: rgba(239, 196, 90, 0.28) !important;
+  background: rgba(31, 28, 22, 0.9) !important;
+}
+
+.card.no-photo {
+  padding-top: 132px !important;
+}
+
+.card.no-photo::before {
+  inset: 0 0 auto 0 !important;
+  height: 132px !important;
+  width: 100% !important;
+  opacity: 1 !important;
+  background:
+    radial-gradient(circle at 72% 20%, rgba(255,223,142,0.52), transparent 9%),
+    radial-gradient(circle at 40% 60%, color-mix(in srgb, var(--card-color) 64%, #d44d3d) 0 18%, transparent 19%),
+    radial-gradient(circle at 58% 44%, rgba(245,205,126,0.42), transparent 22%),
+    linear-gradient(140deg, #4f2a19, #18100b 52%, #0d0c0a) !important;
+  mix-blend-mode: normal !important;
+}
+
+.card-photo,
+.card.has-photo .card-photo {
+  min-height: 132px !important;
+  height: 132px !important;
+  width: 100% !important;
+  object-fit: cover !important;
+  position: relative;
+}
+
+.card-photo::after,
+.card.no-photo::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 60%;
+  background: linear-gradient(180deg, transparent, rgba(13,11,8,0.82));
+}
+
+.card-top,
+.card.has-photo .card-top {
+  margin-top: 0 !important;
+  background: transparent !important;
+  padding: 15px 15px 0 !important;
+}
+
+.card-title-block {
+  padding-right: 42px !important;
+}
+
+.card-name {
+  margin: 0;
+  color: var(--text) !important;
+  font-size: 1.05rem !important;
+  font-weight: 600 !important;
+  line-height: 1.22 !important;
+}
+
+.card-actions {
+  position: absolute;
+  top: 146px;
+  right: 13px;
+  display: inline-flex !important;
+  gap: 4px !important;
+  opacity: 0.72;
+  z-index: 3;
+}
+
+.card.has-photo .card-actions {
+  top: 146px;
+}
+
+.card-location {
+  padding: 8px 15px 0 !important;
+}
+
+.card-location-link {
+  color: var(--muted) !important;
+  font-size: 0.76rem;
+}
+
+.card-note {
+  padding: 10px 15px 0 !important;
+  color: var(--soft) !important;
+  opacity: 1 !important;
+}
+
+.card-collections {
+  padding: 10px 15px 0;
+}
+
+.card-footer {
+  margin-top: auto;
+  padding: 14px 15px 15px !important;
+}
+
+.card-badges {
+  justify-content: flex-end;
+}
+
+.ctag,
+.been-btn,
+.coll-tag {
+  border-radius: 999px !important;
+}
+
+.side-column {
+  display: grid;
+  gap: 16px;
+  align-content: start;
+  position: sticky;
+  top: 128px;
+}
+
+.side-panel {
+  padding: 18px;
+}
+
+.side-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.side-item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+}
+
+.side-number {
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #151006;
+  background: var(--gold);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.side-item strong {
+  display: block;
+  font-size: 0.9rem;
+  line-height: 1.25;
+}
+
+.side-item span {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 0.74rem;
+}
+
+.list-mode .spots-grid {
+  grid-template-columns: 1fr !important;
+}
+
+.list-mode .card {
+  min-height: 180px;
+  display: grid;
+  grid-template-columns: 190px minmax(0, 1fr);
+  padding-top: 0 !important;
+}
+
+.list-mode .card.no-photo::before {
+  height: 100% !important;
+  width: 190px !important;
+  inset: 0 auto 0 0 !important;
+}
+
+.list-mode .card-photo {
+  height: 100% !important;
+  min-height: 100% !important;
+}
+
+.list-mode .card-actions {
+  top: 14px;
+}
+
+.list-mode .card-top,
+.list-mode .card-location,
+.list-mode .card-note,
+.list-mode .card-collections,
+.list-mode .card-footer {
+  grid-column: 2;
+}
+
+@media (max-width: 1180px) {
+  .content {
+    grid-template-columns: 1fr;
+  }
+
+  .side-column {
+    position: static;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .spots-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .app-shell {
+    padding: 12px 14px 92px;
+  }
+
+  header.topbar {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+    padding-bottom: 14px !important;
+  }
+
+  .topbar .header-inner {
+    justify-content: space-between !important;
+  }
+
+  .topbar h1 {
+    font-size: 2.72rem !important;
+    letter-spacing: 0.13em !important;
+  }
+
+  .topbar .sub {
+    font-size: 0.62rem !important;
+    letter-spacing: 0.22em !important;
+  }
+
+  .header-actions {
+    display: none !important;
+  }
+
+  #stickyBar {
+    margin: 0 -14px !important;
+    padding: 10px 14px !important;
+  }
+
+  #topRow {
+    grid-template-columns: 1fr auto !important;
+  }
+
+  .segmented {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .live-active-row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 9px;
+  }
+
+  .content {
+    padding-top: 14px;
+  }
+
+  .feature-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .feature-card {
+    min-height: 430px;
+  }
+
+  .feature-copy {
+    grid-template-columns: 1fr;
+    padding: 20px;
+  }
+
+  .feature-copy h2 {
+    font-size: 2.55rem;
+  }
+
+  .feature-score {
+    justify-items: start;
+  }
+
+  .tonight-panel {
+    min-height: 0;
+  }
+
+  .section-head {
+    align-items: start;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .spots-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .side-column {
+    display: none;
+  }
+
+  .list-mode .card {
+    grid-template-columns: 116px minmax(0, 1fr);
+  }
+
+  .list-mode .card.no-photo::before {
+    width: 116px !important;
+  }
+}
+
+/* Preview-faithful live cards and filter drawer */
+.add-btn {
+  display: none !important;
+}
+
+.drawer {
+  position: fixed;
+  inset: 0 0 0 auto;
+  width: min(420px, 100%);
+  z-index: 120;
+  padding: 22px;
+  background: rgba(18, 16, 12, 0.94);
+  border-left: 1px solid var(--line-strong);
+  box-shadow: -30px 0 90px rgba(0,0,0,0.45);
+  transform: translateX(104%);
+  transition: transform 240ms ease;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  overflow-y: auto;
+}
+
+.drawer.open {
+  transform: translateX(0);
+}
+
+.drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 110;
+  background: rgba(5, 4, 3, 0.48);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms ease;
+}
+
+.drawer-backdrop.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.drawer-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.drawer-head h2 {
+  margin: 0;
+  color: var(--gold);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2rem;
+  letter-spacing: 0.12em;
+}
+
+.drawer-close {
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.035);
+  color: var(--soft);
+  cursor: pointer;
+}
+
+.filter-group {
+  padding: 18px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.filter-group h3 {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.filter-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.drawer-sub-grid {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.drawer-chip.selected {
+  border-color: color-mix(in srgb, var(--chip-color, var(--gold)) 46%, transparent);
+  background: color-mix(in srgb, var(--chip-color, var(--gold)) 14%, transparent);
+  color: var(--chip-color, var(--gold));
+}
+
+.drawer-footer {
+  border-bottom: 0;
+}
+
+.drawer-clear {
+  width: 100%;
+}
+
+.spots-grid {
+  padding-bottom: 90px !important;
+}
+
+.feature-card,
+.tonight-panel,
+.spot-card,
+.side-panel {
+  border: 1px solid var(--line) !important;
+  border-radius: var(--radius) !important;
+  background: var(--panel) !important;
+  box-shadow: var(--shadow) !important;
+  overflow: hidden;
+}
+
+.spot-card.card {
+  min-height: 214px;
+  display: flex;
+  flex-direction: column;
+  padding: 0 !important;
+  transition: transform 170ms ease, border-color 170ms ease, background 170ms ease;
+}
+
+.spot-card.card::before,
+.spot-card.card.no-photo::before,
+.spot-card.card.has-photo::before {
+  display: none !important;
+}
+
+.spot-card.card:hover {
+  transform: translateY(-2px) !important;
+  border-color: rgba(239, 196, 90, 0.28) !important;
+  background: rgba(31, 28, 22, 0.9) !important;
+}
+
+.spot-photo {
+  min-height: 132px;
+  height: 132px;
+  position: relative;
+  overflow: hidden;
+  background: var(--photo-bg);
+  flex: 0 0 auto;
+}
+
+.spot-photo::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.26;
+  background:
+    linear-gradient(90deg, transparent 0 12%, rgba(255,255,255,0.18) 12.3% 12.8%, transparent 13% 100%),
+    radial-gradient(circle at 68% 23%, rgba(255,255,255,0.5), transparent 10rem);
+  mix-blend-mode: soft-light;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.spot-photo::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 60%;
+  background: linear-gradient(180deg, transparent, rgba(13,11,8,0.82));
+  z-index: 2;
+}
+
+.spot-photo img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.photo-1 {
+  --photo-bg:
+    radial-gradient(circle at 72% 20%, rgba(255,223,142,0.76), transparent 9%),
+    radial-gradient(circle at 40% 60%, color-mix(in srgb, var(--card-color, #d44d3d) 72%, #d44d3d), transparent 18%),
+    radial-gradient(circle at 58% 44%, rgba(245,205,126,0.76), transparent 22%),
+    linear-gradient(140deg, #4f2a19, #18100b 52%, #0d0c0a);
+}
+
+.photo-2 {
+  --photo-bg:
+    radial-gradient(circle at 22% 28%, rgba(255,233,180,0.72), transparent 10%),
+    radial-gradient(circle at 66% 60%, rgba(123,184,162,0.62), transparent 24%),
+    linear-gradient(130deg, #243022, #734426 55%, #120e0b);
+}
+
+.photo-3 {
+  --photo-bg:
+    radial-gradient(circle at 44% 32%, rgba(246,198,110,0.78), transparent 11%),
+    radial-gradient(circle at 74% 62%, rgba(211,89,116,0.62), transparent 20%),
+    linear-gradient(135deg, #3c2532, #19100f 50%, #0d0c0b);
+}
+
+.spot-card.card .card-top {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  gap: 12px !important;
+  align-items: start !important;
+  padding: 15px 15px 0 !important;
+}
+
+.spot-card.card .card-title-block {
+  min-width: 0;
+  padding-right: 0 !important;
+}
+
+.spot-card.card .card-name {
+  margin: 0 !important;
+  color: var(--text) !important;
+  font-size: 1.05rem !important;
+  font-weight: 600 !important;
+  line-height: 1.22 !important;
+}
+
+.spot-card.card .card-actions {
+  position: static !important;
+  display: inline-flex !important;
+  gap: 4px !important;
+  opacity: 0.76;
+  z-index: 3;
+}
+
+.spot-card.card .card-actions .icon-btn,
+.spot-card.card .card-actions .want-btn,
+.spot-action {
+  width: 30px !important;
+  height: 30px !important;
+  border: 1px solid var(--line-strong) !important;
+  border-radius: 999px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: rgba(255,255,255,0.035) !important;
+  color: var(--soft) !important;
+  padding: 0 !important;
+}
+
+.spot-card.card .fav-btn-card.on,
+.spot-card.card .want-btn.on {
+  color: var(--rose) !important;
+  border-color: rgba(228,118,121,0.36) !important;
+  background: rgba(228,118,121,0.09) !important;
+  opacity: 1;
+}
+
+.spot-card.card .card-location {
+  padding: 7px 15px 0 !important;
+}
+
+.card-location-link {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  color: var(--muted) !important;
+  font-size: 0.76rem;
+  line-height: 1.35;
+  text-decoration: none;
+}
+
+.spot-card.card .spot-note {
+  margin: 0;
+  padding: 10px 15px 0 !important;
+  color: var(--soft);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.spot-card.card .card-collections {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px 15px 0;
+}
+
+.spot-card.card .card-footer {
+  margin-top: auto;
+  padding: 14px 15px 15px !important;
+  display: grid;
+  gap: 10px;
+}
+
+.spot-card.card .card-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-start;
+}
+
+.tag,
+.ctag,
+.been-btn,
+.goback-btn,
+.coll-tag {
+  display: inline-flex !important;
+  align-items: center !important;
+  min-height: 24px !important;
+  padding: 0 8px !important;
+  border: 1px solid rgba(255,255,255,0.12) !important;
+  border-radius: 999px !important;
+  background: rgba(255,255,255,0.035) !important;
+  color: var(--soft) !important;
+  font-size: 0.66rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+}
+
+.ctag {
+  color: var(--tag-color, var(--gold)) !important;
+  border-color: color-mix(in srgb, var(--tag-color, var(--gold)) 34%, transparent) !important;
+  background: color-mix(in srgb, var(--tag-color, var(--gold)) 8%, transparent) !important;
+}
+
+.been-btn.on,
+.goback-btn.yes {
+  color: var(--green) !important;
+  border-color: rgba(131,201,141,0.34) !important;
+  background: rgba(131,201,141,0.08) !important;
+}
+
+.goback-btn.no {
+  color: var(--rose) !important;
+  border-color: rgba(228,118,121,0.34) !important;
+  background: rgba(228,118,121,0.08) !important;
+}
+
+.spot-card.card .card-stars {
+  justify-content: flex-start;
+  gap: 2px;
+}
+
+.list-mode .spot-card.card {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 190px minmax(0, 1fr);
+}
+
+.list-mode .spot-card.card .spot-photo {
+  min-height: 100%;
+  height: 100%;
+  grid-row: 1 / span 5;
+}
+
+@media (max-width: 760px) {
+  .drawer {
+    width: 100%;
+  }
+
+  .list-mode .spot-card.card {
+    grid-template-columns: 116px minmax(0, 1fr);
+  }
 }
 /* ===== END VISUAL OVERRIDES ===== */
 </style>
