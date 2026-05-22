@@ -958,6 +958,37 @@ input, textarea, select {
   width: 100% !important;
   padding: 12px 14px 4px !important;
 }
+
+/* List mode - name should NOT break within words */
+.list-mode .card-name {
+  word-break: normal !important;
+  overflow-wrap: normal !important;
+  hyphens: none !important;
+  font-size: 0.9rem !important;
+  line-height: 1.28 !important;
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+.list-mode .card-top {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+/* FINAL card-name - no word breaking, no line clamping */
+.card-name,
+.list-mode .card-name,
+#app:not(.list-mode) .card-name {
+  word-break: normal !important;
+  overflow-wrap: normal !important;
+  hyphens: none !important;
+  white-space: normal !important;
+  display: block !important;
+  overflow: visible !important;
+  -webkit-line-clamp: unset !important;
+  max-width: 100% !important;
+  width: 100% !important;
+}
 </style>
 </head>
 <body>
