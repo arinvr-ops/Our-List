@@ -6159,6 +6159,192 @@ header.topbar {
     grid-template-columns: 116px minmax(0, 1fr);
   }
 }
+
+/* Requested compact card layout: [Photo] | Name / Address / actions / stars + tags */
+.spot-card.card {
+  min-height: 132px !important;
+  display: grid !important;
+  grid-template-columns: 108px minmax(0, 1fr) !important;
+  grid-template-rows: auto auto auto !important;
+  position: relative !important;
+  padding: 0 !important;
+}
+
+.spots-grid {
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)) !important;
+}
+
+.spot-card.card .spot-photo {
+  grid-column: 1 !important;
+  grid-row: 1 / -1 !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 132px !important;
+  align-self: stretch !important;
+  border-right: 1px solid var(--line) !important;
+}
+
+.spot-card.card .card-top {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  display: block !important;
+  min-width: 0 !important;
+  padding: 13px 152px 0 14px !important;
+}
+
+.spot-card.card .card-title-block {
+  min-width: 0 !important;
+  padding: 0 !important;
+}
+
+.spot-card.card .card-name {
+  display: block !important;
+  min-width: 0 !important;
+  width: auto !important;
+  max-width: none !important;
+  color: var(--text) !important;
+  font-size: 1rem !important;
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+  overflow-wrap: anywhere !important;
+}
+
+.spot-card.card .visited-label {
+  margin-top: 4px !important;
+  color: var(--muted) !important;
+  font-size: 0.68rem !important;
+}
+
+.spot-card.card .card-actions {
+  position: absolute !important;
+  top: 10px !important;
+  right: 10px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 3px !important;
+  opacity: 1 !important;
+  z-index: 5 !important;
+}
+
+.spot-card.card .card-actions .icon-btn,
+.spot-card.card .card-actions .want-btn,
+.spot-card.card .card-actions .link-btn {
+  width: 25px !important;
+  height: 25px !important;
+  min-width: 25px !important;
+  border-radius: 999px !important;
+}
+
+.spot-card.card .card-actions .ui-icon {
+  width: 14px !important;
+  height: 14px !important;
+}
+
+.spot-card.card .card-location {
+  grid-column: 2 !important;
+  grid-row: 2 !important;
+  min-width: 0 !important;
+  padding: 5px 14px 0 !important;
+}
+
+.spot-card.card .card-location-link {
+  max-width: 100% !important;
+  color: var(--muted) !important;
+  font-size: 0.75rem !important;
+  line-height: 1.35 !important;
+}
+
+.spot-card.card .card-location-link span {
+  min-width: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.spot-card.card .spot-note,
+.spot-card.card .card-collections {
+  display: none !important;
+}
+
+.spot-card.card .card-footer {
+  grid-column: 2 !important;
+  grid-row: 3 !important;
+  align-self: end !important;
+  margin: 0 !important;
+  padding: 8px 14px 13px !important;
+}
+
+.spot-card.card .card-badges {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  flex-wrap: wrap !important;
+  gap: 6px !important;
+}
+
+.spot-card.card .card-stars {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 1px !important;
+  margin-right: 3px !important;
+  white-space: nowrap !important;
+}
+
+.spot-card.card .card-stars .s {
+  font-size: 0.72rem !important;
+  line-height: 1 !important;
+}
+
+.spot-card.card .ctag,
+.spot-card.card .been-btn,
+.spot-card.card .goback-btn {
+  min-height: 22px !important;
+  padding: 0 8px !important;
+  font-size: 0.62rem !important;
+  line-height: 1 !important;
+}
+
+.list-mode .spot-card.card {
+  grid-template-columns: 132px minmax(0, 1fr) !important;
+  min-height: 136px !important;
+}
+
+.list-mode .spot-card.card .spot-photo {
+  min-height: 136px !important;
+  height: auto !important;
+}
+
+.list-mode .spot-card.card .card-top {
+  padding-right: 150px !important;
+}
+
+@media (max-width: 520px) {
+  .spot-card.card {
+    min-height: 128px !important;
+    grid-template-columns: 92px minmax(0, 1fr) !important;
+  }
+
+  .spots-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .spot-card.card .spot-photo {
+    min-height: 128px !important;
+  }
+
+  .spot-card.card .card-top {
+    padding-right: 14px !important;
+  }
+
+  .spot-card.card .card-actions .icon-btn,
+  .spot-card.card .card-actions .want-btn,
+  .spot-card.card .card-actions .link-btn {
+    width: 23px !important;
+    height: 23px !important;
+    min-width: 23px !important;
+  }
+}
 /* ===== END VISUAL OVERRIDES ===== */
 </style>
 
