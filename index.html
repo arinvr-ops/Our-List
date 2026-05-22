@@ -414,8 +414,14 @@ select {
   display: flex; justify-content: space-between; align-items: center;
   gap: 6px; flex-wrap: wrap;
   padding: 4px 14px 12px;
+
+  position: relative;
+  z-index: 2;
 }
-.card-stars { display: flex; gap: 2px; }
+.card-stars { display: flex; gap: 2px; 
+  position: relative;
+  z-index: 2;
+}
 .card-stars .s {
   font-size: 0.88rem; cursor: pointer;
   color: #2a2820; transition: color 0.1s; line-height: 1;
@@ -425,7 +431,10 @@ select {
   text-shadow: 0 0 8px rgba(240,180,41,0.65), 0 0 18px rgba(240,180,41,0.25);
 }
 
-.card-badges { display: flex; gap: 5px; align-items: center; flex-wrap: wrap; }
+.card-badges { display: flex; gap: 5px; align-items: center; flex-wrap: wrap; 
+  position: relative;
+  z-index: 2;
+}
 .ctag {
   font-size: 0.6rem; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase;
   padding: 3px 8px; border-radius: 4px; border: 1px solid; cursor: pointer;
@@ -781,6 +790,24 @@ input, textarea, select {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(232,184,75,0.3); border-radius: 2px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(232,184,75,0.5); }
+
+/* FORCE INTERACTIVE ELEMENTS ABOVE ALL OVERLAYS */
+.card-footer,
+.card-badges,
+.card-stars,
+.card-actions,
+.been-btn,
+.ctag,
+.goback-btn,
+.want-btn,
+.icon-btn,
+.card-location,
+.card-location-link,
+.s {
+  position: relative !important;
+  z-index: 10 !important;
+  pointer-events: auto !important;
+}
 </style>
 </head>
 <body>
@@ -961,10 +988,7 @@ input, textarea, select {
 
       <aside class="tonight-panel">
         <div>
-          <div class="eyebrow"><span class="dot"></span>Surprise me</div>
-          <h2>Low-friction decision</h2>
-          
-        </div>
+          </div>
         <div class="choice-card">
           <div class="choice-name" id="choiceName">Surprise me</div>
           <div class="choice-detail" id="choiceDetail">Spin from the currently filtered list.</div>
@@ -979,7 +1003,7 @@ input, textarea, select {
     <section class="spots-section">
       <div class="section-head">
         <div>
-          <h2>Saved Spots</h2>
+          
           
         </div>
         <div id="countBar"></div>
@@ -1202,7 +1226,7 @@ input, textarea, select {
       <button class="btn btn-primary" onclick="saveSpot()">Save</button>
     </div>
     <div class="modal-btns" id="modalBtnsConfirm" style="display:none">
-      <p style="width:100%;text-align:center;font-size:0.82rem;color:var(--muted);margin-bottom:8px;">Remove this spot for good?</p>
+      
       <button class="btn btn-secondary" onclick="hideDeleteConfirm()">Keep it</button>
       <button class="btn btn-danger" onclick="deleteSpot()">Yes, delete</button>
     </div>
@@ -5816,6 +5840,7 @@ header.topbar {
   position: absolute;
   inset: 0;
   opacity: 0.26;
+  pointer-events: none;
   background:
     linear-gradient(90deg, transparent 0 12%, rgba(255,255,255,0.18) 12.3% 12.8%, transparent 13% 100%),
     radial-gradient(circle at 68% 23%, rgba(255,255,255,0.5), transparent 10rem);
