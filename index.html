@@ -50,6 +50,8 @@ html, body {
   --c-african:     #e8784b;
   --c-other:       #888888;
 }
+::selection { background: transparent; }
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-weight: 300; min-height: 100vh; position: relative; isolation: isolate; }
 
@@ -395,6 +397,7 @@ select {
 .card-location {
   font-size: 0.7rem; color: var(--muted);
   padding: 0 14px 5px;
+  -webkit-tap-highlight-color: transparent;
 
   pointer-events: auto;
 }
@@ -466,15 +469,18 @@ select {
 .card-photo {
   width: 100%; height: 140px; object-fit: cover; object-position: center center;
   display: block; border-radius: 0;
+  pointer-events: none;
 }
 .card.has-photo .card-photo {
   height: 200px;
+  pointer-events: none;
 }
 /* Pull card-top up to overlay the bottom of the photo */
 .card.has-photo .card-top {
   margin-top: -70px;
   position: relative;
   z-index: 1;
+  pointer-events: none;
   background: linear-gradient(to bottom, transparent 0%, rgba(22,20,16,0.88) 46px, #161410 100%);
   padding: 16px 14px 6px;
 }
@@ -482,7 +488,12 @@ select {
   font-size: 1.08rem;
   font-weight: 600;
   text-shadow: 0 1px 10px rgba(0,0,0,0.9);
+  pointer-events: auto;
 }
+.card.has-photo .card-location,
+.card.has-photo .card-footer,
+.card.has-photo .card-badges,
+.card.has-photo .card-actions { pointer-events: auto; }
 /* Cover photo for elements after the overlay */
 .card.has-photo .card-location,
 .card.has-photo .card-note,
@@ -667,7 +678,8 @@ select {
 .overlay.open { display: block; }
 .modal {
   background: var(--card); border: 1px solid var(--border);
-  border-radius: 16px 16px 0 0; padding: 18px 18px env(safe-area-inset-bottom, 28px);
+  border-radius: 16px 16px 0 0;
+  padding: 18px 18px 80px;
   position: fixed; bottom: 0; left: 0; right: 0;
   max-height: 90dvh; overflow-y: auto; overflow-x: hidden;
   -webkit-overflow-scrolling: touch; box-sizing: border-box;
@@ -952,7 +964,7 @@ input, textarea, select {
         <div>
           <div class="eyebrow"><span class="dot"></span>Surprise me</div>
           <h2>Low-friction decision</h2>
-          <p>Use the same synced list, but make choosing the next spot feel polished instead of busy.</p>
+          
         </div>
         <div class="choice-card">
           <div class="choice-name" id="choiceName">Surprise me</div>
@@ -969,7 +981,7 @@ input, textarea, select {
       <div class="section-head">
         <div>
           <h2>Saved Spots</h2>
-          <p id="sectionSubhead">Cleaner cards, calmer color, and the same live data.</p>
+          
         </div>
         <div id="countBar"></div>
       </div>
@@ -4445,6 +4457,7 @@ input[type="text"],
 .card.has-photo .card-photo {
   height: 168px !important;
   border-radius: 0 !important;
+  pointer-events: none;
 }
 
 .card.has-photo .card-top {
@@ -4548,7 +4561,13 @@ input[type="text"],
   color: var(--muted-light) !important;
   text-decoration: none !important;
   font-size: 0.76rem;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
   line-height: 1.35;
+
+  pointer-events: auto;
+  position: relative;
+  z-index: 5;
 }
 
 .card-location-link .ui-icon {
@@ -5352,6 +5371,7 @@ header.topbar {
   width: 100% !important;
   object-fit: cover !important;
   position: relative;
+  pointer-events: none;
 }
 
 .card-photo::after,
@@ -5405,6 +5425,10 @@ header.topbar {
 .card-location-link {
   color: var(--muted) !important;
   font-size: 0.76rem;
+
+  pointer-events: auto;
+  position: relative;
+  z-index: 5;
 }
 
 .card-note {
@@ -5503,6 +5527,7 @@ header.topbar {
 .list-mode .card-photo {
   height: 100% !important;
   min-height: 100% !important;
+  pointer-events: none;
 }
 
 .list-mode .card-actions {
@@ -5904,6 +5929,10 @@ header.topbar {
   font-size: 0.76rem;
   line-height: 1.35;
   text-decoration: none;
+
+  pointer-events: auto;
+  position: relative;
+  z-index: 5;
 }
 
 .spot-card.card .spot-note {
