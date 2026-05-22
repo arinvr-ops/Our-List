@@ -3082,29 +3082,30 @@ function render() {
     <article class="spot-card card${s.photo?' has-photo':' no-photo'}" data-cat="${s.cat}" style="--card-color:${color};">
       ${photo}
       <div class="card-top">
-        <div class="card-name">${htmlText(s.name)}</div>
-        ${visitedLabel}
+        <div class="card-title-block">
+          <div class="card-name">${htmlText(s.name)}</div>
+          ${visitedLabel}
+        </div>
+        <div class="card-actions">
+          <button class="icon-btn fav-btn-card${s.fav?' on':''}" data-action="fav" data-id="${s.id}" title="Favorite"><svg class="ui-icon"><use href="#i-heart"></use></svg></button>
+          <button class="want-btn${s.want?' on':''}" data-action="want" data-id="${s.id}" title="Want to go"><svg class="ui-icon"><use href="#i-flame"></use></svg></button>
+          <button class="icon-btn" data-action="edit" data-id="${s.id}" title="Edit"><svg class="ui-icon"><use href="#i-edit"></use></svg></button>
+          <button class="icon-btn" data-action="share" data-id="${s.id}" title="Share"><svg class="ui-icon"><use href="#i-share"></use></svg></button>
+          ${s.link ? `<a class="icon-btn link-btn" href="${htmlAttr(s.link)}" target="_blank" rel="noopener" title="Open link" onclick="event.stopPropagation()"><svg class="ui-icon"><use href="#i-link"></use></svg></a>` : ''}
+        </div>
       </div>
       ${loc}${note}
       ${colls ? `<div class="card-collections">${colls}</div>` : ''}
       <div class="card-footer">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-          <div class="card-stars${rating ? ' rated' : ' unrated'}" aria-label="${rating ? rating + ' star rating' : 'Tap to rate'}">${stars}</div>
-          <div class="card-actions">
-            <button class="want-btn${s.want?' on':''}" data-action="want" data-id="${s.id}" title="Want to go"><svg class="ui-icon"><use href="#i-flame"></use></svg></button>
-            <button class="icon-btn" data-action="edit" data-id="${s.id}" title="Edit"><svg class="ui-icon"><use href="#i-edit"></use></svg></button>
-            <button class="icon-btn" data-action="share" data-id="${s.id}" title="Share"><svg class="ui-icon"><use href="#i-share"></use></svg></button>
-            <button class="icon-btn fav-btn-card${s.fav?' on':''}" data-action="fav" data-id="${s.id}" title="Favorite"><svg class="ui-icon"><use href="#i-heart"></use></svg></button>
-          ${s.link ? `<a class="icon-btn link-btn" href="${htmlAttr(s.link)}" target="_blank" rel="noopener" title="Open link" onclick="event.stopPropagation()"><svg class="ui-icon"><use href="#i-link"></use></svg></a>` : ''}
-          </div>
-        </div>
         <div class="card-badges">
+          <div class="card-stars${rating ? ' rated' : ' unrated'}">${stars}</div>
           <span class="ctag" data-action="filter" data-cuisine="${htmlAttr(cuisineLabel)}" style="--tag-color:${color};">${htmlText(cuisineLabel)}</span>
           <button class="been-btn${s.been?' on':''}" data-action="been" data-id="${s.id}">${s.been?'✓ Been':'Been?'}</button>
           ${s.been ? `
             <button class="goback-btn${s.goback===true?' yes':''}" data-action="goback-yes" data-id="${s.id}" title="Worth it">✓</button>
             <button class="goback-btn${s.goback===false?' no':''}" data-action="goback-no" data-id="${s.id}" title="Once was enough">×</button>
           ` : ''}
+
         </div>
       </div>
     </article>`;
