@@ -304,7 +304,7 @@ header .sub {
   width: 56px; height: 56px; border-radius: 50%;
   background: var(--accent); border: none;
   color: #0c0b09; font-size: 1.7rem; font-weight: 300; line-height: 1;
-  cursor: pointer; z-index: 90;
+  cursor: pointer; z-index: 50;
   display: flex; align-items: center; justify-content: center;
   box-shadow: 0 4px 20px rgba(232,184,75,0.5), 0 2px 8px rgba(0,0,0,0.5);
   transition: transform 0.15s, box-shadow 0.15s;
@@ -367,7 +367,7 @@ select {
   padding: 0;
   transition: all 0.2s cubic-bezier(0.22,1,0.36,1);
   position: relative;
-  overflow: hidden;
+  
   cursor: pointer;
 }
 .card:hover {
@@ -395,6 +395,8 @@ select {
 .card-location {
   font-size: 0.7rem; color: var(--muted);
   padding: 0 14px 5px;
+
+  pointer-events: auto;
 }
 .card-note {
   font-size: 0.82rem;
@@ -1199,9 +1201,12 @@ input, textarea, select {
 <aside class="drawer" id="filterDrawer" aria-label="Filters" aria-hidden="true">
   <div class="drawer-head">
     <h2>Filters</h2>
-    <button class="drawer-close" type="button" onclick="toggleFilterPanel(false)" title="Close filters">
-      <svg class="ui-icon"><use href="#i-x"></use></svg>
-    </button>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button onclick="clearFilters();toggleFilterPanel(false);" style="background:none;border:1px solid #e84b4b;color:#e84b4b;font-family:'DM Sans',sans-serif;font-size:0.72rem;padding:4px 10px;border-radius:20px;cursor:pointer;">✕ Clear all</button>
+      <button class="drawer-close" type="button" onclick="toggleFilterPanel(false)" title="Close filters">
+        <svg class="ui-icon"><use href="#i-x"></use></svg>
+      </button>
+    </div>
   </div>
   <div class="filter-group">
     <h3>Status</h3>
@@ -2464,6 +2469,8 @@ function ensureMapsLoaded() {
 }
 
 function openAdd() {
+  const fab = document.querySelector('.fab');
+  if (fab) fab.style.display = 'none';
   ensureMapsLoaded();
   populateAreaList();
   editingId = null; modalStars = 0;
@@ -2538,6 +2545,8 @@ function openEdit(id) {
 }
 
 function closeModal() {
+  const fab = document.querySelector('.fab');
+  if (fab) fab.style.display = '';
   _acWidget = null;
   document.getElementById('modal').classList.remove('open');
   const _nr = document.getElementById('nameResults'); if(_nr) _nr.style.display='none';
@@ -2920,9 +2929,12 @@ function render() {
       clearBtn = document.createElement('button');
       clearBtn.id = 'clearFiltersBtn';
       clearBtn.onclick = clearFilters;
-      clearBtn.style.cssText = 'background:none;border:1px solid #e84b4b;color:#e84b4b;font-family:"DM Sans",sans-serif;font-size:0.72rem;padding:3px 10px;border-radius:20px;cursor:pointer;white-space:nowrap;margin-left:8px;';
-      clearBtn.textContent = '✕ Clear filters';
-      document.getElementById('countBar').appendChild(clearBtn);
+      clearBtn.style.cssText = 'background:none;border:1px solid #e84b4b;color:#e84b4b;font-family:"DM Sans",sans-serif;font-size:0.72rem;padding:3px 10px;border-radius:20px;cursor:pointer;white-space:nowrap;flex-shrink:0;';
+      clearBtn.textContent = '✕ Clear';
+      // Add to typeRow so it's always visible in the filter row
+      const typeRow = document.getElementById('typeRow');
+      if (typeRow) typeRow.appendChild(clearBtn);
+      else document.getElementById('countBar').appendChild(clearBtn);
     }
   } else if (clearBtn) {
     clearBtn.remove();
@@ -4524,6 +4536,8 @@ input[type="text"],
 
 .card-location {
   padding: 0 16px 8px !important;
+
+  pointer-events: auto;
 }
 
 .card-location-link {
@@ -4542,6 +4556,8 @@ input[type="text"],
   height: 13px;
   margin-top: 1px;
   color: var(--accent);
+  pointer-events: none;
+  flex-shrink: 0;
 }
 
 .card-location-link:hover {
@@ -5301,7 +5317,7 @@ header.topbar {
   border-radius: var(--radius) !important;
   background: var(--panel) !important;
   box-shadow: var(--shadow);
-  overflow: hidden;
+  
   transition: transform 170ms ease, border-color 170ms ease, background 170ms ease;
   padding: 0 !important;
 }
@@ -5382,6 +5398,8 @@ header.topbar {
 
 .card-location {
   padding: 8px 15px 0 !important;
+
+  pointer-events: auto;
 }
 
 .card-location-link {
@@ -5874,6 +5892,8 @@ header.topbar {
 
 .spot-card.card .card-location {
   padding: 7px 15px 0 !important;
+
+  pointer-events: auto;
 }
 
 .card-location-link {
