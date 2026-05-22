@@ -875,14 +875,44 @@ input, textarea, select {
   overflow: hidden;
 }
 
-/* Fix name wrapping under absolute icons - add right padding */
-.card-top .card-name,
+/* Card name - 2 line clamp, no padding nonsense */
 .card-name {
-  padding-right: 160px !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  word-break: normal !important;
+  overflow-wrap: normal !important;
 }
-.card.has-photo .card-top .card-name,
-.card.has-photo .card-name {
-  padding-right: 160px !important;
+
+/* ICONS POSITION - absolute top right of card content area */
+.card-actions {
+  position: absolute !important;
+  top: 12px !important;
+  right: 12px !important;
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 3px !important;
+  opacity: 1 !important;
+  z-index: 10 !important;
+}
+.list-mode .card-actions {
+  top: 12px !important;
+  right: 12px !important;
+}
+.card.has-photo .card-actions {
+  top: 12px !important;
+  right: 12px !important;
+}
+
+/* Card name - 2 line clamp */
+.card-name {
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  max-width: calc(100% - 155px) !important;
+  word-break: normal !important;
 }
 </style>
 </head>
