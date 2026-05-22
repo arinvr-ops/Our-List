@@ -3095,6 +3095,7 @@ function render() {
             <button class="icon-btn" data-action="edit" data-id="${s.id}" title="Edit"><svg class="ui-icon"><use href="#i-edit"></use></svg></button>
             <button class="icon-btn" data-action="share" data-id="${s.id}" title="Share"><svg class="ui-icon"><use href="#i-share"></use></svg></button>
             <button class="icon-btn fav-btn-card${s.fav?' on':''}" data-action="fav" data-id="${s.id}" title="Favorite"><svg class="ui-icon"><use href="#i-heart"></use></svg></button>
+          ${s.link ? `<a class="icon-btn link-btn" href="${htmlAttr(s.link)}" target="_blank" rel="noopener" title="Open link" onclick="event.stopPropagation()"><svg class="ui-icon"><use href="#i-link"></use></svg></a>` : ''}
           </div>
         </div>
         <div class="card-badges">
@@ -3104,7 +3105,6 @@ function render() {
             <button class="goback-btn${s.goback===true?' yes':''}" data-action="goback-yes" data-id="${s.id}" title="Worth it">✓</button>
             <button class="goback-btn${s.goback===false?' no':''}" data-action="goback-no" data-id="${s.id}" title="Once was enough">×</button>
           ` : ''}
-          ${s.link ? `<a class="link-btn" href="${htmlAttr(s.link)}" target="_blank" rel="noopener" title="Open link" onclick="event.stopPropagation()"><svg class="ui-icon"><use href="#i-link"></use></svg></a>` : ''}
         </div>
       </div>
     </article>`;
