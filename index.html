@@ -989,31 +989,7 @@ input, textarea, select {
   max-width: 100% !important;
   width: 100% !important;
 }
-
-/* Leaflet popup dark theme */
-.leaflet-popup-content-wrapper {
-  background: #161410 !important;
-  border: 1px solid #2a2720 !important;
-  border-radius: 10px !important;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.6) !important;
-  padding: 0 !important;
-}
-.leaflet-popup-content {
-  margin: 0 !important;
-}
-.leaflet-popup-tip {
-  background: #161410 !important;
-}
-.leaflet-container {
-  background: #0c0b09 !important;
-  font-family: 'DM Sans', sans-serif !important;
-}
-.leaflet-tile {
-  filter: brightness(0.7) saturate(0.3) !important;
-}
 </style>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body>
 <svg class="icon-sprite" aria-hidden="true">
@@ -1512,108 +1488,6 @@ const CATS = [
   { key: 'other',        label: 'Other',         color: '#888888', parent: null },
 ];
 const CAT_MAP = Object.fromEntries(CATS.map(c => [c.key, c]));
-function initMap(spots) {
-  setTimeout(() => _renderLeafletMap(spots), 100);
-}
-
-function _renderLeafletMap(spots) {
-  const container = document.getElementById('mapContainer');
-  if (!container) return;
-  container.style.height = '100%';
-
-  const pinned = spots.filter(s => s.lat && s.lng);
-  const unpinned = spots.filter(s => !s.lat || !s.lng);
-
-  document.getElementById('mapCount').textContent =
-    pinned.length + ' pinned · ' + unpinned.length + ' unpinned';
-
-  if (window._leafletMap) { window._leafletMap.remove(); window._leafletMap = null; }
-
-  const center = pinned.length ? [pinned[0].lat, pinned[0].lng] : [45.5051, -122.6750];
-  const map = L.map(container, { zoomControl: true }).setView(center, 12);
-  window._leafletMap = map;
-
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap contributors', maxZoom: 19
-  }).addTo(map);
-
-  pinned.forEach(s => {
-    const color = catColor(s.cat);
-    const icon = L.divIcon({
-      className: '',
-      html: `<div style="width:14px;height:14px;border-radius:50%;background:${color};border:2px solid #0c0b09;box-shadow:0 2px 6px rgba(0,0,0,0.5);"></div>`,
-      iconSize: [14, 14], iconAnchor: [7, 7],
-    });
-    const mUrl = `https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}`;
-    const popup = L.popup({ className: 'map-popup' }).setContent(`
-      <div style="background:#161410;padding:10px 12px;border-radius:8px;color:#f2ede4;font-family:'DM Sans',sans-serif;min-width:160px;">
-        <div style="font-weight:600;font-size:0.92rem;margin-bottom:4px;">${htmlText(s.name)}</div>
-        ${s.location ? `<div style="font-size:0.74rem;margin-bottom:4px;"><a href="${mUrl}" target="_blank" style="color:#e8b84b;text-decoration:none;">📍 ${htmlText(s.location)}</a></div>` : ''}
-        ${s.note ? `<div style="font-size:0.76rem;color:#7a776e;">${htmlText(s.note)}</div>` : ''}
-      </div>
-    `);
-    L.marker([s.lat, s.lng], { icon }).addTo(map).bindPopup(popup);
-  });
-
-  if (pinned.length > 1) {
-    const bounds = L.latLngBounds(pinned.map(s => [s.lat, s.lng]));
-    map.fitBounds(bounds, { padding: [30, 30] });
-  }
-  renderMapSpotList(pinned, unpinned);
-}
-
-function openMapView() {
-  _mapAllSpots = getFilteredList();
-  document.getElementById('mapView').classList.add('open');
-  const locSelect = document.getElementById('mapLocFilter');
-  const locs = Array.from(new Set(_mapAllSpots.filter(s => s.area && s.area.trim()).map(s => s.area.trim()))).sort();
-  locSelect.innerHTML = '<option value="All">All areas</option>' +
-    locs.map(l => `<option value="${htmlAttr(l)}">📍 ${htmlText(l)}</option>`).join('');
-  filterMapSpots();
-}
-
-async function selectPlace(placeId, description) {
-  // Legacy stub
-  document.getElementById('placeResults').style.display = 'none';
-}
-
-function extractAreaFromNominatim(addr) {
-  if (addr.city === 'Portland') {
-    return addr.suburb || addr.neighbourhood || addr.quarter || 'Portland';
-  }
-  return addr.city || addr.town || addr.village || addr.suburb || null;
-}
-
-function selectPlaceNominatim(lat, lng, description) {
-  const res = document.getElementById('placeResults');
-  if (res) res.style.display = 'none';
-  const parts = description.split(',');
-  const shortAddr = parts.slice(0, -1).join(',').trim();
-  document.getElementById('mPlaceSearch').value = shortAddr;
-  document.getElementById('mLocation').value = shortAddr;
-  document.getElementById('mLat').value = lat;
-  document.getElementById('mLng').value = lng;
-  updateMiniMap(lat, lng);
-  reverseGeocodeArea(lat, lng);
-  showStatus('Location pinned - fields auto-filled');
-}
-
-
-async function reverseGeocodeArea(lat, lng) {
-  try {
-    const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1`;
-    const r = await fetch(url, { headers: { 'Accept-Language': 'en' } });
-    const data = await r.json();
-    if (!data.address) return;
-    const area = extractAreaFromNominatim(data.address);
-    if (area) {
-      const el = document.getElementById('mArea');
-      if (el) el.value = area;
-    }
-  } catch(e) { console.warn('Reverse geocode error:', e); }
-}
-
-
 function shareSpot(id) {
   const s = db.spots.find(x => x.id === id);
   if (!s) return;
@@ -2800,9 +2674,15 @@ function spinRandom() {
 
 // ---- MODAL ----
 function ensureMapsLoaded() {
-  // Replaced by Leaflet - no API key needed
+  // Maps loads eagerly on startup - this is just a safety check
+  if (window.google || MAPS_KEY === 'YOUR_GOOGLE_MAPS_KEY') return;
+  if (document.getElementById('gmaps-script')) return;
+  const script = document.createElement('script');
+  script.id = 'gmaps-script';
+  script.src = 'https://maps.googleapis.com/maps/api/js?key=' + MAPS_KEY + '&libraries=places,marker&loading=async&callback=_mapLoaded';
+  script.async = true;
+  document.head.appendChild(script);
 }
-
 
 function openAdd() {
   const fab = document.querySelector('.fab');
@@ -3348,29 +3228,71 @@ function render() {
 // ---- AUTO TAG AREAS ----
 async function autoTagAreas() {
   const btn = document.getElementById('autoTagBtn');
-  const pinned = db.spots.filter(s => s.lat && s.lng && (!s.area || !s.area.trim()));
-  if (!pinned.length) { showStatus('All pinned spots already have areas tagged'); return; }
 
+  // Ensure Maps is loaded before geocoding
+  if (!window.google) {
+    btn.textContent = '⏳ Loading Maps...';
+    btn.style.opacity = '0.6';
+    btn.style.pointerEvents = 'none';
+    await new Promise((resolve, reject) => {
+      const existing = document.getElementById('gmaps-script');
+      if (existing) {
+        // Script already added, just wait
+      } else {
+        const script = document.createElement('script');
+        script.id = 'gmaps-script';
+        script.src = 'https://maps.googleapis.com/maps/api/js?key=' + MAPS_KEY + '&libraries=places&callback=_mapsReadyForTag';
+        script.async = true;
+        document.head.appendChild(script);
+      }
+      window._mapsReadyForTag = resolve;
+      setTimeout(reject, 10000); // 10s timeout
+    }).catch(() => null);
+
+    if (!window.google) {
+      showStatus('Could not load Maps - check connection');
+      btn.textContent = '📍 Auto-tag areas';
+      btn.style.opacity = '1';
+      btn.style.pointerEvents = 'auto';
+      return;
+    }
+  }
+
+  const pinned = db.spots.filter(s => s.lat && s.lng && (!s.area || !s.area.trim()));
+  if (!pinned.length) {
+    showStatus('All pinned spots already have areas tagged');
+    return;
+  }
   btn.textContent = '⏳ Tagging...';
   btn.style.opacity = '0.6';
   btn.style.pointerEvents = 'none';
 
-  let tagged = 0, failed = 0;
+  let tagged = 0;
+  let failed = 0;
+
   for (const spot of pinned) {
     try {
-      const url = `https://nominatim.openstreetmap.org/reverse?lat=${spot.lat}&lon=${spot.lng}&format=json&addressdetails=1`;
-      const r = await fetch(url, { headers: { 'Accept-Language': 'en' } });
-      const data = await r.json();
-      if (data.address) {
-        const area = extractAreaFromNominatim(data.address);
-        if (area) {
-          spot.area = area;
-          await sbFetch('PATCH', 'spots?id=eq.' + spot.id, { area });
-          tagged++;
-        }
-      }
-      await new Promise(r => setTimeout(r, 1100)); // Nominatim rate limit: 1 req/sec
-    } catch(e) { failed++; }
+      await new Promise((resolve) => {
+        const geocoder = new google.maps.Geocoder();
+        geocoder.geocode({ location: { lat: spot.lat, lng: spot.lng } }, async (results, status) => {
+          if (status === 'OK' && results && results.length) {
+            const area = extractArea(results[0].address_components);
+            if (area) {
+              spot.area = area;
+              try {
+                await sbFetch('PATCH', 'spots?id=eq.' + spot.id, { area });
+                tagged++;
+              } catch(e) { failed++; }
+            }
+          }
+          resolve();
+        });
+      });
+      await new Promise(r => setTimeout(r, 200)); // Rate limit
+    } catch(e) {
+      failed++;
+      console.warn('Tag error for', spot.name, e);
+    }
   }
 
   btn.textContent = '📍 Auto-tag areas';
@@ -3381,38 +3303,2937 @@ async function autoTagAreas() {
   render();
 }
 
+// ---- PLACE SEARCH + MINI MAP ----
+let autocompleteService = null;
+let placesService = null;
+
+function initPlacesServices() {
+  if (!window.google || autocompleteService) return;
+  autocompleteService = new google.maps.places.AutocompleteService();
+  placesService = new google.maps.places.PlacesService(document.createElement('div'));
+}
+let miniMapInstance = null;
+let miniMapMarker = null;
+
+async function searchPlace(query) {
+  if (!query || query.length < 3) {
+    document.getElementById('placeResults').style.display = 'none';
+    return;
+  }
+  ensureMapsLoaded();
+  if (!window.google) {
+    // Maps not loaded yet - try again in 1 second
+    setTimeout(() => searchPlace(query), 1000);
+    return;
+  }
+  try {
+    const { AutocompleteSuggestion } = await google.maps.importLibrary('places');
+    const { suggestions } = await AutocompleteSuggestion.fetchAutocompleteSuggestions({
+      input: query,
+      locationBias: new google.maps.Circle({ center: { lat: 45.5051, lng: -122.6750 }, radius: 50000 }),
+    });
+    const res = document.getElementById('placeResults');
+    if (!suggestions || !suggestions.length) { res.style.display = 'none'; return; }
+    res.innerHTML = suggestions.slice(0,5).map(s => {
+      const text = s.placePrediction.text.toString();
+      const pid = s.placePrediction.placeId;
+      return `<div class="place-result-item"
+        data-pid="${pid}"
+        data-desc="${text.replace(/"/g,'&quot;')}"
+        style="padding:10px 14px;cursor:pointer;font-size:0.84rem;color:var(--text);border-bottom:1px solid var(--border);"
+        onmouseover="this.style.background='#2a2820'" onmouseout="this.style.background=''">
+        ${text}
+      </div>`;
+    }).join('');
+    res.onclick = e => {
+      const item = e.target.closest('.place-result-item');
+      if (!item) return;
+      selectPlace(item.dataset.pid, item.dataset.desc.replace(/&quot;/g,'"'));
+    };
+    res.style.display = 'block';
+  } catch(e) {
+    console.warn('Search error:', e);
+    document.getElementById('placeResults').style.display = 'none';
+  }
+}
+
+// Map Google place types to our categories
 async function searchPlaceFromName(query) {
   const res = document.getElementById('nameResults');
   if (!query || query.length < 2) { res.style.display = 'none'; return; }
+  ensureMapsLoaded();
+  if (!window.google) {
+    setTimeout(() => searchPlaceFromName(query), 500);
+    return;
+  }
   try {
-    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=5&countrycodes=us`;
-    const r = await fetch(url, { headers: { 'Accept-Language': 'en' } });
-    const results = await r.json();
-    if (!results.length) { res.style.display = 'none'; return; }
-    res.innerHTML = results.map(p =>
-      `<div class="name-result-item"
-        data-lat="${p.lat}" data-lng="${p.lon}"
-        data-desc="${(p.display_name || '').replace(/"/g,'&quot;')}"
-        data-name="${(p.name || p.display_name.split(',')[0] || '').replace(/"/g,'&quot;')}"
+    const { AutocompleteSuggestion } = await google.maps.importLibrary('places');
+    const { suggestions } = await AutocompleteSuggestion.fetchAutocompleteSuggestions({
+      input: query,
+      locationBias: new google.maps.Circle({ center: { lat: 45.5051, lng: -122.6750 }, radius: 50000 }),
+    });
+    if (!suggestions || !suggestions.length) { res.style.display = 'none'; return; }
+    res.innerHTML = suggestions.slice(0,5).map(s => {
+      const text = s.placePrediction.text.toString();
+      const pid = s.placePrediction.placeId;
+      return `<div class="name-result-item"
+        data-pid="${pid}"
+        data-desc="${text.replace(/"/g,'&quot;')}"
         style="padding:10px 14px;cursor:pointer;font-size:0.84rem;color:var(--text);border-bottom:1px solid var(--border);"
         onmouseover="this.style.background='#2a2820'" onmouseout="this.style.background=''">
-        ${p.display_name}
-      </div>`
-    ).join('');
+        ${text}
+      </div>`;
+    }).join('');
     res.style.display = 'block';
     res.onclick = e => {
       const item = e.target.closest('.name-result-item');
       if (!item) return;
       res.style.display = 'none';
-      const placeName = item.dataset.name.replace(/&quot;/g, '"');
+      const fullDesc = item.dataset.desc.replace(/&quot;/g, '"');
+      const placeName = fullDesc.split(',')[0].trim();
       document.getElementById('mName').value = placeName;
-      selectPlaceNominatim(
-        parseFloat(item.dataset.lat),
-        parseFloat(item.dataset.lng),
-        item.dataset.desc.replace(/&quot;/g, '"')
-      );
+      selectPlace(item.dataset.pid, fullDesc);
     };
-  } catch(e) { console.warn('Name search error:', e); }
+  } catch(e) {
+    console.warn('Name search error:', e);
+    res.style.display = 'none';
+  }
 }
 
+function populateAreaList() {
+  const areas = Array.from(new Set(db.spots.map(s => s.area).filter(Boolean))).sort();
+  const dl = document.getElementById('areaList');
+  if (dl) dl.innerHTML = areas.map(a => `<option value="${htmlAttr(a)}">`).join('');
+}
 
+function googleTypeToCategory(types) {
+  if (!types) return null;
+  const t = types.join(',');
+  if (t.includes('restaurant') || t.includes('food') || t.includes('meal') || t.includes('bakery') || t.includes('cafe') || t.includes('coffee') || t.includes('bar') || t.includes('night_club') || t.includes('pizza') || t.includes('sushi') || t.includes('ramen')) return 'food';
+  if (t.includes('lodging') || t.includes('hotel') || t.includes('resort')) return 'getaways';
+  if (t.includes('park') || t.includes('gym') || t.includes('stadium') || t.includes('amusement') || t.includes('bowling') || t.includes('spa')) return 'activities';
+  if (t.includes('natural_feature') || t.includes('campground') || t.includes('trail')) return 'hikes';
+  if (t.includes('store') || t.includes('shop') || t.includes('market') || t.includes('mall') || t.includes('clothing') || t.includes('book_store') || t.includes('furniture') || t.includes('jewelry')) return 'shopping';
+  if (t.includes('tourist_attraction') || t.includes('museum') || t.includes('art_gallery') || t.includes('place_of_worship') || t.includes('zoo') || t.includes('aquarium')) return 'activities';
+  return null;
+}
+
+function googleTypeToCuisine(types) {
+  if (!types) return '';
+  const t = types.join(',');
+  if (t.includes('bar') || t.includes('night_club')) return 'Bar';
+  if (t.includes('cafe') || t.includes('coffee')) return 'Coffee';
+  if (t.includes('bakery')) return 'Bakery';
+  if (t.includes('pizza')) return 'Pizza';
+  if (t.includes('japanese') || t.includes('sushi') || t.includes('ramen')) return 'Japanese';
+  if (t.includes('chinese')) return 'Chinese';
+  if (t.includes('mexican')) return 'Mexican';
+  if (t.includes('italian')) return 'Italian';
+  if (t.includes('thai')) return 'Thai';
+  if (t.includes('vietnamese')) return 'Vietnamese';
+  if (t.includes('indian')) return 'Indian';
+  if (t.includes('korean')) return 'Korean';
+  if (t.includes('spa')) return 'Spa';
+  if (t.includes('gym') || t.includes('fitness')) return 'Fitness';
+  if (t.includes('museum')) return 'Museum';
+  if (t.includes('hotel') || t.includes('lodging')) return 'Hotel';
+  return '';
+}
+
+async function selectPlace(placeId, description) {
+  document.getElementById('placeResults').style.display = 'none';
+  document.getElementById('mPlaceSearch').value = description;
+  if (!window.google) return;
+  try {
+    const { Place } = await google.maps.importLibrary('places');
+    const place = new Place({ id: placeId });
+    await place.fetchFields({ fields: ['location','displayName','formattedAddress','types'] });
+    const lat = place.location.lat();
+    const lng = place.location.lng();
+    setPinFromCoords(lat, lng, place.displayName);
+
+    // Auto-fill name if empty
+    if (!document.getElementById('mName').value && place.displayName) {
+      document.getElementById('mName').value = place.displayName;
+    }
+
+    // Auto-fill address
+    if (place.formattedAddress) {
+      document.getElementById('mLocation').value = place.formattedAddress;
+    }
+
+    // Auto-fill category if empty
+    const catEl = document.getElementById('mCategory');
+    if (!catEl.value && place.types) {
+      const guessedCat = googleTypeToCategory(place.types);
+      if (guessedCat) {
+        const catInfo = CAT_MAP[guessedCat];
+        if (catInfo) {
+          if (catInfo.parent === 'food') {
+            catEl.value = 'Food';
+            document.getElementById('mSubCat').value = catInfo.label;
+            document.getElementById('subCatField').style.display = '';
+          } else {
+            catEl.value = catInfo.label;
+          }
+        }
+      }
+    }
+
+    // Auto-fill cuisine/type if empty
+    const cuisineEl = document.getElementById('mCuisine');
+    if (!cuisineEl.value && place.types) {
+      const guessedCuisine = googleTypeToCuisine(place.types);
+      if (guessedCuisine) cuisineEl.value = guessedCuisine;
+    }
+
+    // Auto-fill area from reverse geocoding
+    showStatus('Location pinned - fields auto-filled');
+    reverseGeocodeArea(lat, lng);
+  } catch(e) { console.warn('Place error:', e); }
+}
+
+function reverseGeocodeArea(lat, lng) {
+  // Use Google Maps Geocoder (uses loaded Maps JS, respects API key restrictions)
+  if (!window.google) return;
+  const geocoder = new google.maps.Geocoder();
+  geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+    console.log('Geocode status:', status);
+    if (status !== 'OK' || !results || !results.length) return;
+    console.log('Components:', JSON.stringify(results[0].address_components));
+    const area = extractArea(results[0].address_components);
+    console.log('Extracted area:', area);
+    if (area) {
+      const el = document.getElementById('mArea');
+      if (el) { el.value = area; console.log('Area field set to:', area); }
+    }
+  });
+}
+
+function extractArea(components) {
+  const locality    = components.find(c => c.types.includes('locality'));
+  const neighborhood = components.find(c => c.types.includes('neighborhood'));
+  const sublocality  = components.find(c => c.types.includes('sublocality_level_1') || c.types.includes('sublocality'));
+  // Portland proper - use neighborhood for specificity (Pearl District, Nob Hill etc)
+  if (locality && locality.long_name === 'Portland') {
+    if (neighborhood) return neighborhood.long_name;
+    if (sublocality) return sublocality.long_name;
+    return 'Portland';
+  }
+  // Suburbs - Beaverton, Tigard, Lake Oswego etc
+  if (locality) return locality.long_name;
+  if (neighborhood) return neighborhood.long_name;
+  return null;
+}
+
+function setPinFromCoords(lat, lng, name) {
+  document.getElementById('mLat').value = lat;
+  document.getElementById('mLng').value = lng;
+  document.getElementById('pinStatus').style.display = 'block';
+  document.getElementById('miniMapWrap').style.display = 'block';
+
+  if (!window.google) return;
+  initPlacesServices();
+
+  const mapDiv = document.getElementById('miniMap');
+  const pos = { lat: parseFloat(lat), lng: parseFloat(lng) };
+
+  if (!miniMapInstance) {
+    miniMapInstance = new google.maps.Map(mapDiv, {
+      zoom: 15, center: pos,
+      styles: [
+        {elementType:'geometry',stylers:[{color:'#1a1916'}]},
+        {elementType:'labels.text.fill',stylers:[{color:'#f0ede6'}]},
+        {featureType:'road',elementType:'geometry',stylers:[{color:'#2e2c28'}]},
+        {featureType:'water',elementType:'geometry',stylers:[{color:'#0d1b2a'}]},
+        {featureType:'poi',stylers:[{visibility:'off'}]},
+      ],
+      mapTypeControl:false, streetViewControl:false, fullscreenControl:false, zoomControl:false
+    });
+  } else {
+    miniMapInstance.setCenter(pos);
+  }
+
+  if (miniMapMarker) miniMapMarker.setMap(null);
+  miniMapMarker = new google.maps.Marker({
+    position: pos, map: miniMapInstance, draggable: true, title: name,
+    icon: { path: google.maps.SymbolPath.CIRCLE, scale: 10,
+      fillColor: '#e8b84b', fillOpacity: 1, strokeColor: '#0f0e0d', strokeWeight: 2 }
+  });
+
+  // Update coords if pin is dragged
+  miniMapMarker.addListener('dragend', () => {
+    const p = miniMapMarker.getPosition();
+    document.getElementById('mLat').value = p.lat();
+    document.getElementById('mLng').value = p.lng();
+  });
+}
+
+function clearPin() {
+  try {
+    const ids = ['mLat','mLng','mPlaceSearch'];
+    ids.forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+    ['pinStatus','miniMapWrap','placeResults'].forEach(id => {
+      const el = document.getElementById(id); if(el) el.style.display = 'none';
+    });
+    if (miniMapMarker) { try { miniMapMarker.setMap(null); } catch(e){} miniMapMarker = null; }
+    miniMapInstance = null;
+  } catch(e) { console.warn('clearPin:', e); }
+}
+
+// ---- PHOTO UPLOAD + CROP ----
+let _cropImg = null;   // the loaded Image object
+let _cropSrc = '';     // base64 data URL
+let _cropFile = null;
+let _cx = 0, _cy = 0, _cScale = 1;
+let _dragging = false, _lastX = 0, _lastY = 0;
+
+function handlePhotoCrop(input) {
+  const file = input.files[0];
+  if (!file) return;
+  _cropFile = file;
+  input.value = '';
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    _cropSrc = e.target.result;
+    const img = new Image();
+    img.onload = () => {
+      _cropImg = img;
+      // Fill frame completely (no black bars) - centered so you can drag to reposition
+      const frame = document.getElementById('cropFrame');
+      const fw = frame.offsetWidth || 300;
+      const fh = 150;
+      _cScale = Math.max(fw / img.width, fh / img.height);
+      // Center the image
+      _cx = (fw - img.width * _cScale) / 2;
+      _cy = (fh - img.height * _cScale) / 2;
+      // Set slider to match initial fill scale
+      setTimeout(() => {
+        const slider = document.getElementById('zoomSlider');
+        if (slider) {
+          const minS = Math.min(fw / img.width, fh / img.height);
+          const fillS = Math.max(fw / img.width, fh / img.height);
+          const maxS = fillS * 3;
+          slider.value = Math.round(((fillS - minS) / (maxS - minS)) * 100);
+        }
+      }, 50);
+
+      // Show the img element
+      const cropImgEl = document.getElementById('cropImg');
+      cropImgEl.src = _cropSrc;
+      cropImgEl.style.width = (img.width * _cScale) + 'px';
+      cropImgEl.style.height = (img.height * _cScale) + 'px';
+      cropImgEl.style.transform = `translate(${_cx}px, ${_cy}px)`;
+
+      document.getElementById('cropWrap').style.display = 'block';
+      document.getElementById('photoUploadBtn').style.display = 'none';
+      document.getElementById('photoPreviewWrap').style.display = 'none';
+      drawPreview();
+      attachCropEvents();
+    };
+    img.src = _cropSrc;
+  };
+  reader.readAsDataURL(file);
+}
+
+function attachCropEvents() {
+  const frame = document.getElementById('cropFrame');
+  // Remove old listeners by cloning
+  const newFrame = frame.cloneNode(true);
+  frame.parentNode.replaceChild(newFrame, frame);
+  // Re-attach img ref
+  document.getElementById('cropImg').src = _cropSrc;
+  updateCropImgStyle();
+
+  // Touch
+  let _pinchDist = 0;
+
+  newFrame.addEventListener('touchstart', e => {
+    if (e.touches.length === 1) {
+      _dragging = true;
+      _lastX = e.touches[0].clientX;
+      _lastY = e.touches[0].clientY;
+    } else if (e.touches.length === 2) {
+      _dragging = false;
+      _pinchDist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+    }
+  }, { passive: true });
+
+  newFrame.addEventListener('touchmove', e => {
+    e.preventDefault();
+    if (e.touches.length === 1 && _dragging) {
+      const dx = e.touches[0].clientX - _lastX;
+      const dy = e.touches[0].clientY - _lastY;
+      _lastX = e.touches[0].clientX;
+      _lastY = e.touches[0].clientY;
+      moveCrop(dx, dy);
+    } else if (e.touches.length === 2) {
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      if (_pinchDist > 0) {
+        zoomCrop(dist / _pinchDist);
+      }
+      _pinchDist = dist;
+    }
+  }, { passive: false });
+
+  newFrame.addEventListener('touchend', e => {
+    _pinchDist = 0;
+    // If one finger still on screen after pinch, prep for drag immediately
+    if (e.touches.length === 1) {
+      _dragging = true;
+      _lastX = e.touches[0].clientX;
+      _lastY = e.touches[0].clientY;
+    } else {
+      _dragging = false;
+    }
+  });
+
+  // Mouse
+  newFrame.addEventListener('mousedown', e => {
+    _dragging = true; _lastX = e.clientX; _lastY = e.clientY;
+    newFrame.style.cursor = 'grabbing';
+  });
+  document.addEventListener('mousemove', e => {
+    if (!_dragging) return;
+    moveCrop(e.clientX - _lastX, e.clientY - _lastY);
+    _lastX = e.clientX; _lastY = e.clientY;
+  });
+  document.addEventListener('mouseup', () => {
+    _dragging = false;
+    const f = document.getElementById('cropFrame');
+    if (f) f.style.cursor = 'grab';
+  });
+}
+
+function moveCrop(dx, dy) {
+  if (!_cropImg) return;
+  const frame = document.getElementById('cropFrame');
+  const fw = frame.offsetWidth, fh = 150;
+  const iw = _cropImg.width * _cScale, ih = _cropImg.height * _cScale;
+  // When image smaller than frame allow free movement, when larger clamp to edges
+  _cx = iw >= fw ? Math.min(0, Math.max(fw - iw, _cx + dx)) : Math.max(0, Math.min(fw - iw, _cx + dx));
+  _cy = ih >= fh ? Math.min(0, Math.max(fh - ih, _cy + dy)) : Math.max(0, Math.min(fh - ih, _cy + dy));
+  updateCropImgStyle();
+  drawPreview();
+}
+
+function zoomCrop(ratio) {
+  if (!_cropImg) return;
+  const frame = document.getElementById('cropFrame');
+  const fw = frame.offsetWidth, fh = 150;
+  const minScale = Math.min(fw / _cropImg.width, fh / _cropImg.height); // allow full zoom out to see whole image
+  const newScale = Math.max(minScale, Math.min(_cScale * ratio, minScale * 4));
+  // Zoom toward center of frame
+  const centerX = fw / 2, centerY = fh / 2;
+  _cx = centerX - (centerX - _cx) * (newScale / _cScale);
+  _cy = centerY - (centerY - _cy) * (newScale / _cScale);
+  _cScale = newScale;
+  // Clamp after zoom
+  const iw = _cropImg.width * _cScale, ih = _cropImg.height * _cScale;
+  _cx = Math.min(0, Math.max(fw - iw, _cx));
+  _cy = Math.min(0, Math.max(fh - ih, _cy));
+  updateCropImgStyle();
+  drawPreview();
+  // Sync slider position to current scale
+  const slider = document.getElementById('zoomSlider');
+  if (slider && _cropImg) {
+    const minS = Math.min(fw / _cropImg.width, fh / _cropImg.height);
+    const fillS = Math.max(fw / _cropImg.width, fh / _cropImg.height);
+    const maxS = fillS * 3;
+    slider.value = Math.round(Math.max(0, Math.min(100, ((_cScale - minS) / (maxS - minS)) * 100)));
+  }
+}
+
+function updateCropImgStyle() {
+  const el = document.getElementById('cropImg');
+  if (!el || !_cropImg) return;
+  el.style.width  = (_cropImg.width  * _cScale) + 'px';
+  el.style.height = (_cropImg.height * _cScale) + 'px';
+  el.style.transform = `translate(${_cx}px, ${_cy}px)`;
+}
+
+function drawPreview() {
+  if (!_cropImg) return;
+  const canvas = document.getElementById('cropPreviewCanvas');
+  if (!canvas) return;
+  const frame = document.getElementById('cropFrame');
+  const fw = frame.offsetWidth || 300;
+  const fh = 150;
+  canvas.width  = fw * 2;
+  canvas.height = fh * 2;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  // Source: what's visible in the crop frame mapped back to original image coords
+  const srcX = -_cx / _cScale;
+  const srcY = -_cy / _cScale;
+  const srcW =  fw  / _cScale;
+  const srcH =  fh  / _cScale;
+  ctx.drawImage(_cropImg, srcX, srcY, srcW, srcH, 0, 0, canvas.width, canvas.height);
+}
+
+function sliderZoom(val) {
+  if (!_cropImg) return;
+  const frame = document.getElementById('cropFrame');
+  const fw = frame.offsetWidth, fh = 150;
+  const minScale = Math.min(fw / _cropImg.width, fh / _cropImg.height); // fully zoomed out
+  const fillScale = Math.max(fw / _cropImg.width, fh / _cropImg.height); // fills frame
+  const maxScale = fillScale * 3; // max zoom
+  // Slider 0 = fully out, 50 = fills frame, 100 = max zoom
+  const t = val / 100;
+  const targetScale = minScale + t * (maxScale - minScale);
+  zoomCrop(targetScale / _cScale);
+}
+
+function cancelCrop() {
+  _cropFile = null; _cropImg = null;
+  document.getElementById('cropWrap').style.display = 'none';
+  document.getElementById('photoUploadBtn').style.display = 'flex';
+}
+
+async function confirmCrop() {
+  if (!_cropImg) return;
+  const btn = document.getElementById('confirmCropBtn');
+  btn.textContent = 'Uploading...'; btn.style.opacity = '0.6';
+
+  try {
+    const frame = document.getElementById('cropFrame');
+    const fw = frame.offsetWidth || 300;
+    const fh = 150;
+    const canvas = document.createElement('canvas');
+    canvas.width = fw * 2; canvas.height = fh * 2;
+    const ctx = canvas.getContext('2d');
+    const srcX = -_cx / _cScale;
+    const srcY = -_cy / _cScale;
+    const srcW =  fw  / _cScale;
+    const srcH =  fh  / _cScale;
+    ctx.drawImage(_cropImg, srcX, srcY, srcW, srcH, 0, 0, canvas.width, canvas.height);
+    const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.88));
+    const filename = 'photo-' + Date.now() + '.jpg';
+
+    const res = await fetch(SUPABASE_URL + '/storage/v1/object/spot-photos/' + filename, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'Content-Type': 'image/jpeg',
+        'x-upsert': 'true'
+      },
+      body: blob
+    });
+
+    if (!res.ok) throw new Error(await res.text());
+
+    const publicUrl = SUPABASE_URL + '/storage/v1/object/public/spot-photos/' + filename;
+    document.getElementById('mPhoto').value = publicUrl;
+    document.getElementById('cropWrap').style.display = 'none';
+    showPhotoPreview(publicUrl);
+    const status = document.getElementById('photoUploadStatus');
+    status.style.display = 'block';
+    status.textContent = '✓ Photo saved';
+    status.style.color = '#4caf78';
+  } catch(e) {
+    console.error(e);
+    const status = document.getElementById('photoUploadStatus');
+    status.style.display = 'block';
+    status.textContent = 'Upload failed - try again';
+    status.style.color = '#e84b4b';
+  }
+  btn.textContent = 'Use photo'; btn.style.opacity = '1';
+  _cropFile = null; _cropImg = null;
+}
+
+function compressImage(file, maxWidth, quality) {
+  return new Promise(resolve => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let w = img.width, h = img.height;
+        if (w > maxWidth) { h = h * maxWidth / w; w = maxWidth; }
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        canvas.toBlob(resolve, 'image/jpeg', quality);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function compressImage(file, maxWidth, quality) {
+  return new Promise(resolve => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let w = img.width, h = img.height;
+        if (w > maxWidth) { h = h * maxWidth / w; w = maxWidth; }
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        canvas.toBlob(resolve, 'image/jpeg', quality);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function showPhotoPreview(url) {
+  document.getElementById('photoPreview').src = url;
+  document.getElementById('photoPreviewWrap').style.display = 'block';
+  document.getElementById('photoUploadBtn').style.display = 'none';
+}
+
+function removePhoto() {
+  document.getElementById('mPhoto').value = '';
+  document.getElementById('photoPreviewWrap').style.display = 'none';
+  document.getElementById('photoUploadBtn').style.display = 'flex';
+  document.getElementById('photoUploadStatus').style.display = 'none';
+}
+
+// ---- MAP VIEW ----
+const MAPS_KEY = 'AIzaSyAn2Bpv623J3Q7M8wAkG4i73MKltg4levY'; // Replace with your key
+let mapInstance = null;
+let mapMarkers = [];
+
+let _mapAllSpots = [];
+
+function openMapView() {
+  _mapAllSpots = getFilteredList();
+  document.getElementById('mapView').classList.add('open');
+
+  // Populate location filter
+  const locSelect = document.getElementById('mapLocFilter');
+  const locs = Array.from(new Set(_mapAllSpots.filter(s=>s.area && s.area.trim()).map(s=>s.area.trim()))).sort();
+  locSelect.innerHTML = '<option value="All">All areas</option>' +
+    locs.map(l => `<option value="${htmlAttr(l)}">📍 ${htmlText(l)}</option>`).join('');
+
+  filterMapSpots();
+}
+
+function filterMapSpots() {
+  const q = (document.getElementById('mapSearch').value || '').toLowerCase();
+  const loc = document.getElementById('mapLocFilter').value;
+  const cat = document.getElementById('mapCatFilter').value;
+  const filtered = _mapAllSpots.filter(s => {
+    if (cat !== 'all') {
+      if (cat === 'food' && !isFood(s.cat)) return false;
+      if (cat !== 'food' && s.cat !== cat) return false;
+    }
+    if (loc !== 'All' && (s.area||s.location) !== loc) return false;
+    if (q && !`${s.name} ${s.location||''}`.toLowerCase().includes(q)) return false;
+    return true;
+  });
+  const pinned = filtered.filter(s => s.lat && s.lng);
+  document.getElementById('mapCount').textContent = pinned.length + ' pinned · ' + (filtered.length - pinned.length) + ' unpinned';
+  renderMapSpotList(pinned, filtered.filter(s => !s.lat || !s.lng));
+  initMap(filtered);
+}
+
+function closeMapView() {
+  document.getElementById('mapView').classList.remove('open');
+}
+
+function renderMapSpotList(pinned, unpinned) {
+  const list = document.getElementById('mapSpotList');
+  let html = '';
+
+  if (pinned.length) {
+    html += `<div style="padding:8px 16px 4px;font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">📍 Pinned (${pinned.length})</div>`;
+    html += pinned.map((s,i) => `
+      <div class="map-spot-item" onclick="focusMarker(${i})">
+        <span class="dot" style="background:${catColor(s.cat)}"></span>
+        <div>
+          <div class="spot-name">${htmlText(s.name)}</div>
+          <div class="spot-loc">${htmlText(s.location||'')}</div>
+        </div>
+      </div>`).join('');
+  }
+
+  if (unpinned.length) {
+    html += `<div style="padding:8px 16px 4px;font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;border-top:1px solid var(--border);">Not pinned yet (${unpinned.length}) - edit to add location</div>`;
+    html += unpinned.map(s => `
+      <div class="map-spot-item" style="opacity:0.45;">
+        <span class="dot" style="background:${catColor(s.cat)}"></span>
+        <div>
+          <div class="spot-name">${htmlText(s.name)}</div>
+          <div class="spot-loc">${s.location ? htmlText(s.location) : 'No location set'}</div>
+        </div>
+      </div>`).join('');
+  }
+
+  if (!pinned.length && !unpinned.length) {
+    html = '<div style="padding:20px;color:var(--muted);font-size:0.84rem;text-align:center;">No spots in this filter</div>';
+  }
+
+  list.innerHTML = html;
+}
+
+function initMap(spots) {
+  const container = document.getElementById('mapContainer');
+  if (MAPS_KEY === 'YOUR_GOOGLE_MAPS_KEY') {
+    container.innerHTML = `
+      <div style="height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;padding:30px;text-align:center;">
+        <div style="font-size:3rem;">🗺️</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:2px;color:var(--accent);">Map coming soon</div>
+        <div style="color:var(--muted);font-size:0.84rem;line-height:1.6;">Add your Google Maps API key to enable.<br>Pin spots via the edit modal to show them here.</div>
+      </div>`;
+    return;
+  }
+  if (!window.google) {
+    const script = document.createElement('script');
+    script.src = 'https://maps.googleapis.com/maps/api/js?key=' + MAPS_KEY + '&libraries=places&callback=_mapLoaded';
+    script.async = true;
+    window._mapPendingSpots = spots;
+    document.head.appendChild(script);
+    return;
+  }
+  // Wait for DOM to render before initialising map
+  setTimeout(() => _renderGoogleMap(spots), 100);
+}
+
+window._mapLoaded = function() {
+  initPlacesServices();
+  if (window._mapPendingSpots) {
+    setTimeout(() => _renderGoogleMap(window._mapPendingSpots), 100);
+    window._mapPendingSpots = null;
+  }
+};
+
+function _renderGoogleMap(spots) {
+  mapMarkers = [];
+  const container = document.getElementById('mapContainer');
+
+  // Only show spots with pinned coordinates
+  const pinned = spots.filter(s => s.lat && s.lng);
+  const unpinned = spots.filter(s => !s.lat || !s.lng);
+
+  const map = new google.maps.Map(container, {
+    zoom: pinned.length ? 12 : 11,
+    center: pinned.length
+      ? { lat: pinned[0].lat, lng: pinned[0].lng }
+      : { lat: 45.5051, lng: -122.6750 },
+    styles: [
+      {elementType:'geometry',stylers:[{color:'#1a1916'}]},
+      {elementType:'labels.text.fill',stylers:[{color:'#f0ede6'}]},
+      {elementType:'labels.text.stroke',stylers:[{color:'#0f0e0d'}]},
+      {featureType:'road',elementType:'geometry',stylers:[{color:'#2e2c28'}]},
+      {featureType:'road',elementType:'labels.text.fill',stylers:[{color:'#7a776e'}]},
+      {featureType:'water',elementType:'geometry',stylers:[{color:'#0d1b2a'}]},
+      {featureType:'poi',stylers:[{visibility:'off'}]},
+      {featureType:'transit',stylers:[{visibility:'off'}]},
+    ],
+    mapTypeControl: false, streetViewControl: false, fullscreenControl: false,
+  });
+  mapInstance = map;
+
+  if (pinned.length === 0) {
+    // Show message overlay on map
+    const div = document.createElement('div');
+    div.style.cssText = 'position:absolute;bottom:0;left:0;right:0;background:rgba(15,14,13,0.88);padding:14px 18px;text-align:center;font-size:0.82rem;color:#7a776e;';
+    div.innerHTML = 'Pin spots by searching their location in the edit modal to show them here.';
+    container.style.position = 'relative';
+    container.appendChild(div);
+  }
+
+  // Fit map to all pinned spots
+  if (pinned.length > 1) {
+    const bounds = new google.maps.LatLngBounds();
+    pinned.forEach(s => bounds.extend({ lat: s.lat, lng: s.lng }));
+    map.fitBounds(bounds, { top: 40, right: 40, bottom: 40, left: 40 });
+  }
+
+  pinned.forEach((s, i) => {
+    const marker = new google.maps.Marker({
+      position: { lat: s.lat, lng: s.lng },
+      map, title: s.name,
+      icon: {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: 9,
+        fillColor: catColor(s.cat),
+        fillOpacity: 1,
+        strokeColor: '#0f0e0d',
+        strokeWeight: 2
+      }
+    });
+    const infoContent = (() => {
+        const mUrl = s.lat && s.lng
+          ? `https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}`
+          : s.location ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(s.location)}` : null;
+        return `
+      <div style="background:#1a1916;padding:10px 12px;border-radius:8px;color:#f0ede6;font-family:'DM Sans',sans-serif;max-width:220px;">
+        <div style="font-weight:500;font-size:0.92rem;margin-bottom:3px;">${s.name}</div>
+        ${s.location ? `<div style="font-size:0.76rem;margin-bottom:3px;">${mUrl ? `<a href="${mUrl}" target="_blank" style="color:#e8b84b;text-decoration:none;">📍 ${s.location}</a>` : `<span style="color:#7a776e;">📍 ${s.location}</span>`}</div>` : ''}
+        ${s.note ? `<div style="font-size:0.78rem;color:#7a776e;margin-bottom:4px;">${s.note}</div>` : ''}
+        ${s.link ? `<a href="${s.link}" target="_blank" style="font-size:0.74rem;color:#e8b84b;">Open link 🔗</a>` : ''}
+      </div>`;
+      })()
+    const info = new google.maps.InfoWindow({ content: infoContent });
+    marker.addListener('click', () => {
+      mapMarkers.forEach(m => m && m.info.close());
+      info.open(map, marker);
+    });
+    mapMarkers[i] = { marker, info };
+  });
+
+  // Update spot list to show pinned vs unpinned
+  renderMapSpotList(pinned, unpinned);
+}
+
+function focusMarker(i) {
+  if (!mapInstance || !mapMarkers[i]) return;
+  const { marker, info } = mapMarkers[i];
+  mapInstance.panTo(marker.getPosition());
+  mapInstance.setZoom(15);
+  info.open(mapInstance, marker);
+}
+
+// grid delegation
+document.getElementById('grid').addEventListener('click', e => {
+  const el = e.target.closest('[data-action]');
+  if (!el) return;
+  const { action, id, n, cuisine } = el.dataset;
+  if (action==='edit')   openEdit(id);
+  else if (action==='fav')    toggleFav(id);
+  else if (action==='been')   toggleBeen(id);
+  else if (action==='want')   toggleWant(id);
+  else if (action==='share')  shareSpot(id);
+  else if (action==='goback-yes') gobackYes(id);
+  else if (action==='goback-no')  gobackNo(id);
+  else if (action==='goback-no')  gobackNo(id);
+
+  else if (action==='star')   setSpotStars(id, parseInt(n));
+  else if (action==='filter') filterByCuisineTag(cuisine);
+});
+
+// ---- AUTOCOMPLETE ----
+const AC_OPTS = {
+  topcategory: CATS.filter(c => c.parent === null).map(c => c.label),
+  subcategory: CATS.filter(c => c.parent === 'food').map(c => c.label),
+  cuisine: [],
+  location: LOCATION_OPTS,
+  collections: ['Date Night','Quick Lunch','Special Occasion','Weekend Vibes','Brunch Club','Happy Hour','Bucket List','With Friends','Just Us','Rainy Day']
+};
+
+// Called when category input changes - show/hide subcategory field
+function onCategoryInput(input) {
+  acShow(input, 'topcategory');
+  updateSubCatVisibility(input.value);
+}
+
+function updateSubCatVisibility(catValue) {
+  const isFood = catValue.trim().toLowerCase() === 'food';
+  const subField = document.getElementById('subCatField');
+  subField.style.display = isFood ? '' : 'none';
+  if (!isFood) document.getElementById('mSubCat').value = '';
+}
+
+function acShow(input, type) {
+  const q = input.value.toLowerCase().trim();
+  const listId = { topcategory:'acCategory', subcategory:'acSubCat', cuisine:'acCuisine', location:'acLocation', collections:'acCollections' }[type];
+  const list = document.getElementById(listId);
+  if (!list) return;
+  let opts = type==='cuisine'
+    ? Array.from(new Set(db.spots.map(s=>s.cuisine))).sort()
+    : AC_OPTS[type];
+
+  const matches = q ? opts.filter(o => o.toLowerCase().includes(q)) : [];
+  const rest    = q ? opts.filter(o => !o.toLowerCase().includes(q)) : opts;
+  const sorted  = [...matches, ...rest];
+
+  if (!sorted.length) { list.classList.remove('open'); return; }
+  list.innerHTML = sorted.map(o => {
+    const safe = htmlAttr(o);
+    const hi = q && o.toLowerCase().includes(q);
+    return `<div class="ac-item${hi?' highlighted':''}" data-val="${safe}">${htmlText(o)}</div>`;
+  }).join('');
+  list.classList.add('open');
+  list._inputRef = input;
+}
+
+function acBlur() {
+  setTimeout(() => {
+    const focused = document.activeElement;
+    if (!focused || !focused.closest('.ac-wrap')) {
+      document.querySelectorAll('.ac-list').forEach(l => l.classList.remove('open'));
+    }
+  }, 200);
+}
+
+// touch tracking
+let _ty = 0, _tx = 0, _moved = false;
+document.addEventListener('touchstart', e => { _ty=e.touches[0].clientY; _tx=e.touches[0].clientX; _moved=false; }, {passive:true});
+document.addEventListener('touchmove', e => { if(Math.abs(e.touches[0].clientY-_ty)>8||Math.abs(e.touches[0].clientX-_tx)>8) _moved=true; }, {passive:true});
+document.addEventListener('touchend', e => {
+  if (_moved) return;
+  const item = e.target.closest('.ac-item');
+  if (item) {
+    e.preventDefault();
+    const list = item.closest('.ac-list');
+    const inp = list?._inputRef;
+    if (inp) { inp.value = item.dataset.val; inp.dispatchEvent(new Event('input')); }
+    document.querySelectorAll('.ac-list').forEach(l => l.classList.remove('open'));
+    return;
+  }
+  if (!e.target.closest('.ac-wrap')) document.querySelectorAll('.ac-list').forEach(l => l.classList.remove('open'));
+}, {passive:false});
+document.addEventListener('mousedown', e => {
+  const item = e.target.closest('.ac-item');
+  if (item) {
+    e.preventDefault();
+    const list = item.closest('.ac-list');
+    const inp = list?._inputRef;
+    if (inp) inp.value = item.dataset.val;
+    document.querySelectorAll('.ac-list').forEach(l => l.classList.remove('open'));
+    return;
+  }
+  if (!e.target.closest('.ac-wrap')) document.querySelectorAll('.ac-list').forEach(l => l.classList.remove('open'));
+});
+
+document.getElementById('modal').addEventListener('click', function(e) { if(e.target===this) closeModal(); });
+document.addEventListener('click', e => {
+  if (!e.target.closest('.cat-pill') && !e.target.closest('.cat-dropdown-menu')) {
+    closeAllDropdowns();
+  }
+  if (!e.target.closest('#customSortWrap') && !e.target.closest('#customSortMenu')) {
+    const m = document.getElementById('customSortMenu');
+    if (m) m.style.display = 'none';
+  }
+  if (!e.target.closest('#mName') && !e.target.closest('#nameResults')) {
+    const nr = document.getElementById('nameResults'); if(nr) nr.style.display='none';
+  }
+});
+document.getElementById('randOverlay').addEventListener('click', function(e) { if(e.target===this) closeRandom(); });
+
+// Init
+wireFilterDrawer();
+loadCustomCats();
+loadFromSupabase();
+
+function toggleSortMenu(e) {
+  e.stopPropagation();
+  const menu = document.getElementById('customSortMenu');
+  const btn = document.getElementById('customSortBtn');
+  const rect = btn.getBoundingClientRect();
+  const isOpen = menu.style.display === 'block';
+  menu.style.top = (rect.bottom + 6) + 'px';
+  menu.style.right = (window.innerWidth - rect.right) + 'px';
+  menu.style.display = isOpen ? 'none' : 'block';
+}
+
+function selectSortOption(val) {
+  const labels = { newest:'Newest first', az:'A - Z', za:'Z - A', top:'Top rated', lowest:'Lowest rated', ourlist:'Our List', worthit:'👍 Worth it', onedone:'One & Done', decide:'Decide Later' };
+  const sortMap = { newest:'newest', az:'alpha', za:'alpha-desc', top:'stars-desc', lowest:'stars-asc', ourlist:'view-active', worthit:'view-repeats', onedone:'view-noback', decide:'view-archive' };
+  document.getElementById('customSortLabel').textContent = labels[val] || 'Newest first';
+  document.getElementById('customSortMenu').style.display = 'none';
+  document.querySelectorAll('.custom-sort-item').forEach(i => i.classList.remove('active'));
+  const active = document.querySelector('.custom-sort-item[data-sort="' + val + '"]');
+  if (active) active.classList.add('active');
+  const sel = document.getElementById('sortSelect');
+  if (sel && sortMap[val]) {
+    sel.value = sortMap[val];
+    handleSortChange(sel);
+  }
+}
+
+// Visual effects via JS (CSP compatible)
+(function() {
+  const glow = document.createElement('div');
+  glow.setAttribute('style', 'position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:0;background:radial-gradient(ellipse 70% 50% at 85% 10%, rgba(232,184,75,0.15) 0%, transparent 60%), radial-gradient(ellipse 60% 60% at 15% 85%, rgba(180,140,60,0.08) 0%, transparent 60%);');
+  document.body.insertBefore(glow, document.body.firstChild);
+
+  const grain = document.createElement('div');
+  grain.setAttribute('style', 'position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:1;opacity:0.04;background-image:url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noise%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.9%22 numOctaves=%224%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noise)%22 opacity=%221%22/%3E%3C/svg%3E");background-size:150px 150px;');
+  document.body.insertBefore(grain, document.body.firstChild);
+
+  const fab = document.querySelector('.fab');
+  if (fab) fab.style.cssText += ';box-shadow:0 4px 20px rgba(232,184,75,0.5),0 2px 8px rgba(0,0,0,0.5);';
+})();
+</script>
+
+<!-- Floating action button -->
+<button class="fab" onclick="openAdd()" title="Add spot">
+  <svg class="ui-icon"><use href="#i-plus"></use></svg>
+</button>
+
+<nav class="mobile-nav" aria-label="Main actions">
+  <button class="mobile-nav-btn active" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+    <svg class="ui-icon"><use href="#i-grid"></use></svg>
+    <span>List</span>
+  </button>
+  <button class="mobile-nav-btn" onclick="openMapView()">
+    <svg class="ui-icon"><use href="#i-map"></use></svg>
+    <span>Map</span>
+  </button>
+  <button class="mobile-nav-btn" onclick="openRandom()">
+    <svg class="ui-icon"><use href="#i-dice"></use></svg>
+    <span>Spin</span>
+  </button>
+  <button class="mobile-nav-btn" onclick="toggleFilterPanel(true)">
+    <svg class="ui-icon"><use href="#i-filter"></use></svg>
+    <span>Filter</span>
+  </button>
+  <button class="mobile-nav-btn" onclick="openAdd()">
+    <svg class="ui-icon"><use href="#i-plus"></use></svg>
+    <span>Add</span>
+  </button>
+</nav>
+
+<!-- dynamic style for random card accent line -->
+<style id="randAccentStyle">.rand-card::before { background: var(--accent); }</style>
+<style id="randBefore">.rand-card::before { background: var(--accent); }.field input, .field select, .field textarea, input[type="text"], input[type="url"] { font-size: 16px !important; }
+
+/* Prevent iOS auto-zoom - inputs must be >= 16px */
+.modal input, .modal textarea, .modal select,
+.field input, .field textarea, .field select {
+  font-size: 16px !important;
+}
+/* Nuclear iOS zoom prevention */
+input, textarea, select {
+  font-size: 16px !important;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* CUSTOM SORT DROPDOWN */
+.custom-sort-wrap { position: relative; display: inline-block; flex-shrink: 0; }
+.custom-sort-btn { background: rgba(22,20,16,0.85); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.88rem; font-weight: 300; padding: 9px 14px; cursor: pointer; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+.custom-sort-menu { display: none; position: fixed; min-width: 200px; background: rgba(18,16,12,0.97); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 200; padding: 6px; }
+.custom-sort-menu.open { display: block; }
+.sort-section-label { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); padding: 8px 12px 4px; }
+.custom-sort-item { padding: 10px 12px; font-family: 'DM Sans', sans-serif; font-size: 0.88rem; color: var(--text); cursor: pointer; border-radius: 8px; transition: background 0.12s; }
+.custom-sort-item:hover { background: rgba(255,255,255,0.06); }
+.custom-sort-item.active { color: var(--accent); font-weight: 500; }
+
+/* ===== VISUAL OVERRIDES ===== */
+header {
+  background: rgba(12,11,9,0.88) !important;
+  backdrop-filter: blur(20px) saturate(1.2) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(1.2) !important;
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 30 !important;
+}
+#stickyBar {
+  background: rgba(12,11,9,0.92) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+}
+#favBar, #viewTabs, #catRow, #starRow, #topRow {
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+  scrollbar-width: none !important;
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  white-space: nowrap !important;
+}
+.fab {
+  animation: fabPulse 3s ease-in-out infinite !important;
+}
+@keyframes fabPulse {
+  0%, 100% { box-shadow: 0 4px 20px rgba(232,184,75,0.5), 0 2px 8px rgba(0,0,0,0.5); }
+  50% { box-shadow: 0 4px 32px rgba(232,184,75,0.8), 0 2px 8px rgba(0,0,0,0.5); }
+}
+
+/* ===== LIVE DESIGN REFRESH ===== */
+.icon-sprite { display: none; }
+.ui-icon {
+  width: 1.05em;
+  height: 1.05em;
+  display: block;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex: 0 0 auto;
+}
+
+:root {
+  --bg: #0c0b09;
+  --card: #181612;
+  --card-hover: #211e18;
+  --border: rgba(242,237,228,0.1);
+  --border-subtle: rgba(242,237,228,0.065);
+  --text: #f4efe6;
+  --muted: #817a70;
+  --muted-light: #b6aea2;
+  --tag-bg: rgba(255,255,255,0.035);
+  --accent: #efc45a;
+  --accent-dim: rgba(239,196,90,0.12);
+  --accent-glow: rgba(239,196,90,0.32);
+}
+
+body {
+  background:
+    radial-gradient(circle at 12% -8%, rgba(239,196,90,0.12), transparent 34rem),
+    radial-gradient(circle at 100% 12%, rgba(128,70,44,0.16), transparent 30rem),
+    linear-gradient(180deg, #0f0d0a 0%, #0b0a08 46%, #090807 100%) !important;
+  font-weight: 300;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.2;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+  background-size: 38px 38px;
+  mask-image: linear-gradient(to bottom, black, transparent 82%);
+}
+
+header {
+  position: relative !important;
+  top: auto !important;
+  z-index: 10 !important;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 24px 22px 22px !important;
+  background: rgba(12,11,9,0.68) !important;
+  border-bottom: 1px solid var(--border-subtle) !important;
+}
+
+.header-inner {
+  min-width: 0;
+}
+
+header h1 {
+  color: var(--accent) !important;
+  font-size: clamp(2.55rem, 6vw, 4.6rem) !important;
+  letter-spacing: 0.16em !important;
+  text-shadow: 0 0 60px rgba(239,196,90,0.18) !important;
+}
+
+header .sub {
+  color: var(--muted) !important;
+  letter-spacing: 0.32em !important;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.premium-icon-btn,
+.filter-panel-btn {
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.035);
+  color: var(--muted-light);
+  cursor: pointer;
+  transition: transform 0.16s ease, background 0.16s ease, border-color 0.16s ease, color 0.16s ease;
+}
+
+.premium-icon-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.premium-icon-btn.primary {
+  background: linear-gradient(180deg, #f4cf74, #dcae3f);
+  color: #151006;
+  border-color: transparent;
+  box-shadow: 0 12px 30px rgba(239,196,90,0.22);
+}
+
+.premium-icon-btn:hover,
+.filter-panel-btn:hover {
+  color: var(--text);
+  border-color: rgba(239,196,90,0.36);
+  background: rgba(239,196,90,0.08);
+}
+
+#stickyBar {
+  top: 0 !important;
+  z-index: 40 !important;
+  background: rgba(12,11,9,0.86) !important;
+  border-bottom: 1px solid var(--border-subtle);
+  backdrop-filter: blur(22px) saturate(1.25) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(1.25) !important;
+}
+
+#favBar {
+  gap: 8px !important;
+  padding: 12px 16px 8px !important;
+  border-bottom-color: transparent !important;
+}
+
+.toggle-btn,
+.random-btn,
+.map-btn,
+.cat-pill,
+.pill,
+.star-pill,
+.view-tab,
+.custom-sort-btn,
+.filter-panel-btn {
+  min-height: 34px;
+  border: 1px solid var(--border) !important;
+  border-radius: 999px !important;
+  background: rgba(255,255,255,0.035) !important;
+  color: var(--muted-light) !important;
+  letter-spacing: 0.05em !important;
+  text-transform: none !important;
+}
+
+.toggle-btn,
+.random-btn,
+.map-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 7px !important;
+}
+
+.toggle-btn:hover,
+.random-btn:hover,
+.map-btn:hover,
+.cat-pill:hover,
+.pill:hover,
+.star-pill:hover,
+.view-tab:hover,
+.custom-sort-btn:hover {
+  color: var(--text) !important;
+  border-color: rgba(239,196,90,0.35) !important;
+  background: rgba(239,196,90,0.08) !important;
+}
+
+.toggle-btn.active-fav,
+.toggle-btn.active-been,
+.star-pill.active,
+.view-tab.active,
+.pill.active,
+.cat-pill.active,
+.filter-panel-btn.active {
+  color: var(--accent) !important;
+  border-color: rgba(239,196,90,0.46) !important;
+  background: rgba(239,196,90,0.13) !important;
+  box-shadow: none !important;
+}
+
+#autoTagBtn {
+  opacity: 0.55;
+}
+
+#topRow {
+  display: grid !important;
+  grid-template-columns: minmax(180px, 1fr) auto auto;
+  gap: 9px !important;
+  padding: 8px 16px 12px !important;
+  border-bottom: 0 !important;
+}
+
+.search-wrap {
+  min-width: 0 !important;
+}
+
+input[type="text"],
+.custom-sort-btn {
+  background: rgba(24,22,18,0.72) !important;
+  border-color: var(--border) !important;
+}
+
+.filter-panel-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 15px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+#subCatRow {
+  display: flex !important;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 6px;
+  max-height: 50px;
+  padding: 2px 16px 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  white-space: nowrap;
+  transition: max-height 0.3s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease, padding 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+
+#subCatRow::-webkit-scrollbar {
+  display: none;
+}
+
+#stickyBar:not(.filters-open) #catRow,
+#stickyBar:not(.filters-open) #subCatRow,
+#stickyBar:not(.filters-open) #typeRow,
+#stickyBar:not(.filters-open) #starRow,
+#stickyBar:not(.filters-open) #viewTabs {
+  max-height: 0 !important;
+  min-height: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  overflow: hidden !important;
+  border-bottom: 0 !important;
+}
+
+#stickyBar.filters-open #catRow,
+#stickyBar.filters-open #subCatRow,
+#stickyBar.filters-open #typeRow,
+#stickyBar.filters-open #starRow,
+#stickyBar.filters-open #viewTabs {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+#stickyBar.filters-open #catRow { padding: 8px 16px 4px !important; }
+#stickyBar.filters-open #subCatRow { padding: 2px 16px 8px !important; }
+#stickyBar.filters-open #typeRow { padding: 2px 16px 8px !important; }
+#stickyBar.filters-open #starRow { padding: 4px 16px 8px !important; }
+#stickyBar.filters-open #viewTabs { padding: 8px 16px 12px !important; }
+
+#countBar {
+  padding: 10px 20px 6px !important;
+  color: var(--muted) !important;
+}
+
+.grid {
+  grid-template-columns: repeat(auto-fill, minmax(288px, 1fr)) !important;
+  gap: 16px !important;
+  padding: 14px 20px 104px !important;
+}
+
+.card {
+  min-height: 196px;
+  background:
+    linear-gradient(160deg, color-mix(in srgb, var(--card-color) 8%, transparent), transparent 46%),
+    rgba(24,22,18,0.86) !important;
+  border: 1px solid var(--border) !important;
+  border-left: 3px solid color-mix(in srgb, var(--card-color) 64%, transparent) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 20px 70px rgba(0,0,0,0.22);
+  cursor: default !important;
+}
+
+.card:hover {
+  transform: translateY(-2px) !important;
+  background:
+    linear-gradient(160deg, color-mix(in srgb, var(--card-color) 11%, transparent), transparent 46%),
+    rgba(32,29,23,0.92) !important;
+  border-color: rgba(239,196,90,0.24) !important;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.34), 0 10px 24px rgba(239,196,90,0.06) !important;
+}
+
+.card:not(.has-photo)::before {
+  width: 64% !important;
+  opacity: 0.055 !important;
+  background: linear-gradient(to left, var(--card-color), transparent) !important;
+}
+
+.card.has-photo {
+  border-left: 1px solid var(--border) !important;
+}
+
+.card-photo,
+.card.has-photo .card-photo {
+  height: 168px !important;
+  border-radius: 0 !important;
+  pointer-events: none;
+}
+
+.card.has-photo .card-top {
+  margin-top: 0 !important;
+  background: linear-gradient(180deg, rgba(12,11,9,0.08), rgba(24,22,18,0.96)) !important;
+}
+
+.card-top {
+  gap: 12px;
+  position: relative;
+  display: block !important;
+  padding: 16px 16px 7px !important;
+}
+
+.card-title-block {
+  min-width: 0;
+  padding-right: 112px;
+}
+
+.card-name {
+  font-size: 1.06rem !important;
+  font-weight: 600 !important;
+  color: var(--text) !important;
+  line-height: 1.24 !important;
+  padding-right: 0 !important;
+  overflow-wrap: anywhere;
+}
+
+.visited-label {
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 0.68rem;
+}
+
+.card-actions {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  gap: 3px !important;
+  opacity: 0.7;
+  transition: opacity 0.16s ease;
+}
+
+.card:hover .card-actions,
+.card:focus-within .card-actions {
+  opacity: 1;
+}
+
+.icon-btn,
+.want-btn,
+.fav-btn-card,
+.link-btn,
+.goback-btn {
+  width: 27px !important;
+  height: 27px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  border: 1px solid transparent !important;
+  border-radius: 999px !important;
+  background: transparent !important;
+  color: var(--muted) !important;
+  opacity: 0.82 !important;
+  text-decoration: none !important;
+}
+
+.icon-btn:hover,
+.want-btn:hover,
+.fav-btn-card:hover,
+.link-btn:hover,
+.goback-btn:hover {
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+  background: rgba(255,255,255,0.045) !important;
+}
+
+.want-btn.on {
+  color: #e8784b !important;
+  background: rgba(232,120,75,0.1) !important;
+  border-color: rgba(232,120,75,0.22) !important;
+}
+
+.fav-btn-card.on {
+  color: #e47679 !important;
+  background: rgba(228,118,121,0.1) !important;
+  border-color: rgba(228,118,121,0.24) !important;
+}
+
+.card-location {
+  padding: 0 16px 8px !important;
+
+  pointer-events: auto;
+}
+
+.card-location-link {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 6px;
+  max-width: 100%;
+  color: var(--muted-light) !important;
+  text-decoration: none !important;
+  font-size: 0.76rem;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  line-height: 1.35;
+
+  pointer-events: auto;
+  position: relative;
+  z-index: 5;
+}
+
+.card-location-link .ui-icon {
+  width: 13px;
+  height: 13px;
+  margin-top: 1px;
+  color: var(--accent);
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+.card-location-link:hover {
+  color: var(--accent) !important;
+  text-decoration: underline !important;
+  text-underline-offset: 3px;
+}
+
+.card-note {
+  padding: 0 16px 10px !important;
+  color: var(--soft, #b6aea2) !important;
+  opacity: 0.92 !important;
+  line-height: 1.5 !important;
+}
+
+.card-collections {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  padding: 0 16px 8px;
+}
+
+.coll-tag {
+  border-radius: 999px !important;
+  background: rgba(255,255,255,0.035) !important;
+  border-color: var(--border) !important;
+  color: var(--muted-light) !important;
+}
+
+.card-footer {
+  padding: 5px 16px 15px !important;
+  align-items: flex-end !important;
+}
+
+.card-stars {
+  min-height: 24px;
+  display: flex;
+  align-items: center;
+  gap: 1px !important;
+}
+
+.card-stars .s {
+  color: rgba(244,239,230,0.15) !important;
+  font-size: 0.92rem !important;
+  text-shadow: none !important;
+}
+
+.card-stars .s.lit {
+  color: var(--accent) !important;
+  text-shadow: 0 0 10px rgba(239,196,90,0.28) !important;
+}
+
+.card-stars.unrated .s {
+  opacity: 0.38;
+}
+
+.card:hover .card-stars.unrated .s {
+  opacity: 0.72;
+}
+
+.ctag {
+  border-radius: 999px !important;
+  border-color: color-mix(in srgb, var(--tag-color, var(--accent)) 42%, transparent) !important;
+  background: color-mix(in srgb, var(--tag-color, var(--accent)) 10%, transparent) !important;
+  color: color-mix(in srgb, var(--tag-color, var(--accent)) 78%, white) !important;
+}
+
+.been-btn {
+  border-radius: 999px !important;
+  min-height: 24px;
+  background: rgba(255,255,255,0.025) !important;
+}
+
+.been-btn.on,
+.goback-btn.yes {
+  color: #83c98d !important;
+  border-color: rgba(131,201,141,0.26) !important;
+  background: rgba(131,201,141,0.08) !important;
+}
+
+.goback-btn.no {
+  color: #e47679 !important;
+  border-color: rgba(228,118,121,0.26) !important;
+  background: rgba(228,118,121,0.08) !important;
+}
+
+.fab {
+  width: 58px !important;
+  height: 58px !important;
+  background: linear-gradient(180deg, #f4cf74, #dcae3f) !important;
+  color: #151006 !important;
+  animation: none !important;
+  box-shadow: 0 16px 40px rgba(239,196,90,0.24), 0 12px 30px rgba(0,0,0,0.48) !important;
+}
+
+.fab .ui-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.mobile-nav {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  body {
+    padding-bottom: 82px;
+  }
+
+  header {
+    padding: 18px 14px 16px !important;
+  }
+
+  .header-inner {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  header h1 {
+    font-size: 2.8rem !important;
+    letter-spacing: 0.13em !important;
+  }
+
+  header .sub {
+    font-size: 0.58rem !important;
+    letter-spacing: 0.2em !important;
+  }
+
+  .header-actions {
+    display: none;
+  }
+
+  #favBar {
+    display: none !important;
+  }
+
+  #topRow {
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    padding: 10px 12px !important;
+  }
+
+  .custom-sort-wrap {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .custom-sort-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .filter-panel-btn span {
+    display: none;
+  }
+
+  #stickyBar:not(.filters-open) #catRow,
+  #stickyBar:not(.filters-open) #subCatRow,
+  #stickyBar:not(.filters-open) #typeRow,
+  #stickyBar:not(.filters-open) #starRow,
+  #stickyBar:not(.filters-open) #viewTabs {
+    display: flex !important;
+  }
+
+  #countBar {
+    padding: 8px 14px 4px !important;
+  }
+
+  .grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+    padding: 10px 14px 102px !important;
+  }
+
+  .card {
+    min-height: 0;
+  }
+
+  .card-actions {
+    opacity: 1;
+  }
+
+  .icon-btn,
+  .want-btn,
+  .fav-btn-card,
+  .link-btn,
+  .goback-btn {
+    width: 30px !important;
+    height: 30px !important;
+  }
+
+  .card-title-block {
+    padding-right: 126px;
+  }
+
+  .card-top {
+    padding: 15px 14px 7px !important;
+  }
+
+  .card-location,
+  .card-note,
+  .card-collections,
+  .card-footer {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+
+  .fab {
+    display: none !important;
+  }
+
+  .mobile-nav {
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    z-index: 120;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 4px;
+    padding: 6px;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background: rgba(18,16,12,0.94);
+    box-shadow: 0 18px 70px rgba(0,0,0,0.5);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  .mobile-nav-btn {
+    min-width: 0;
+    height: 48px;
+    border: 0;
+    border-radius: 14px;
+    background: transparent;
+    color: var(--muted);
+    display: grid;
+    place-items: center;
+    gap: 2px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.64rem;
+  }
+
+  .mobile-nav-btn .ui-icon {
+    width: 17px;
+    height: 17px;
+  }
+
+  .mobile-nav-btn.active {
+    background: rgba(239,196,90,0.14);
+    color: var(--accent);
+  }
+}
+/* ===== DESIGN PREVIEW LIVE LAYOUT ===== */
+:root {
+  --bg-soft: #12100d;
+  --panel: rgba(24, 22, 18, 0.82);
+  --panel-solid: #181612;
+  --panel-lift: #211e18;
+  --line: rgba(242, 237, 228, 0.08);
+  --line-strong: rgba(242, 237, 228, 0.14);
+  --soft: #b5aea3;
+  --dim: #514b43;
+  --gold: #efc45a;
+  --rose: #e47679;
+  --green: #83c98d;
+  --blue: #7fb2d9;
+  --violet: #b78ae6;
+  --shadow: 0 24px 80px rgba(0, 0, 0, 0.42);
+  --radius: 8px;
+  --serif: "Playfair Display", Georgia, serif;
+}
+
+.app-shell {
+  width: min(1440px, 100%);
+  margin: 0 auto;
+  padding: 18px 22px 110px;
+  position: relative;
+  z-index: 2;
+}
+
+header.topbar {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  gap: 20px !important;
+  align-items: center !important;
+  padding: 16px 0 20px !important;
+  margin: 0 !important;
+  border-bottom: 1px solid var(--line) !important;
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.topbar .header-inner {
+  display: flex !important;
+  align-items: baseline !important;
+  gap: 18px !important;
+  min-width: 0;
+}
+
+.topbar h1 {
+  margin: 0 !important;
+  color: var(--gold) !important;
+  font-family: 'Bebas Neue', sans-serif !important;
+  font-size: clamp(2.6rem, 6vw, 4.7rem) !important;
+  line-height: 0.86 !important;
+  letter-spacing: 0.16em !important;
+  text-shadow: 0 0 60px rgba(239, 196, 90, 0.18) !important;
+}
+
+.topbar .sub {
+  margin: 0 !important;
+  color: var(--muted) !important;
+  font-size: 0.72rem !important;
+  letter-spacing: 0.32em !important;
+  text-transform: uppercase !important;
+  white-space: nowrap;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.premium-icon-btn,
+.text-btn,
+.filter-panel-btn,
+.seg-btn,
+.chip,
+.spot-action,
+.feature-route {
+  border: 1px solid var(--line-strong);
+  background: rgba(255, 255, 255, 0.035);
+  color: var(--soft);
+  cursor: pointer;
+  transition: transform 160ms ease, border-color 160ms ease, color 160ms ease, background 160ms ease, opacity 160ms ease;
+}
+
+.premium-icon-btn {
+  width: 42px !important;
+  height: 42px !important;
+  border-radius: 999px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.premium-icon-btn.primary,
+.primary-action {
+  border-color: rgba(239, 196, 90, 0.5) !important;
+  background: linear-gradient(180deg, #f1ca6c, #dcae3f) !important;
+  color: #151006 !important;
+  box-shadow: 0 12px 30px rgba(239, 196, 90, 0.22);
+}
+
+#stickyBar {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 40 !important;
+  margin: 0 -22px !important;
+  padding: 14px 22px 12px !important;
+  border-bottom: 1px solid var(--line) !important;
+  background: rgba(12, 11, 9, 0.82) !important;
+  backdrop-filter: blur(22px) saturate(1.25) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(1.25) !important;
+}
+
+#favBar,
+.custom-sort-wrap,
+#stickyBorder {
+  display: none !important;
+}
+
+#topRow {
+  display: grid !important;
+  grid-template-columns: minmax(240px, 1fr) auto auto !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 0 !important;
+  max-height: none !important;
+  overflow: visible !important;
+  border: 0 !important;
+}
+
+.search-wrap {
+  height: 46px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 0 14px !important;
+  border: 1px solid var(--line-strong) !important;
+  border-radius: var(--radius) !important;
+  background: rgba(24, 22, 18, 0.68) !important;
+}
+
+.search-wrap svg {
+  position: static !important;
+  transform: none !important;
+  color: var(--muted) !important;
+  flex: 0 0 auto;
+}
+
+.search-wrap input {
+  width: 100% !important;
+  border: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  color: var(--text) !important;
+  font-size: 1rem !important;
+  padding: 0 !important;
+  min-width: 0;
+}
+
+.filter-panel-btn,
+.text-btn {
+  height: 46px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 9px !important;
+  padding: 0 16px !important;
+  border-radius: var(--radius) !important;
+  white-space: nowrap;
+}
+
+.segmented {
+  height: 46px;
+  display: inline-grid;
+  grid-template-columns: repeat(2, minmax(82px, 1fr));
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: rgba(24, 22, 18, 0.68);
+}
+
+.seg-btn {
+  border: 0 !important;
+  border-radius: 6px !important;
+  background: transparent !important;
+  color: var(--muted) !important;
+  font-size: 0.82rem !important;
+}
+
+.seg-btn.active {
+  color: #151006 !important;
+  background: var(--gold) !important;
+  font-weight: 600 !important;
+}
+
+.live-active-row,
+.active-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 12px;
+}
+
+.chips {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.chips::-webkit-scrollbar { display: none; }
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 30px;
+  padding: 0 11px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.chip.selected {
+  border-color: rgba(239, 196, 90, 0.45);
+  background: rgba(239, 196, 90, 0.14);
+  color: var(--gold);
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: currentColor;
+  opacity: 0.88;
+  flex: 0 0 auto;
+}
+
+.result-count {
+  color: var(--muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+#catRow,
+#subCatRow,
+#typeRow,
+#starRow,
+#viewTabs {
+  margin-top: 8px;
+}
+
+#subCatRow:not(.has-subcategories) {
+  display: none !important;
+}
+
+.content {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 22px;
+  padding-top: 22px;
+}
+
+.main-column {
+  min-width: 0;
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(280px, 0.85fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.feature-card,
+.tonight-panel,
+.side-panel {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.feature-card {
+  min-height: 360px;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  background:
+    linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.12) 42%, rgba(8, 7, 5, 0.94) 100%),
+    radial-gradient(circle at 25% 28%, color-mix(in srgb, var(--feature-color, var(--gold)) 35%, #fff2bf) 0 6%, transparent 7%),
+    radial-gradient(circle at 66% 30%, rgba(186, 67, 57, 0.74) 0 11%, transparent 12%),
+    radial-gradient(circle at 58% 58%, rgba(43, 97, 70, 0.9) 0 13%, transparent 14%),
+    linear-gradient(135deg, #2d1d13, #6a3824 38%, #17100d 39%, #11100e 100%);
+}
+
+.feature-card::before,
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.26;
+  background:
+    linear-gradient(90deg, transparent 0 12%, rgba(255,255,255,0.18) 12.3% 12.8%, transparent 13% 100%),
+    radial-gradient(circle at 68% 23%, rgba(255,255,255,0.5), transparent 10rem);
+  mix-blend-mode: soft-light;
+  pointer-events: none;
+}
+
+.feature-copy {
+  width: 100%;
+  position: relative;
+  padding: 26px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 20px;
+  align-items: end;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  color: var(--gold);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.feature-copy h2 {
+  max-width: 720px;
+  margin: 0;
+  font-family: var(--serif);
+  font-size: clamp(2rem, 5vw, 4.5rem);
+  line-height: 0.94;
+  letter-spacing: 0;
+}
+
+.feature-copy p,
+.tonight-panel p {
+  color: var(--soft);
+  line-height: 1.6;
+}
+
+.feature-copy p {
+  max-width: 540px;
+  margin: 12px 0 0;
+  font-size: 1rem;
+}
+
+.feature-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.meta-pill {
+  display: inline-flex;
+  min-height: 28px;
+  align-items: center;
+  padding: 0 10px;
+  border: 1px solid rgba(255,255,255,0.13);
+  border-radius: 999px;
+  background: rgba(0,0,0,0.28);
+  color: var(--soft);
+  font-size: 0.74rem;
+}
+
+.feature-score {
+  display: grid;
+  gap: 8px;
+  justify-items: end;
+  color: var(--soft);
+}
+
+.feature-route {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  text-decoration: none;
+}
+
+.mini-map {
+  width: 164px;
+  aspect-ratio: 1.45;
+  position: relative;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(110deg, transparent 0 31%, rgba(239,196,90,0.24) 31.4% 32.4%, transparent 33% 100%),
+    linear-gradient(15deg, transparent 0 47%, rgba(255,255,255,0.12) 47.4% 48.2%, transparent 48.8% 100%),
+    radial-gradient(circle at 46% 52%, var(--rose) 0 4px, transparent 5px),
+    radial-gradient(circle at 72% 38%, var(--green) 0 3px, transparent 4px),
+    radial-gradient(circle at 24% 68%, var(--blue) 0 3px, transparent 4px),
+    #15130f;
+}
+
+.tonight-panel {
+  padding: 22px;
+  min-height: 360px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background:
+    linear-gradient(160deg, rgba(239,196,90,0.08), transparent 44%),
+    rgba(24, 22, 18, 0.82);
+}
+
+.tonight-panel h2,
+.side-panel h2 {
+  margin: 0;
+  font-family: 'Bebas Neue', sans-serif;
+  color: var(--gold);
+  font-size: 2rem;
+  letter-spacing: 0.1em;
+  line-height: 0.95;
+}
+
+.choice-card {
+  margin: 26px 0;
+  padding: 18px;
+  border: 1px solid rgba(239,196,90,0.22);
+  border-radius: var(--radius);
+  background: rgba(239,196,90,0.06);
+}
+
+.choice-name {
+  font-family: var(--serif);
+  font-size: 1.55rem;
+  line-height: 1;
+}
+
+.choice-detail {
+  margin-top: 10px;
+  color: var(--soft);
+  line-height: 1.5;
+}
+
+.panel-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+}
+
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 18px;
+  margin: 0 0 12px;
+}
+
+.section-head h2 {
+  margin: 0;
+  font-family: 'Bebas Neue', sans-serif;
+  color: var(--text);
+  font-size: 2rem;
+  letter-spacing: 0.11em;
+  line-height: 1;
+}
+
+.section-head p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+#countBar {
+  padding: 0 !important;
+  white-space: nowrap;
+}
+
+.spots-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 16px !important;
+  padding: 0 0 90px !important;
+}
+
+.card {
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  border: 1px solid var(--line) !important;
+  border-radius: var(--radius) !important;
+  background: var(--panel) !important;
+  box-shadow: var(--shadow);
+  
+  transition: transform 170ms ease, border-color 170ms ease, background 170ms ease;
+  padding: 0 !important;
+}
+
+.card:hover {
+  transform: translateY(-2px) !important;
+  border-color: rgba(239, 196, 90, 0.28) !important;
+  background: rgba(31, 28, 22, 0.9) !important;
+}
+
+.card.no-photo {
+  padding-top: 132px !important;
+}
+
+.card.no-photo::before {
+  inset: 0 0 auto 0 !important;
+  height: 132px !important;
+  width: 100% !important;
+  opacity: 1 !important;
+  background:
+    radial-gradient(circle at 72% 20%, rgba(255,223,142,0.52), transparent 9%),
+    radial-gradient(circle at 40% 60%, color-mix(in srgb, var(--card-color) 64%, #d44d3d) 0 18%, transparent 19%),
+    radial-gradient(circle at 58% 44%, rgba(245,205,126,0.42), transparent 22%),
+    linear-gradient(140deg, #4f2a19, #18100b 52%, #0d0c0a) !important;
+  mix-blend-mode: normal !important;
+}
+
+.card-photo,
+.card.has-photo .card-photo {
+  min-height: 132px !important;
+  height: 132px !important;
+  width: 100% !important;
+  object-fit: cover !important;
+  position: relative;
+  pointer-events: none;
+}
+
+.card-photo::after,
+.card.no-photo::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 60%;
+  background: linear-gradient(180deg, transparent, rgba(13,11,8,0.82));
+}
+
+.card-top,
+.card.has-photo .card-top {
+  margin-top: 0 !important;
+  background: transparent !important;
+  padding: 15px 15px 0 !important;
+}
+
+.card-title-block {
+  padding-right: 42px !important;
+}
+
+.card-name {
+  margin: 0;
+  color: var(--text) !important;
+  font-size: 1.05rem !important;
+  font-weight: 600 !important;
+  line-height: 1.22 !important;
+}
+
+.card-actions {
+  position: absolute;
+  top: 146px;
+  right: 13px;
+  display: inline-flex !important;
+  gap: 4px !important;
+  opacity: 0.72;
+  z-index: 3;
+}
+
+.card.has-photo .card-actions {
+  top: 146px;
+}
+
+.card-location {
+  padding: 8px 15px 0 !important;
+
+  pointer-events: auto;
+}
+
+.card-location-link {
+  color: var(--muted) !important;
+  font-size: 0.76rem;
+
+  pointer-events: auto;
+  position: relative;
+  z-index: 5;
+}
+
+.card-note {
+  padding: 10px 15px 0 !important;
+  color: var(--soft) !important;
+  opacity: 1 !important;
+}
+
+.card-collections {
+  padding: 10px 15px 0;
+}
+
+.card-footer {
+  margin-top: auto;
+  padding: 14px 15px 15px !important;
+}
+
+.card-badges {
+  justify-content: flex-end;
+}
+
+.ctag,
+.been-btn,
+.coll-tag {
+  border-radius: 999px !important;
+}
+
+.side-column {
+  display: grid;
+  gap: 16px;
+  align-content: start;
+  position: sticky;
+  top: 128px;
+}
+
+.side-panel {
+  padding: 18px;
+}
+
+.side-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.side-item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+}
+
+.side-number {
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #151006;
+  background: var(--gold);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.side-item strong {
+  display: block;
+  font-size: 0.9rem;
+  line-height: 1.25;
+}
+
+.side-item span {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 0.74rem;
+}
+
+.list-mode .spots-grid {
+  grid-template-columns: 1fr !important;
+}
+
+.list-mode .card {
+  min-height: 180px;
+  display: grid;
+  grid-template-columns: 190px minmax(0, 1fr);
+  padding-top: 0 !important;
+}
+
+.list-mode .card.no-photo::before {
+  height: 100% !important;
+  width: 190px !important;
+  inset: 0 auto 0 0 !important;
+}
+
+.list-mode .card-photo {
+  height: 100% !important;
+  min-height: 100% !important;
+  pointer-events: none;
+}
+
+.list-mode .card-actions {
+  top: 14px;
+}
+
+.list-mode .card-top,
+.list-mode .card-location,
+.list-mode .card-note,
+.list-mode .card-collections,
+.list-mode .card-footer {
+  grid-column: 2;
+}
+
+@media (max-width: 1180px) {
+  .content {
+    grid-template-columns: 1fr;
+  }
+
+  .side-column {
+    position: static;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .spots-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .app-shell {
+    padding: 12px 14px 92px;
+  }
+
+  header.topbar {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+    padding-bottom: 14px !important;
+  }
+
+  .topbar .header-inner {
+    justify-content: space-between !important;
+  }
+
+  .topbar h1 {
+    font-size: 2.72rem !important;
+    letter-spacing: 0.13em !important;
+  }
+
+  .topbar .sub {
+    font-size: 0.62rem !important;
+    letter-spacing: 0.22em !important;
+  }
+
+  .header-actions {
+    display: none !important;
+  }
+
+  #stickyBar {
+    margin: 0 -14px !important;
+    padding: 10px 14px !important;
+  }
+
+  #topRow {
+    grid-template-columns: 1fr auto !important;
+  }
+
+  .segmented {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .live-active-row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 9px;
+  }
+
+  .content {
+    padding-top: 14px;
+  }
+
+  .feature-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .feature-card {
+    min-height: 430px;
+  }
+
+  .feature-copy {
+    grid-template-columns: 1fr;
+    padding: 20px;
+  }
+
+  .feature-copy h2 {
+    font-size: 2.55rem;
+  }
+
+  .feature-score {
+    justify-items: start;
+  }
+
+  .tonight-panel {
+    min-height: 0;
+  }
+
+  .section-head {
+    align-items: start;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .spots-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .side-column {
+    display: none;
+  }
+
+  .list-mode .card {
+    grid-template-columns: 116px minmax(0, 1fr);
+  }
+
+  .list-mode .card.no-photo::before {
+    width: 116px !important;
+  }
+}
+
+/* Preview-faithful live cards and filter drawer */
+.add-btn {
+  display: none !important;
+}
+
+.drawer {
+  position: fixed;
+  inset: 0 0 0 auto;
+  width: min(420px, 100%);
+  z-index: 120;
+  padding: 22px;
+  background: rgba(18, 16, 12, 0.94);
+  border-left: 1px solid var(--line-strong);
+  box-shadow: -30px 0 90px rgba(0,0,0,0.45);
+  transform: translateX(104%);
+  transition: transform 240ms ease;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  overflow-y: auto;
+}
+
+.drawer.open {
+  transform: translateX(0);
+}
+
+.drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 110;
+  background: rgba(5, 4, 3, 0.48);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms ease;
+}
+
+.drawer-backdrop.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.drawer-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.drawer-head h2 {
+  margin: 0;
+  color: var(--gold);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2rem;
+  letter-spacing: 0.12em;
+}
+
+.drawer-close {
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.035);
+  color: var(--soft);
+  cursor: pointer;
+}
+
+.filter-group {
+  padding: 18px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.filter-group h3 {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.filter-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.drawer-sub-grid {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.drawer-chip.selected {
+  border-color: color-mix(in srgb, var(--chip-color, var(--gold)) 46%, transparent);
+  background: color-mix(in srgb, var(--chip-color, var(--gold)) 14%, transparent);
+  color: var(--chip-color, var(--gold));
+}
+
+.drawer-footer {
+  border-bottom: 0;
+}
+
+.drawer-clear {
+  width: 100%;
+}
+
+.spots-grid {
+  padding-bottom: 90px !important;
+}
+
+.feature-card,
+.tonight-panel,
+.spot-card,
+.side-panel {
+  border: 1px solid var(--line) !important;
+  border-radius: var(--radius) !important;
+  background: var(--panel) !important;
+  box-shadow: var(--shadow) !important;
+  overflow: hidden;
+}
+
+.spot-card.card {
+  min-height: 214px;
+  display: flex;
+  flex-direction: column;
+  padding: 0 !important;
+  transition: transform 170ms ease, border-color 170ms ease, background 170ms ease;
+}
+
+.spot-card.card::before,
+.spot-card.card.no-photo::before,
+.spot-card.card.has-photo::before {
+  display: none !important;
+}
+
+.spot-card.card:hover {
+  transform: translateY(-2px) !important;
+  border-color: rgba(239, 196, 90, 0.28) !important;
+  background: rgba(31, 28, 22, 0.9) !important;
+}
+
+.spot-photo {
+  min-height: 132px;
+  height: 132px;
+  position: relative;
+  overflow: hidden;
+  background: var(--photo-bg);
+  flex: 0 0 auto;
+}
+
+.spot-photo::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.26;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, transparent 0 12%, rgba(255,255,255,0.18) 12.3% 12.8%, transparent 13% 100%),
+    radial-gradient(circle at 68% 23%, rgba(255,255,255,0.5), transparent 10rem);
+  mix-blend-mode: soft-light;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.spot-photo::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 60%;
+  background: linear-gradient(180deg, transparent, rgba(13,11,8,0.82));
+  z-index: 2;
+}
+
+.spot-photo img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.photo-1 {
+  --photo-bg:
+    radial-gradient(circle at 72% 20%, rgba(255,223,142,0.76), transparent 9%),
+    radial-gradient(circle at 40% 60%, color-mix(in srgb, var(--card-color, #d44d3d) 72%, #d44d3d), transparent 18%),
+    radial-gradient(circle at 58% 44%, rgba(245,205,126,0.76), transparent 22%),
+    linear-gradient(140deg, #4f2a19, #18100b 52%, #0d0c0a);
+}
+
+.photo-2 {
+  --photo-bg:
+    radial-gradient(circle at 22% 28%, rgba(255,233,180,0.72), transparent 10%),
+    radial-gradient(circle at 66% 60%, rgba(123,184,162,0.62), transparent 24%),
+    linear-gradient(130deg, #243022, #734426 55%, #120e0b);
+}
+
+.photo-3 {
+  --photo-bg:
+    radial-gradient(circle at 44% 32%, rgba(246,198,110,0.78), transparent 11%),
+    radial-gradient(circle at 74% 62%, rgba(211,89,116,0.62), transparent 20%),
+    linear-gradient(135deg, #3c2532, #19100f 50%, #0d0c0b);
+}
+
+.spot-card.card .card-top {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  gap: 12px !important;
+  align-items: start !important;
+  padding: 15px 15px 0 !important;
+}
+
+.spot-card.card .card-title-block {
+  min-width: 0;
+  padding-right: 0 !important;
+}
+
+.spot-card.card .card-name {
+  margin: 0 !important;
+  color: var(--text) !important;
+  font-size: 1.05rem !important;
+  font-weight: 600 !important;
+  line-height: 1.22 !important;
+}
+
+.spot-card.card .card-actions {
+  position: static !important;
+  display: inline-flex !important;
+  gap: 4px !important;
+  opacity: 0.76;
+  z-index: 3;
+}
+
+.spot-card.card .card-actions .icon-btn,
+.spot-card.card .card-actions .want-btn,
+.spot-action {
+  width: 30px !important;
+  height: 30px !important;
+  border: 1px solid var(--line-strong) !important;
+  border-radius: 999px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: rgba(255,255,255,0.035) !important;
+  color: var(--soft) !important;
+  padding: 0 !important;
+}
+
+.spot-card.card .fav-btn-card.on,
+.spot-card.card .want-btn.on {
+  color: var(--rose) !important;
+  border-color: rgba(228,118,121,0.36) !important;
+  background: rgba(228,118,121,0.09) !important;
+  opacity: 1;
+}
+
+.spot-card.card .card-location {
+  padding: 7px 15px 0 !important;
+
+  pointer-events: auto;
+}
+
+.card-location-link {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  color: var(--muted) !important;
+  font-size: 0.76rem;
+  line-height: 1.35;
+  text-decoration: none;
+
+  pointer-events: auto;
+  position: relative;
+  z-index: 5;
+}
+
+.spot-card.card .spot-note {
+  margin: 0;
+  padding: 10px 15px 0 !important;
+  color: var(--soft);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.spot-card.card .card-collections {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px 15px 0;
+}
+
+.spot-card.card .card-footer {
+  margin-top: auto;
+  padding: 14px 15px 15px !important;
+  display: grid;
+  gap: 10px;
+}
+
+.spot-card.card .card-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-start;
+}
+
+.tag,
+.ctag,
+.been-btn,
+.goback-btn,
+.coll-tag {
+  display: inline-flex !important;
+  align-items: center !important;
+  min-height: 24px !important;
+  padding: 0 8px !important;
+  border: 1px solid rgba(255,255,255,0.12) !important;
+  border-radius: 999px !important;
+  background: rgba(255,255,255,0.035) !important;
+  color: var(--soft) !important;
+  font-size: 0.66rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+}
+
+.ctag {
+  color: var(--tag-color, var(--gold)) !important;
+  border-color: color-mix(in srgb, var(--tag-color, var(--gold)) 34%, transparent) !important;
+  background: color-mix(in srgb, var(--tag-color, var(--gold)) 8%, transparent) !important;
+}
+
+.been-btn.on,
+.goback-btn.yes {
+  color: var(--green) !important;
+  border-color: rgba(131,201,141,0.34) !important;
+  background: rgba(131,201,141,0.08) !important;
+}
+
+.goback-btn.no {
+  color: var(--rose) !important;
+  border-color: rgba(228,118,121,0.34) !important;
+  background: rgba(228,118,121,0.08) !important;
+}
+
+.spot-card.card .card-stars {
+  justify-content: flex-start;
+  gap: 2px;
+}
+
+.list-mode .spot-card.card {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 190px minmax(0, 1fr);
+}
+
+.list-mode .spot-card.card .spot-photo {
+  min-height: 100%;
+  height: 100%;
+  grid-row: 1 / span 5;
+}
+
+@media (max-width: 760px) {
+  .drawer {
+    width: 100%;
+  }
+
+  .list-mode .spot-card.card {
+    grid-template-columns: 116px minmax(0, 1fr);
+  }
+}
+/* ===== END VISUAL OVERRIDES ===== */
+</style>
+
+</body>
+</html>
