@@ -3263,34 +3263,47 @@ async function autoTagAreas() {
   render();
 }
 
-// ---- PLACE SEARCH + MINI MAP (Nominatim + Leaflet) ----
+// ---- PLACE SEARCH (Photon) + MINI MAP (Leaflet) ----
 let miniMapInstance = null;
 let miniMapMarker = null;
 
-async function nominatimSearch(query) {
-  const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=5`;
-  const res = await fetch(url, { headers: { 'Accept-Language': 'en' } });
-  return res.json();
+async function photonSearch(query) {
+  const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=5&bbox=-123.5,45.2,-121.8,45.8`;
+  const res = await fetch(url);
+  const data = await res.json();
+  return (data && data.features) || [];
+}
+
+// Builds a Nominatim-style "Name, Street, City, State, Country" string from Photon properties
+function photonDisplayParts(props) {
+  const streetAddr = [props.housenumber, props.street].filter(Boolean).join(' ');
+  return [props.name, streetAddr, props.city, props.state, props.country].filter(Boolean);
 }
 
 async function searchPlace(query) {
   const res = document.getElementById('placeResults');
   if (!query || query.length < 3) { res.style.display = 'none'; return; }
   try {
-    const results = await nominatimSearch(query);
-    if (!results || !results.length) { res.style.display = 'none'; return; }
-    res.innerHTML = results.map(p => `<div class="place-result-item"
-        data-lat="${p.lat}" data-lng="${p.lon}"
-        data-desc="${(p.display_name || '').replace(/"/g,'&quot;')}"
+    const features = await photonSearch(query);
+    if (!features.length) { res.style.display = 'none'; return; }
+    res.innerHTML = features.map(f => {
+      const p = f.properties;
+      const [lng, lat] = f.geometry.coordinates;
+      const display = photonDisplayParts(p).join(', ');
+      return `<div class="place-result-item"
+        data-lat="${lat}" data-lng="${lng}"
+        data-desc="${display.replace(/"/g,'&quot;')}"
+        data-name="${(p.name || '').replace(/"/g,'&quot;')}"
         style="padding:10px 14px;cursor:pointer;font-size:0.84rem;color:var(--text);border-bottom:1px solid var(--border);"
         onmouseover="this.style.background='#2a2820'" onmouseout="this.style.background=''">
-        ${p.display_name}
-      </div>`).join('');
+        ${display}
+      </div>`;
+    }).join('');
     res.onclick = e => {
       const item = e.target.closest('.place-result-item');
       if (!item) return;
       res.style.display = 'none';
-      selectPlaceNominatim(parseFloat(item.dataset.lat), parseFloat(item.dataset.lng), item.dataset.desc.replace(/&quot;/g,'"'));
+      selectPlaceNominatim(parseFloat(item.dataset.lat), parseFloat(item.dataset.lng), item.dataset.desc.replace(/&quot;/g,'"'), item.dataset.name.replace(/&quot;/g,'"'));
     };
     res.style.display = 'block';
   } catch(e) {
@@ -3303,16 +3316,23 @@ async function searchPlaceFromName(query) {
   const res = document.getElementById('nameResults');
   if (!query || query.length < 2) { res.style.display = 'none'; return; }
   try {
-    const results = await nominatimSearch(query);
-    if (!results || !results.length) { res.style.display = 'none'; return; }
-    res.innerHTML = results.map(p => `<div class="name-result-item"
-        data-lat="${p.lat}" data-lng="${p.lon}"
-        data-desc="${(p.display_name || '').replace(/"/g,'&quot;')}"
-        data-name="${(p.name || (p.display_name || '').split(',')[0] || '').replace(/"/g,'&quot;')}"
+    const features = await photonSearch(query);
+    if (!features.length) { res.style.display = 'none'; return; }
+    res.innerHTML = features.map(f => {
+      const p = f.properties;
+      const [lng, lat] = f.geometry.coordinates;
+      const parts = photonDisplayParts(p);
+      const display = parts.join(', ');
+      const name = p.name || parts[0] || display;
+      return `<div class="name-result-item"
+        data-lat="${lat}" data-lng="${lng}"
+        data-desc="${display.replace(/"/g,'&quot;')}"
+        data-name="${name.replace(/"/g,'&quot;')}"
         style="padding:10px 14px;cursor:pointer;font-size:0.84rem;color:var(--text);border-bottom:1px solid var(--border);"
         onmouseover="this.style.background='#2a2820'" onmouseout="this.style.background=''">
-        ${p.display_name}
-      </div>`).join('');
+        ${display}
+      </div>`;
+    }).join('');
     res.style.display = 'block';
     res.onclick = e => {
       const item = e.target.closest('.name-result-item');
