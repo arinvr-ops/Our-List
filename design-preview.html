@@ -1,0 +1,1498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Our List - Design Preview</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0c0b09;
+  --bg-soft: #12100d;
+  --panel: rgba(24, 22, 18, 0.82);
+  --panel-solid: #181612;
+  --panel-lift: #211e18;
+  --line: rgba(242, 237, 228, 0.08);
+  --line-strong: rgba(242, 237, 228, 0.14);
+  --text: #f4efe6;
+  --soft: #b5aea3;
+  --muted: #7f786e;
+  --dim: #514b43;
+  --gold: #efc45a;
+  --gold-deep: #9c7424;
+  --rose: #e47679;
+  --green: #83c98d;
+  --blue: #7fb2d9;
+  --violet: #b78ae6;
+  --shadow: 0 24px 80px rgba(0, 0, 0, 0.42);
+  --radius: 8px;
+  --sans: "DM Sans", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --display: "Bebas Neue", Impact, sans-serif;
+  --serif: "Playfair Display", Georgia, serif;
+}
+
+* { box-sizing: border-box; }
+html { color-scheme: dark; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 14% -10%, rgba(239, 196, 90, 0.12), transparent 36rem),
+    radial-gradient(circle at 100% 16%, rgba(128, 70, 44, 0.16), transparent 30rem),
+    linear-gradient(180deg, #0f0d0a 0%, #0b0a08 48%, #090807 100%);
+  color: var(--text);
+  font-family: var(--sans);
+  font-weight: 300;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0.28;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+  background-size: 38px 38px;
+  mask-image: linear-gradient(to bottom, black, transparent 80%);
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  color: inherit;
+}
+
+a {
+  color: inherit;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.icons { display: none; }
+.icon {
+  width: 18px;
+  height: 18px;
+  display: block;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.app-shell {
+  width: min(1440px, 100%);
+  margin: 0 auto;
+  padding: 18px 22px 110px;
+}
+
+.preview-flag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.preview-flag::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--gold);
+  box-shadow: 0 0 18px rgba(239, 196, 90, 0.58);
+}
+
+.topbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 20px;
+  align-items: center;
+  padding: 16px 0 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: 18px;
+  min-width: 0;
+}
+
+.brand h1 {
+  margin: 0;
+  color: var(--gold);
+  font-family: var(--display);
+  font-size: clamp(2.6rem, 6vw, 4.7rem);
+  line-height: 0.86;
+  letter-spacing: 0.16em;
+  text-shadow: 0 0 60px rgba(239, 196, 90, 0.18);
+}
+
+.brand p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.top-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.icon-btn,
+.text-btn,
+.fab,
+.nav-btn,
+.chip,
+.seg-btn,
+.spot-action,
+.drawer-close {
+  border: 1px solid var(--line-strong);
+  background: rgba(255, 255, 255, 0.035);
+  color: var(--soft);
+  cursor: pointer;
+  transition: transform 160ms ease, border-color 160ms ease, color 160ms ease, background 160ms ease, opacity 160ms ease;
+}
+
+.icon-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-btn:hover,
+.text-btn:hover,
+.chip:hover,
+.spot-action:hover,
+.drawer-close:hover {
+  color: var(--text);
+  border-color: rgba(239, 196, 90, 0.38);
+  background: rgba(239, 196, 90, 0.08);
+}
+
+.primary-action {
+  border-color: rgba(239, 196, 90, 0.5);
+  background: linear-gradient(180deg, #f1ca6c, #dcae3f);
+  color: #151006;
+  box-shadow: 0 12px 30px rgba(239, 196, 90, 0.22);
+}
+
+.primary-action:hover {
+  color: #151006;
+  background: linear-gradient(180deg, #f5d37b, #e6b746);
+}
+
+.command-surface {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  margin: 0 -22px;
+  padding: 14px 22px 12px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(12, 11, 9, 0.82);
+  backdrop-filter: blur(22px) saturate(1.25);
+  -webkit-backdrop-filter: blur(22px) saturate(1.25);
+}
+
+.command-row {
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) auto auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.search {
+  height: 46px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: rgba(24, 22, 18, 0.68);
+}
+
+.search .icon {
+  color: var(--muted);
+  flex: 0 0 auto;
+}
+
+.search input {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text);
+  font-size: 1rem;
+  min-width: 0;
+}
+
+.search input::placeholder {
+  color: var(--muted);
+}
+
+.text-btn {
+  height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 0 16px;
+  border-radius: var(--radius);
+  white-space: nowrap;
+}
+
+.segmented {
+  height: 46px;
+  display: inline-grid;
+  grid-template-columns: repeat(2, minmax(82px, 1fr));
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: rgba(24, 22, 18, 0.68);
+}
+
+.seg-btn {
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.seg-btn.active {
+  color: #151006;
+  background: var(--gold);
+  font-weight: 600;
+}
+
+.active-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 12px;
+}
+
+.chips {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.chips::-webkit-scrollbar { display: none; }
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 30px;
+  padding: 0 11px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.chip.selected {
+  border-color: rgba(239, 196, 90, 0.45);
+  background: rgba(239, 196, 90, 0.14);
+  color: var(--gold);
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: currentColor;
+  opacity: 0.88;
+}
+
+.result-count {
+  color: var(--muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.content {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 22px;
+  padding-top: 22px;
+}
+
+.main-column {
+  min-width: 0;
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(280px, 0.85fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.feature-card,
+.tonight-panel,
+.spot-card,
+.side-panel {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.feature-card {
+  min-height: 360px;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  background:
+    linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.12) 42%, rgba(8, 7, 5, 0.94) 100%),
+    radial-gradient(circle at 25% 28%, rgba(255, 242, 191, 0.74) 0 6%, transparent 7%),
+    radial-gradient(circle at 66% 30%, rgba(186, 67, 57, 0.74) 0 11%, transparent 12%),
+    radial-gradient(circle at 58% 58%, rgba(43, 97, 70, 0.9) 0 13%, transparent 14%),
+    linear-gradient(135deg, #2d1d13, #6a3824 38%, #17100d 39%, #11100e 100%);
+}
+
+.feature-card::before,
+.spot-photo::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.26;
+  background:
+    linear-gradient(90deg, transparent 0 12%, rgba(255,255,255,0.18) 12.3% 12.8%, transparent 13% 100%),
+    radial-gradient(circle at 68% 23%, rgba(255,255,255,0.5), transparent 10rem);
+  mix-blend-mode: soft-light;
+}
+
+.feature-copy {
+  width: 100%;
+  position: relative;
+  padding: 26px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 20px;
+  align-items: end;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  color: var(--gold);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.feature-copy h2,
+.tonight-panel h2,
+.side-panel h2 {
+  margin: 0;
+}
+
+.feature-copy h2 {
+  max-width: 720px;
+  font-family: var(--serif);
+  font-size: clamp(2rem, 5vw, 4.5rem);
+  line-height: 0.94;
+  letter-spacing: 0;
+}
+
+.feature-copy p {
+  max-width: 540px;
+  margin: 12px 0 0;
+  color: var(--soft);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.feature-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.meta-pill {
+  display: inline-flex;
+  min-height: 28px;
+  align-items: center;
+  padding: 0 10px;
+  border: 1px solid rgba(255,255,255,0.13);
+  border-radius: 999px;
+  background: rgba(0,0,0,0.28);
+  color: var(--soft);
+  font-size: 0.74rem;
+}
+
+.feature-score {
+  display: grid;
+  gap: 8px;
+  justify-items: end;
+  color: var(--soft);
+}
+
+.score {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--gold);
+  font-weight: 600;
+}
+
+.mini-map {
+  width: 164px;
+  aspect-ratio: 1.45;
+  position: relative;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(110deg, transparent 0 31%, rgba(239,196,90,0.24) 31.4% 32.4%, transparent 33% 100%),
+    linear-gradient(15deg, transparent 0 47%, rgba(255,255,255,0.12) 47.4% 48.2%, transparent 48.8% 100%),
+    radial-gradient(circle at 46% 52%, var(--rose) 0 4px, transparent 5px),
+    radial-gradient(circle at 72% 38%, var(--green) 0 3px, transparent 4px),
+    radial-gradient(circle at 24% 68%, var(--blue) 0 3px, transparent 4px),
+    #15130f;
+}
+
+.tonight-panel {
+  padding: 22px;
+  min-height: 360px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background:
+    linear-gradient(160deg, rgba(239,196,90,0.08), transparent 44%),
+    rgba(24, 22, 18, 0.82);
+}
+
+.tonight-panel h2,
+.side-panel h2 {
+  font-family: var(--display);
+  color: var(--gold);
+  font-size: 2rem;
+  letter-spacing: 0.1em;
+  line-height: 0.95;
+}
+
+.tonight-panel p {
+  margin: 14px 0 0;
+  color: var(--soft);
+  line-height: 1.55;
+}
+
+.choice-card {
+  margin: 26px 0;
+  padding: 18px;
+  border: 1px solid rgba(239,196,90,0.22);
+  border-radius: var(--radius);
+  background: rgba(239,196,90,0.06);
+}
+
+.choice-name {
+  font-family: var(--serif);
+  font-size: 1.55rem;
+  line-height: 1;
+}
+
+.choice-detail {
+  margin-top: 10px;
+  color: var(--soft);
+  line-height: 1.5;
+}
+
+.panel-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+}
+
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 18px;
+  margin: 0 0 12px;
+}
+
+.section-head h2 {
+  margin: 0;
+  font-family: var(--display);
+  color: var(--text);
+  font-size: 2rem;
+  letter-spacing: 0.11em;
+  line-height: 1;
+}
+
+.section-head p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.spots-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.spot-card {
+  min-height: 214px;
+  display: flex;
+  flex-direction: column;
+  transition: transform 170ms ease, border-color 170ms ease, background 170ms ease;
+}
+
+.spot-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(239, 196, 90, 0.28);
+  background: rgba(31, 28, 22, 0.9);
+}
+
+.spot-card.hidden { display: none; }
+
+.spot-photo {
+  min-height: 132px;
+  position: relative;
+  overflow: hidden;
+  background: var(--photo-bg);
+}
+
+.spot-photo::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 60%;
+  background: linear-gradient(180deg, transparent, rgba(13,11,8,0.82));
+}
+
+.photo-1 {
+  --photo-bg:
+    radial-gradient(circle at 72% 20%, rgba(255,223,142,0.76), transparent 9%),
+    radial-gradient(circle at 40% 60%, rgba(212,77,61,0.82), transparent 18%),
+    radial-gradient(circle at 58% 44%, rgba(245,205,126,0.76), transparent 22%),
+    linear-gradient(140deg, #4f2a19, #18100b 52%, #0d0c0a);
+}
+
+.photo-2 {
+  --photo-bg:
+    radial-gradient(circle at 22% 28%, rgba(255,233,180,0.72), transparent 10%),
+    radial-gradient(circle at 66% 60%, rgba(123,184,162,0.62), transparent 24%),
+    linear-gradient(130deg, #243022, #734426 55%, #120e0b);
+}
+
+.photo-3 {
+  --photo-bg:
+    radial-gradient(circle at 44% 32%, rgba(246,198,110,0.78), transparent 11%),
+    radial-gradient(circle at 74% 62%, rgba(211,89,116,0.62), transparent 20%),
+    linear-gradient(135deg, #3c2532, #19100f 50%, #0d0c0b);
+}
+
+.spot-body {
+  padding: 15px;
+  display: grid;
+  gap: 10px;
+  flex: 1;
+}
+
+.spot-top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: start;
+}
+
+.spot-title {
+  margin: 0;
+  color: var(--text);
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.22;
+}
+
+.spot-note {
+  margin: 0;
+  color: var(--soft);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.spot-location {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  color: var(--muted);
+  font-size: 0.76rem;
+  line-height: 1.35;
+}
+
+.spot-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  margin-top: auto;
+}
+
+.spot-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 8px;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 999px;
+  background: rgba(255,255,255,0.035);
+  color: var(--soft);
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.tag.gold { color: var(--gold); border-color: rgba(239,196,90,0.3); background: rgba(239,196,90,0.08); }
+.tag.rose { color: var(--rose); border-color: rgba(228,118,121,0.34); background: rgba(228,118,121,0.08); }
+.tag.green { color: var(--green); border-color: rgba(131,201,141,0.34); background: rgba(131,201,141,0.08); }
+.tag.blue { color: var(--blue); border-color: rgba(127,178,217,0.34); background: rgba(127,178,217,0.08); }
+.tag.violet { color: var(--violet); border-color: rgba(183,138,230,0.34); background: rgba(183,138,230,0.08); }
+
+.spot-actions {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+.spot-action {
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.72;
+}
+
+.spot-action.faved,
+.spot-action[aria-pressed="true"] {
+  color: var(--rose);
+  border-color: rgba(228,118,121,0.36);
+  background: rgba(228,118,121,0.09);
+  opacity: 1;
+}
+
+.list-mode .spots-grid {
+  grid-template-columns: 1fr;
+}
+
+.list-mode .spot-card {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 190px minmax(0, 1fr);
+}
+
+.list-mode .spot-photo {
+  min-height: 100%;
+}
+
+.side-column {
+  display: grid;
+  gap: 16px;
+  align-content: start;
+  position: sticky;
+  top: 128px;
+}
+
+.side-panel {
+  padding: 18px;
+}
+
+.side-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.side-item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+}
+
+.side-number {
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #151006;
+  background: var(--gold);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.side-item strong {
+  display: block;
+  font-size: 0.9rem;
+  line-height: 1.25;
+}
+
+.side-item span {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 0.74rem;
+}
+
+.review-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.review-list label {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 9px;
+  color: var(--soft);
+  font-size: 0.8rem;
+  line-height: 1.35;
+}
+
+.review-list input {
+  accent-color: var(--gold);
+  margin-top: 2px;
+}
+
+.drawer {
+  position: fixed;
+  inset: 0 0 0 auto;
+  width: min(420px, 100%);
+  z-index: 60;
+  padding: 22px;
+  background: rgba(18, 16, 12, 0.94);
+  border-left: 1px solid var(--line-strong);
+  box-shadow: -30px 0 90px rgba(0,0,0,0.45);
+  transform: translateX(104%);
+  transition: transform 240ms ease;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.drawer.open {
+  transform: translateX(0);
+}
+
+.drawer-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.drawer-head h2 {
+  margin: 0;
+  color: var(--gold);
+  font-family: var(--display);
+  font-size: 2rem;
+  letter-spacing: 0.12em;
+}
+
+.drawer-close {
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.filter-group {
+  padding: 18px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.filter-group h3 {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.filter-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.fab {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 50;
+  width: 58px;
+  height: 58px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gold);
+  color: #151006;
+  border-color: transparent;
+  box-shadow: 0 16px 40px rgba(239, 196, 90, 0.24), 0 12px 30px rgba(0,0,0,0.48);
+}
+
+.fab:hover {
+  transform: translateY(-2px);
+}
+
+.mobile-nav {
+  display: none;
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  transform: translate(-50%, 20px);
+  z-index: 80;
+  opacity: 0;
+  pointer-events: none;
+  padding: 10px 14px;
+  border: 1px solid rgba(239,196,90,0.24);
+  border-radius: 999px;
+  background: rgba(18, 16, 12, 0.94);
+  color: var(--soft);
+  box-shadow: 0 18px 50px rgba(0,0,0,0.4);
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+@media (max-width: 1180px) {
+  .content {
+    grid-template-columns: 1fr;
+  }
+
+  .side-column {
+    position: static;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .spots-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .app-shell {
+    padding: 12px 14px 92px;
+  }
+
+  .preview-flag {
+    margin-bottom: 6px;
+  }
+
+  .topbar {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding-bottom: 14px;
+  }
+
+  .brand {
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .brand h1 {
+    font-size: 2.72rem;
+    letter-spacing: 0.13em;
+  }
+
+  .brand p {
+    font-size: 0.62rem;
+    letter-spacing: 0.22em;
+  }
+
+  .top-actions {
+    display: none;
+  }
+
+  .command-surface {
+    margin: 0 -14px;
+    padding: 10px 14px;
+  }
+
+  .command-row {
+    grid-template-columns: 1fr auto;
+  }
+
+  .segmented {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .active-row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 9px;
+  }
+
+  .result-count {
+    font-size: 0.68rem;
+  }
+
+  .content {
+    padding-top: 14px;
+  }
+
+  .feature-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .feature-card {
+    min-height: 430px;
+  }
+
+  .feature-copy {
+    grid-template-columns: 1fr;
+    padding: 20px;
+  }
+
+  .feature-copy h2 {
+    font-size: 2.55rem;
+  }
+
+  .feature-score {
+    justify-items: start;
+  }
+
+  .mini-map {
+    width: min(220px, 100%);
+  }
+
+  .tonight-panel {
+    min-height: 0;
+  }
+
+  .section-head {
+    align-items: start;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .spots-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .list-mode .spot-card {
+    grid-template-columns: 116px minmax(0, 1fr);
+  }
+
+  .list-mode .spot-photo {
+    min-height: auto;
+  }
+
+  .list-mode .spot-note {
+    display: none;
+  }
+
+  .side-column {
+    display: none;
+  }
+
+  .fab {
+    display: none;
+  }
+
+  .mobile-nav {
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    z-index: 70;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 4px;
+    padding: 6px;
+    border: 1px solid var(--line-strong);
+    border-radius: 18px;
+    background: rgba(18, 16, 12, 0.92);
+    box-shadow: 0 18px 70px rgba(0,0,0,0.5);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  .nav-btn {
+    min-width: 0;
+    height: 48px;
+    border: 0;
+    border-radius: 14px;
+    background: transparent;
+    display: grid;
+    place-items: center;
+    gap: 2px;
+    color: var(--muted);
+    font-size: 0.64rem;
+  }
+
+  .nav-btn .icon {
+    width: 17px;
+    height: 17px;
+  }
+
+  .nav-btn.active {
+    background: rgba(239,196,90,0.14);
+    color: var(--gold);
+  }
+}
+</style>
+</head>
+<body>
+<svg class="icons" aria-hidden="true">
+  <symbol id="icon-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4.2-4.2"></path></symbol>
+  <symbol id="icon-map" viewBox="0 0 24 24"><path d="m8 18-5 3V6l5-3 8 3 5-3v15l-5 3-8-3Z"></path><path d="M8 3v15"></path><path d="M16 6v15"></path></symbol>
+  <symbol id="icon-dice" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"></rect><path d="M8.5 8.5h.01M15.5 8.5h.01M12 12h.01M8.5 15.5h.01M15.5 15.5h.01"></path></symbol>
+  <symbol id="icon-plus" viewBox="0 0 24 24"><path d="M12 5v14"></path><path d="M5 12h14"></path></symbol>
+  <symbol id="icon-filter" viewBox="0 0 24 24"><path d="M4 6h16"></path><path d="M7 12h10"></path><path d="M10 18h4"></path></symbol>
+  <symbol id="icon-heart" viewBox="0 0 24 24"><path d="M20.8 8.6c0 5.4-8.8 10.4-8.8 10.4S3.2 14 3.2 8.6A4.6 4.6 0 0 1 12 6.7a4.6 4.6 0 0 1 8.8 1.9Z"></path></symbol>
+  <symbol id="icon-pin" viewBox="0 0 24 24"><path d="M12 21s7-6.1 7-12A7 7 0 0 0 5 9c0 5.9 7 12 7 12Z"></path><circle cx="12" cy="9" r="2.4"></circle></symbol>
+  <symbol id="icon-star" viewBox="0 0 24 24"><path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9L12 3Z"></path></symbol>
+  <symbol id="icon-share" viewBox="0 0 24 24"><path d="M14 4h6v6"></path><path d="M10 14 20 4"></path><path d="M20 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h4"></path></symbol>
+  <symbol id="icon-edit" viewBox="0 0 24 24"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5Z"></path></symbol>
+  <symbol id="icon-x" viewBox="0 0 24 24"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></symbol>
+  <symbol id="icon-home" viewBox="0 0 24 24"><path d="m3 11 9-8 9 8"></path><path d="M5 10v10h14V10"></path></symbol>
+</svg>
+
+<div class="app-shell" id="app">
+  <div class="preview-flag">Design preview - no data writes</div>
+
+  <header class="topbar">
+    <div class="brand">
+      <h1>Our List</h1>
+      <p>Portland + Beyond</p>
+    </div>
+    <div class="top-actions">
+      <button class="icon-btn" title="Map"><svg class="icon"><use href="#icon-map"></use></svg></button>
+      <button class="icon-btn" title="Surprise me" id="surpriseTop"><svg class="icon"><use href="#icon-dice"></use></svg></button>
+      <button class="icon-btn primary-action" title="Add spot"><svg class="icon"><use href="#icon-plus"></use></svg></button>
+    </div>
+  </header>
+
+  <div class="command-surface">
+    <div class="command-row">
+      <label class="search">
+        <svg class="icon"><use href="#icon-search"></use></svg>
+        <span class="sr-only">Search</span>
+        <input id="searchInput" type="text" placeholder="Search restaurants, notes, neighborhoods">
+      </label>
+      <button class="text-btn" id="filterButton"><svg class="icon"><use href="#icon-filter"></use></svg> Filters</button>
+      <div class="segmented" aria-label="View mode">
+        <button class="seg-btn active" data-view="gallery">Gallery</button>
+        <button class="seg-btn" data-view="list">List</button>
+      </div>
+    </div>
+    <div class="active-row">
+      <div class="chips" aria-label="Active filters">
+        <button class="chip selected"><span class="dot"></span>Food</button>
+        <button class="chip selected"><span class="dot"></span>Want</button>
+        <button class="chip"><span class="dot"></span>NE + SE</button>
+        <button class="chip"><span class="dot"></span>4+ rating</button>
+      </div>
+      <div class="result-count" id="resultCount">302 spots</div>
+    </div>
+  </div>
+
+  <div class="content">
+    <main class="main-column">
+      <section class="feature-grid" aria-label="Featured spots">
+        <article class="feature-card">
+          <div class="feature-copy">
+            <div>
+              <div class="eyebrow"><span class="dot"></span>Tonight's front-runner</div>
+              <h2>Killer Banh Mi & MoMo</h2>
+              <p>A tighter, more editorial card gives the list a premium first impression while keeping the practical details close by.</p>
+              <div class="feature-meta">
+                <span class="meta-pill">Vietnamese</span>
+                <span class="meta-pill">SE Powell</span>
+                <span class="meta-pill">Want to go</span>
+              </div>
+            </div>
+            <div class="feature-score">
+              <div class="score"><svg class="icon"><use href="#icon-star"></use></svg> 4.8</div>
+              <div class="mini-map" aria-label="Mini map preview"></div>
+            </div>
+          </div>
+        </article>
+
+        <aside class="tonight-panel">
+          <div>
+            <div class="eyebrow"><span class="dot"></span>Surprise me</div>
+            <h2>Low-friction decision</h2>
+            <p>The random picker becomes a polished decision surface instead of another dense control.</p>
+          </div>
+          <div class="choice-card">
+            <div class="choice-name" id="choiceName">Gado Gado</div>
+            <div class="choice-detail" id="choiceDetail">Indonesian food on NE Cesar Chavez. Good for a planned dinner.</div>
+          </div>
+          <div class="panel-actions">
+            <button class="text-btn primary-action" id="spinButton"><svg class="icon"><use href="#icon-dice"></use></svg> Spin</button>
+            <button class="text-btn"><svg class="icon"><use href="#icon-map"></use></svg> Route</button>
+          </div>
+        </aside>
+      </section>
+
+      <section>
+        <div class="section-head">
+          <div>
+            <h2>Saved Spots</h2>
+            <p>Cleaner cards, calmer color, and actions that wait until they are needed.</p>
+          </div>
+        </div>
+
+        <div class="spots-grid" id="spotsGrid">
+          <article class="spot-card" data-search="killer banh mi momo vietnamese se powell want">
+            <div class="spot-photo photo-1"></div>
+            <div class="spot-body">
+              <div class="spot-top">
+                <div>
+                  <h3 class="spot-title">Killer Banh Mi & MoMo</h3>
+                  <div class="spot-location"><svg class="icon"><use href="#icon-pin"></use></svg> 8201 SE Powell Blvd</div>
+                </div>
+                <div class="spot-actions">
+                  <button class="spot-action faved" aria-pressed="true" title="Favorite"><svg class="icon"><use href="#icon-heart"></use></svg></button>
+                </div>
+              </div>
+              <p class="spot-note">Fast-casual Vietnamese, good for a low-pressure weekend lunch.</p>
+              <div class="spot-footer">
+                <div class="spot-tags"><span class="tag gold">Vietnamese</span><span class="tag rose">Want</span></div>
+                <div class="spot-actions">
+                  <button class="spot-action" title="Share"><svg class="icon"><use href="#icon-share"></use></svg></button>
+                  <button class="spot-action" title="Edit"><svg class="icon"><use href="#icon-edit"></use></svg></button>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="spot-card" data-search="laverne bar dekum rotisserie chicken">
+            <div class="spot-photo photo-2"></div>
+            <div class="spot-body">
+              <div class="spot-top">
+                <div>
+                  <h3 class="spot-title">LaVerne's</h3>
+                  <div class="spot-location"><svg class="icon"><use href="#icon-pin"></use></svg> NE Dekum</div>
+                </div>
+                <div class="spot-actions">
+                  <button class="spot-action" aria-pressed="false" title="Favorite"><svg class="icon"><use href="#icon-heart"></use></svg></button>
+                </div>
+              </div>
+              <p class="spot-note">70s bar energy with rotisserie chicken. Feels like a weeknight wildcard.</p>
+              <div class="spot-footer">
+                <div class="spot-tags"><span class="tag blue">Bar</span><span class="tag green">Worth it</span></div>
+                <div class="spot-actions">
+                  <button class="spot-action" title="Share"><svg class="icon"><use href="#icon-share"></use></svg></button>
+                  <button class="spot-action" title="Edit"><svg class="icon"><use href="#icon-edit"></use></svg></button>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="spot-card" data-search="monster tea pokemon bubble tea hawthorne dessert">
+            <div class="spot-photo photo-3"></div>
+            <div class="spot-body">
+              <div class="spot-top">
+                <div>
+                  <h3 class="spot-title">Monster Tea</h3>
+                  <div class="spot-location"><svg class="icon"><use href="#icon-pin"></use></svg> SE Hawthorne</div>
+                </div>
+                <div class="spot-actions">
+                  <button class="spot-action" aria-pressed="false" title="Favorite"><svg class="icon"><use href="#icon-heart"></use></svg></button>
+                </div>
+              </div>
+              <p class="spot-note">Bubble tea stop with a playful theme and easy after-dinner timing.</p>
+              <div class="spot-footer">
+                <div class="spot-tags"><span class="tag violet">Dessert</span><span class="tag rose">Want</span></div>
+                <div class="spot-actions">
+                  <button class="spot-action" title="Share"><svg class="icon"><use href="#icon-share"></use></svg></button>
+                  <button class="spot-action" title="Edit"><svg class="icon"><use href="#icon-edit"></use></svg></button>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="spot-card" data-search="pizzeria otto lake oswego pizza italian">
+            <div class="spot-photo photo-1"></div>
+            <div class="spot-body">
+              <div class="spot-top">
+                <div>
+                  <h3 class="spot-title">Pizzeria Otto - Lake Oswego</h3>
+                  <div class="spot-location"><svg class="icon"><use href="#icon-pin"></use></svg> Mercantile Dr</div>
+                </div>
+                <div class="spot-actions">
+                  <button class="spot-action" aria-pressed="false" title="Favorite"><svg class="icon"><use href="#icon-heart"></use></svg></button>
+                </div>
+              </div>
+              <p class="spot-note">A cleaner card lets longer names wrap without crowding every action.</p>
+              <div class="spot-footer">
+                <div class="spot-tags"><span class="tag gold">Pizza</span><span class="tag">Lake Oswego</span></div>
+                <div class="spot-actions">
+                  <button class="spot-action" title="Share"><svg class="icon"><use href="#icon-share"></use></svg></button>
+                  <button class="spot-action" title="Edit"><svg class="icon"><use href="#icon-edit"></use></svg></button>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="spot-card" data-search="snowmoon shaved ice beaverton dessert">
+            <div class="spot-photo photo-3"></div>
+            <div class="spot-body">
+              <div class="spot-top">
+                <div>
+                  <h3 class="spot-title">SnowMoon</h3>
+                  <div class="spot-location"><svg class="icon"><use href="#icon-pin"></use></svg> Beaverton</div>
+                </div>
+                <div class="spot-actions">
+                  <button class="spot-action faved" aria-pressed="true" title="Favorite"><svg class="icon"><use href="#icon-heart"></use></svg></button>
+                </div>
+              </div>
+              <p class="spot-note">Shaved ice for dessert runs and sunny errands on the west side.</p>
+              <div class="spot-footer">
+                <div class="spot-tags"><span class="tag violet">Shaved ice</span><span class="tag rose">Want</span></div>
+                <div class="spot-actions">
+                  <button class="spot-action" title="Share"><svg class="icon"><use href="#icon-share"></use></svg></button>
+                  <button class="spot-action" title="Edit"><svg class="icon"><use href="#icon-edit"></use></svg></button>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="spot-card" data-search="foxtrot outdoor bar belmont">
+            <div class="spot-photo photo-2"></div>
+            <div class="spot-body">
+              <div class="spot-top">
+                <div>
+                  <h3 class="spot-title">Foxtrot</h3>
+                  <div class="spot-location"><svg class="icon"><use href="#icon-pin"></use></svg> SE Belmont</div>
+                </div>
+                <div class="spot-actions">
+                  <button class="spot-action" aria-pressed="false" title="Favorite"><svg class="icon"><use href="#icon-heart"></use></svg></button>
+                </div>
+              </div>
+              <p class="spot-note">Nice outdoor area. Better hierarchy makes short notes feel intentional.</p>
+              <div class="spot-footer">
+                <div class="spot-tags"><span class="tag blue">Bar</span><span class="tag">Patio</span></div>
+                <div class="spot-actions">
+                  <button class="spot-action" title="Share"><svg class="icon"><use href="#icon-share"></use></svg></button>
+                  <button class="spot-action" title="Edit"><svg class="icon"><use href="#icon-edit"></use></svg></button>
+                </div>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <aside class="side-column">
+      <section class="side-panel">
+        <h2>Worth It</h2>
+        <div class="side-list">
+          <div class="side-item"><span class="side-number">1</span><div><strong>LaVerne's</strong><span>Bar - NE Dekum</span></div></div>
+          <div class="side-item"><span class="side-number">2</span><div><strong>SnowMoon</strong><span>Dessert - Beaverton</span></div></div>
+          <div class="side-item"><span class="side-number">3</span><div><strong>Killer Banh Mi</strong><span>Vietnamese - SE Powell</span></div></div>
+        </div>
+      </section>
+
+      <section class="side-panel">
+        <h2>Green Light</h2>
+        <div class="review-list">
+          <label><input type="checkbox" checked> Reduced control stack</label>
+          <label><input type="checkbox" checked> Cleaner card hierarchy</label>
+          <label><input type="checkbox" checked> Consistent icon system</label>
+          <label><input type="checkbox" checked> Restrained category color</label>
+          <label><input type="checkbox" checked> More spacing and rhythm</label>
+          <label><input type="checkbox" checked> Mobile bottom navigation</label>
+          <label><input type="checkbox" checked> Premium photo treatment</label>
+          <label><input type="checkbox" checked> No always-on pulse motion</label>
+          <label><input type="checkbox" checked> Cleaner reusable UI styles</label>
+        </div>
+      </section>
+    </aside>
+  </div>
+</div>
+
+<aside class="drawer" id="drawer" aria-label="Filters">
+  <div class="drawer-head">
+    <h2>Filters</h2>
+    <button class="drawer-close" id="drawerClose" title="Close filters"><svg class="icon"><use href="#icon-x"></use></svg></button>
+  </div>
+  <div class="filter-group">
+    <h3>Status</h3>
+    <div class="filter-grid">
+      <button class="chip selected"><span class="dot"></span>Want to go</button>
+      <button class="chip"><span class="dot"></span>Been</button>
+      <button class="chip"><span class="dot"></span>Worth it</button>
+      <button class="chip"><span class="dot"></span>One and done</button>
+    </div>
+  </div>
+  <div class="filter-group">
+    <h3>Category</h3>
+    <div class="filter-grid">
+      <button class="chip selected"><span class="dot"></span>Food</button>
+      <button class="chip"><span class="dot"></span>Bars</button>
+      <button class="chip"><span class="dot"></span>Dessert</button>
+      <button class="chip"><span class="dot"></span>Brunch</button>
+      <button class="chip"><span class="dot"></span>Getaways</button>
+    </div>
+  </div>
+  <div class="filter-group">
+    <h3>Area</h3>
+    <div class="filter-grid">
+      <button class="chip"><span class="dot"></span>NE</button>
+      <button class="chip selected"><span class="dot"></span>SE</button>
+      <button class="chip"><span class="dot"></span>Beaverton</button>
+      <button class="chip"><span class="dot"></span>Lake Oswego</button>
+    </div>
+  </div>
+</aside>
+
+<button class="fab" title="Add spot"><svg class="icon"><use href="#icon-plus"></use></svg></button>
+
+<nav class="mobile-nav" aria-label="Mobile navigation">
+  <button class="nav-btn active"><svg class="icon"><use href="#icon-home"></use></svg><span>List</span></button>
+  <button class="nav-btn"><svg class="icon"><use href="#icon-map"></use></svg><span>Map</span></button>
+  <button class="nav-btn" id="surpriseMobile"><svg class="icon"><use href="#icon-dice"></use></svg><span>Spin</span></button>
+  <button class="nav-btn" id="filterMobile"><svg class="icon"><use href="#icon-filter"></use></svg><span>Filter</span></button>
+  <button class="nav-btn"><svg class="icon"><use href="#icon-plus"></use></svg><span>Add</span></button>
+</nav>
+
+<div class="toast" id="toast">Preview updated</div>
+
+<script>
+const drawer = document.getElementById("drawer");
+const app = document.getElementById("app");
+const toast = document.getElementById("toast");
+const choices = [
+  ["Gado Gado", "Indonesian food on NE Cesar Chavez. Good for a planned dinner."],
+  ["LaVerne's", "Rotisserie chicken, good bar lighting, and a strong weeknight case."],
+  ["Monster Tea", "A low-stakes dessert stop after Hawthorne wandering."],
+  ["Pizzeria Otto", "A reliable pizza answer when Lake Oswego wins the geography argument."]
+];
+
+function showToast(text) {
+  toast.textContent = text;
+  toast.classList.add("show");
+  clearTimeout(window.toastTimer);
+  window.toastTimer = setTimeout(() => toast.classList.remove("show"), 1700);
+}
+
+function toggleDrawer(open) {
+  drawer.classList.toggle("open", open);
+}
+
+document.getElementById("filterButton").addEventListener("click", () => toggleDrawer(true));
+document.getElementById("filterMobile").addEventListener("click", () => toggleDrawer(true));
+document.getElementById("drawerClose").addEventListener("click", () => toggleDrawer(false));
+
+document.querySelectorAll(".seg-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".seg-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    app.classList.toggle("list-mode", btn.dataset.view === "list");
+  });
+});
+
+document.querySelectorAll(".spot-action[title='Favorite']").forEach(btn => {
+  btn.addEventListener("click", event => {
+    event.stopPropagation();
+    const pressed = btn.getAttribute("aria-pressed") === "true";
+    btn.setAttribute("aria-pressed", String(!pressed));
+    btn.classList.toggle("faved", !pressed);
+  });
+});
+
+function spinChoice() {
+  const picked = choices[Math.floor(Math.random() * choices.length)];
+  document.getElementById("choiceName").textContent = picked[0];
+  document.getElementById("choiceDetail").textContent = picked[1];
+  showToast("Surprise picked: " + picked[0]);
+}
+
+document.getElementById("spinButton").addEventListener("click", spinChoice);
+document.getElementById("surpriseTop").addEventListener("click", spinChoice);
+document.getElementById("surpriseMobile").addEventListener("click", spinChoice);
+
+document.getElementById("searchInput").addEventListener("input", event => {
+  const q = event.target.value.trim().toLowerCase();
+  let visible = 0;
+  document.querySelectorAll(".spot-card").forEach(card => {
+    const match = !q || card.dataset.search.includes(q);
+    card.classList.toggle("hidden", !match);
+    if (match) visible += 1;
+  });
+  document.getElementById("resultCount").textContent = q ? visible + " matching spots" : "302 spots";
+});
+
+document.querySelectorAll(".chip").forEach(chip => {
+  chip.addEventListener("click", () => chip.classList.toggle("selected"));
+});
+</script>
+</body>
+</html>
