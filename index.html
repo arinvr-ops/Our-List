@@ -3270,9 +3270,36 @@ let miniMapMarker = null;
 
 async function foursquareSearch(query) {
   const url = 'https://api.foursquare.com/v3/places/search?query=' + encodeURIComponent(query) + '&ll=45.5051,-122.6750&radius=200000&limit=5';
-  const res = await fetch(url, { headers: { 'Authorization': FOURSQUARE_KEY, 'Accept': 'application/json' } });
-  const data = await res.json();
-  return (data && data.results) || [];
+  try {
+    const res = await fetch(url, {
+      mode: 'cors',
+      headers: { 'Authorization': FOURSQUARE_KEY, 'Accept': 'application/json' }
+    });
+    const data = await res.json();
+    console.log('Foursquare response:', res.status, data);
+    if (!res.ok) throw new Error('Foursquare HTTP ' + res.status + ': ' + JSON.stringify(data));
+    return (data && data.results) || [];
+  } catch (err) {
+    console.warn('Foursquare direct request failed (likely CORS), retrying via proxy:', err);
+    return foursquareSearchViaProxy(url);
+  }
+}
+
+async function foursquareSearchViaProxy(targetUrl) {
+  const proxyUrl = 'https://corsproxy.io/?url=' + encodeURIComponent(targetUrl);
+  try {
+    const res = await fetch(proxyUrl, {
+      mode: 'cors',
+      headers: { 'Authorization': FOURSQUARE_KEY, 'Accept': 'application/json' }
+    });
+    const data = await res.json();
+    console.log('Foursquare proxy response:', res.status, data);
+    if (!res.ok) throw new Error('Foursquare proxy HTTP ' + res.status + ': ' + JSON.stringify(data));
+    return (data && data.results) || [];
+  } catch (err) {
+    console.warn('Foursquare proxy request also failed:', err);
+    return [];
+  }
 }
 
 async function nominatimSearchPlaces(query) {
