@@ -3269,19 +3269,12 @@ let miniMapInstance = null;
 let miniMapMarker = null;
 
 async function geoapifySearch(query) {
-  const url = `https://api.geoapify.com/v1/geocode/autocomplete?text=${encodeURIComponent(query)}&apiKey=${GEOAPIFY_KEY}&limit=5&bias=proximity:45.5051,-122.6750`;
+  const url = `https://api.geoapify.com/v1/geocode/autocomplete?text=${encodeURIComponent(query)}&apiKey=${GEOAPIFY_KEY}&limit=5&filter=rect:-124.6,41.9,-116.5,46.3&bias=proximity:45.5051,-122.6750`;
   const res = await fetch(url);
   const data = await res.json();
   console.log('Geoapify response:', res.status, data);
   if (!res.ok) throw new Error('Geoapify HTTP ' + res.status + ': ' + JSON.stringify(data));
   return (data && data.features) || [];
-}
-
-async function nominatimSearchPlaces(query) {
-  const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=5`;
-  const res = await fetch(url, { headers: { 'Accept-Language': 'en' } });
-  const data = await res.json();
-  return data || [];
 }
 
 // Normalizes a Geoapify feature into { lat, lng, display, name }
@@ -3293,26 +3286,9 @@ function geoapifyToPlace(feature) {
   return { lat: coords[1], lng: coords[0], display: name + (addr ? ' - ' + addr : ''), name };
 }
 
-// Normalizes a Nominatim search result into { lat, lng, display, name }
-function nominatimToPlace(item) {
-  const addr = item.address || {};
-  const streetAddr = [addr.house_number, addr.road].filter(Boolean).join(' ');
-  const name = addr.amenity || addr.shop || addr.building || (item.display_name || '').split(',')[0];
-  const parts = [name, streetAddr, addr.city || addr.town || addr.village, addr.state].filter(Boolean);
-  return { lat: parseFloat(item.lat), lng: parseFloat(item.lon), display: parts.join(', '), name };
-}
-
-// Searches Geoapify first (biased toward Oregon); falls back to Nominatim if Geoapify has no results
 async function searchPlaces(query) {
-  let features = [];
-  try {
-    features = await geoapifySearch(query);
-  } catch (err) {
-    console.warn('Geoapify request failed:', err);
-  }
-  if (features.length) return features.map(geoapifyToPlace);
-  const nomResults = await nominatimSearchPlaces(query);
-  return nomResults.map(nominatimToPlace);
+  const features = await geoapifySearch(query);
+  return features.map(geoapifyToPlace);
 }
 
 async function searchPlace(query) {
