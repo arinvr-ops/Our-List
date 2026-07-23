@@ -1906,7 +1906,7 @@ const BASE = [
 // Load any custom categories saved previously
 const SUPABASE_URL = 'https://rqmpvdbakzosifmtuvrd.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJxbXB2ZGJha3pvc2lmbXR1dnJkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5ODI5OTksImV4cCI6MjA5MDU1ODk5OX0.wjpMXNi9O_145jCPtvG4wXG2jbZXDNemCB46cPW4frg';
-const FOURSQUARE_KEY = 'fsq3Gmb/ZU/MyoDe9+Gp/h+bF5aHQYFElmfuwXfYhRoXEnU=';
+const GEOAPIFY_KEY = '80f6587f28e54f678fd3233329f98078';
 
 async function sbFetch(method, path, body) {
   const res = await fetch(SUPABASE_URL + '/rest/v1/' + path, {
@@ -3268,38 +3268,13 @@ async function autoTagAreas() {
 let miniMapInstance = null;
 let miniMapMarker = null;
 
-async function foursquareSearch(query) {
-  const url = 'https://api.foursquare.com/v3/places/search?query=' + encodeURIComponent(query) + '&ll=45.5051,-122.6750&radius=200000&limit=5';
-  try {
-    const res = await fetch(url, {
-      mode: 'cors',
-      headers: { 'Authorization': FOURSQUARE_KEY, 'Accept': 'application/json' }
-    });
-    const data = await res.json();
-    console.log('Foursquare response:', res.status, data);
-    if (!res.ok) throw new Error('Foursquare HTTP ' + res.status + ': ' + JSON.stringify(data));
-    return (data && data.results) || [];
-  } catch (err) {
-    console.warn('Foursquare direct request failed (likely CORS), retrying via proxy:', err);
-    return foursquareSearchViaProxy(url);
-  }
-}
-
-async function foursquareSearchViaProxy(targetUrl) {
-  const proxyUrl = 'https://corsproxy.io/?url=' + encodeURIComponent(targetUrl);
-  try {
-    const res = await fetch(proxyUrl, {
-      mode: 'cors',
-      headers: { 'Authorization': FOURSQUARE_KEY, 'Accept': 'application/json' }
-    });
-    const data = await res.json();
-    console.log('Foursquare proxy response:', res.status, data);
-    if (!res.ok) throw new Error('Foursquare proxy HTTP ' + res.status + ': ' + JSON.stringify(data));
-    return (data && data.results) || [];
-  } catch (err) {
-    console.warn('Foursquare proxy request also failed:', err);
-    return [];
-  }
+async function geoapifySearch(query) {
+  const url = `https://api.geoapify.com/v1/geocode/autocomplete?text=${encodeURIComponent(query)}&apiKey=${GEOAPIFY_KEY}&limit=5&bias=proximity:45.5051,-122.6750`;
+  const res = await fetch(url);
+  const data = await res.json();
+  console.log('Geoapify response:', res.status, data);
+  if (!res.ok) throw new Error('Geoapify HTTP ' + res.status + ': ' + JSON.stringify(data));
+  return (data && data.features) || [];
 }
 
 async function nominatimSearchPlaces(query) {
@@ -3309,12 +3284,13 @@ async function nominatimSearchPlaces(query) {
   return data || [];
 }
 
-// Normalizes a Foursquare result into { lat, lng, display, name }
-function foursquareToPlace(result) {
-  const name = result.name || '';
-  const addr = (result.location && result.location.formatted_address) || '';
-  const geo = (result.geocodes && result.geocodes.main) || {};
-  return { lat: geo.latitude, lng: geo.longitude, display: name + (addr ? ' - ' + addr : ''), name };
+// Normalizes a Geoapify feature into { lat, lng, display, name }
+function geoapifyToPlace(feature) {
+  const p = feature.properties || {};
+  const coords = feature.geometry.coordinates;
+  const name = p.name || '';
+  const addr = p.formatted || '';
+  return { lat: coords[1], lng: coords[0], display: name + (addr ? ' - ' + addr : ''), name };
 }
 
 // Normalizes a Nominatim search result into { lat, lng, display, name }
@@ -3326,10 +3302,15 @@ function nominatimToPlace(item) {
   return { lat: parseFloat(item.lat), lng: parseFloat(item.lon), display: parts.join(', '), name };
 }
 
-// Searches Foursquare first (biased toward Oregon); falls back to Nominatim if Foursquare has no results
+// Searches Geoapify first (biased toward Oregon); falls back to Nominatim if Geoapify has no results
 async function searchPlaces(query) {
-  const results = await foursquareSearch(query);
-  if (results.length) return results.map(foursquareToPlace);
+  let features = [];
+  try {
+    features = await geoapifySearch(query);
+  } catch (err) {
+    console.warn('Geoapify request failed:', err);
+  }
+  if (features.length) return features.map(geoapifyToPlace);
   const nomResults = await nominatimSearchPlaces(query);
   return nomResults.map(nominatimToPlace);
 }
