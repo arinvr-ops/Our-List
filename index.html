@@ -304,7 +304,7 @@ header .sub {
 
 /* FLOATING ACTION BUTTON */
 .fab {
-  position: fixed; bottom: 24px; right: 20px;
+  position: fixed; bottom: calc(80px + env(safe-area-inset-bottom, 0px)); right: 20px;
   width: 56px; height: 56px; border-radius: 50%;
   background: var(--accent); border: none;
   color: #0c0b09; font-size: 1.7rem; font-weight: 300; line-height: 1;
@@ -694,7 +694,7 @@ select {
 .modal {
   background: var(--card); border: 1px solid var(--border);
   border-radius: 16px 16px 0 0;
-  padding: 18px 18px 80px;
+  padding: 18px 18px calc(80px + env(safe-area-inset-bottom, 0px));
   position: fixed; bottom: 0; left: 0; right: 0;
   max-height: 90dvh; overflow-y: scroll; overflow-x: hidden;
   -webkit-overflow-scrolling: touch; box-sizing: border-box;
@@ -731,7 +731,7 @@ select {
   header h1 { font-size: 2.3rem; }
   #topRow, #catRow, #subCatRow, #filterRow, #starRow, #favBar, #countBar { padding-left: 12px; padding-right: 12px; }
   .grid { padding: 8px 14px 90px; }
-  .fab { bottom: 20px; right: 16px; }
+  .fab { bottom: calc(80px + env(safe-area-inset-bottom, 0px)); right: 16px; }
 }
 .field input, .field select, .field textarea, input[type="text"], input[type="url"] { font-size: 16px !important; }
 
@@ -1527,8 +1527,7 @@ function shareSpot(id) {
     navigator.share({ title: s.name, text }).catch(() => {});
   } else {
     navigator.clipboard.writeText(text).then(() => showStatus('Copied to clipboard!')).catch(() => {
-      // Fallback - prompt
-      prompt('Copy this:', text);
+      showStatus(s.name + (s.location ? ' - ' + s.location : ''));
     });
   }
 }
@@ -2362,6 +2361,12 @@ function closeAllDropdowns() {
   });
 }
 
+// Dropdowns are positioned once via getBoundingClientRect() as position:fixed,
+// so scrolling the page while one is open leaves it detached from its anchor button.
+window.addEventListener('scroll', () => {
+  if (document.querySelector('.cat-dropdown-menu.open')) closeAllDropdowns();
+}, { passive: true, capture: true });
+
 function htmlAttr(s) { return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;'); }
 function htmlText(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
@@ -2536,27 +2541,37 @@ function wireFilterDrawer() {
   });
 }
 
-function toggleFilterPanel(forceOpen) {
+function toggleFilterPanel(forceOpen, fromPopstate) {
   const bar = document.getElementById('stickyBar');
   const btn = document.getElementById('filterPanelBtn');
   const drawer = document.getElementById('filterDrawer');
   const backdrop = document.getElementById('drawerBackdrop');
   if (!bar && !drawer) return;
-  const open = typeof forceOpen === 'boolean'
-    ? forceOpen
-    : !(drawer ? drawer.classList.contains('open') : bar.classList.contains('filters-open'));
+  const wasOpen = drawer ? drawer.classList.contains('open') : bar.classList.contains('filters-open');
+  const open = typeof forceOpen === 'boolean' ? forceOpen : !wasOpen;
   if (drawer) {
     renderFilterDrawer();
     drawer.classList.toggle('open', open);
     drawer.setAttribute('aria-hidden', open ? 'false' : 'true');
   }
   if (backdrop) backdrop.classList.toggle('open', open);
-  if (bar) bar.classList.toggle('filters-open', false);
+  if (bar) bar.classList.toggle('filters-open', open);
   if (btn) btn.classList.toggle('active', open);
   if (open && window.innerWidth <= 760) {
     setCollapse(false, false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
+  if (!fromPopstate) {
+    if (open && !wasOpen) history.pushState({ modal: 'filter' }, '');
+    else if (!open && wasOpen) history.back();
+  }
+  if (!open) setActiveMobileNavBtn('list');
+}
+
+function setActiveMobileNavBtn(name) {
+  document.querySelectorAll('.mobile-nav-btn').forEach(b => b.classList.remove('active'));
+  const btn = document.querySelector('.mobile-nav-btn[data-nav="' + name + '"]');
+  if (btn) btn.classList.add('active');
 }
 
 function syncFilterPanelState() {
@@ -2634,6 +2649,7 @@ function openRandom() {
   // Default to spots not been to yet - more useful
   const filtered = getFilteredList();
   if (!filtered.length) return;
+  history.pushState({ modal: 'random' }, '');
   document.getElementById('randOverlay').classList.add('open');
   spinRandom();
 }
@@ -2643,7 +2659,11 @@ function getRandomPool() {
   const notBeen = filtered.filter(s => !s.been);
   return notBeen.length > 0 ? notBeen : filtered;
 }
-function closeRandom() { document.getElementById('randOverlay').classList.remove('open'); }
+function closeRandom(fromPopstate) {
+  document.getElementById('randOverlay').classList.remove('open');
+  setActiveMobileNavBtn('list');
+  if (!fromPopstate) history.back();
+}
 
 let _currentRandSpot = null;
 
@@ -2695,6 +2715,7 @@ function spinRandom() {
 
 // ---- MODAL ----
 function openAdd() {
+  history.pushState({ modal: 'edit' }, '');
   document.body.style.overflow = 'hidden';
   document.body.style.position = 'fixed';
   document.body.style.width = '100%';
@@ -2725,6 +2746,7 @@ function openAdd() {
 function openEdit(id) {
   const s = db.spots.find(x => x.id === id);
   if (!s) return;
+  history.pushState({ modal: 'edit' }, '');
   document.body.style.overflow = 'hidden';
   document.body.style.position = 'fixed';
   document.body.style.width = '100%';
@@ -2772,7 +2794,7 @@ function openEdit(id) {
   document.getElementById('modal').classList.add('open');
 }
 
-function closeModal() {
+function closeModal(fromPopstate) {
   document.body.style.overflow = '';
   document.body.style.position = '';
   document.body.style.width = '';
@@ -2783,6 +2805,7 @@ function closeModal() {
   const _nr = document.getElementById('nameResults'); if(_nr) _nr.style.display='none';
   document.querySelectorAll('.ac-list').forEach(l => l.classList.remove('open'));
   if (document.activeElement) document.activeElement.blur();
+  if (!fromPopstate) history.back();
 }
 function pickStar(n) { modalStars = n; renderStarPicker(n); }
 function renderStarPicker(n) {
@@ -3124,9 +3147,11 @@ function updatePreviewPanels(list) {
       .filter(s => s.goback === true || s.fav || (s.stars || 0) >= 4)
       .sort((a,b)=>(b.stars||0)-(a.stars||0)||a.name.localeCompare(b.name))
       .slice(0,3);
-    worth.innerHTML = (top.length ? top : db.spots.slice(0,3)).map((s,i) =>
-      `<div class="side-item"><span class="side-number">${i+1}</span><div><strong>${htmlText(s.name)}</strong><span>${htmlText(s.cuisine || catLabel(s.cat))}${s.location ? ' - ' + htmlText(s.location.split(',')[0]) : ''}</span></div></div>`
-    ).join('');
+    worth.innerHTML = top.length
+      ? top.map((s,i) =>
+          `<div class="side-item"><span class="side-number">${i+1}</span><div><strong>${htmlText(s.name)}</strong><span>${htmlText(s.cuisine || catLabel(s.cat))}${s.location ? ' - ' + htmlText(s.location.split(',')[0]) : ''}</span></div></div>`
+        ).join('')
+      : `<div style="color:var(--muted);font-size:0.82rem;line-height:1.5;">No worth it spots yet - mark spots as Been and rate them to see recommendations here.</div>`;
   }
 
   const stats = document.getElementById('quickStats');
@@ -3234,7 +3259,7 @@ function render() {
     const colls = s.collections ? s.collections.split(',').map(c => c.trim()).filter(Boolean).map(c => `<span class="tag">${htmlText(c)}</span>`).join('') : '';
     const cuisineLabel = s.cuisine || catLabel(s.cat) || 'Spot';
     return `
-    <article class="spot-card card${s.photo?' has-photo':' no-photo'}" data-cat="${s.cat}" style="--card-color:${color};">
+    <article class="spot-card card${s.photo?' has-photo':' no-photo'}" data-cat="${s.cat}" style="--card-color:${color};" onclick="handleCardClick(event, '${s.id}')">
       ${photo}
       <div class="card-top">
         <div class="card-name">${htmlText(s.name)}</div>
@@ -3874,6 +3899,7 @@ let mapMarkers = [];
 let _mapAllSpots = [];
 
 function openMapView() {
+  history.pushState({ modal: 'map' }, '');
   _mapAllSpots = getFilteredList();
   document.getElementById('mapView').classList.add('open');
 
@@ -3905,8 +3931,10 @@ function filterMapSpots() {
   initMap(filtered);
 }
 
-function closeMapView() {
+function closeMapView(fromPopstate) {
   document.getElementById('mapView').classList.remove('open');
+  setActiveMobileNavBtn('list');
+  if (!fromPopstate) history.back();
 }
 
 function renderMapSpotList(pinned, unpinned) {
@@ -4018,6 +4046,12 @@ function focusMarker(i) {
   mapInstance.panTo(marker.getLatLng());
   mapInstance.setZoom(15);
   marker.openPopup();
+}
+
+// Tapping the card body (outside any button/link/data-action element) opens edit
+function handleCardClick(e, id) {
+  if (e.target.closest('[data-action], a, button')) return;
+  openEdit(id);
 }
 
 // grid delegation
@@ -4137,6 +4171,18 @@ document.addEventListener('click', e => {
 });
 document.getElementById('randOverlay').addEventListener('click', function(e) { if(e.target===this) closeRandom(); });
 
+window.addEventListener('popstate', () => {
+  if (document.getElementById('modal').classList.contains('open')) {
+    closeModal(true);
+  } else if (document.getElementById('mapView').classList.contains('open')) {
+    closeMapView(true);
+  } else if (document.getElementById('randOverlay').classList.contains('open')) {
+    closeRandom(true);
+  } else if (document.getElementById('filterDrawer').classList.contains('open')) {
+    toggleFilterPanel(false, true);
+  }
+});
+
 // Init
 wireFilterDrawer();
 loadCustomCats();
@@ -4189,23 +4235,23 @@ function selectSortOption(val) {
 </button>
 
 <nav class="mobile-nav" aria-label="Main actions">
-  <button class="mobile-nav-btn active" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+  <button class="mobile-nav-btn active" data-nav="list" onclick="setActiveMobileNavBtn('list');window.scrollTo({top:0,behavior:'smooth'})">
     <svg class="ui-icon"><use href="#i-grid"></use></svg>
     <span>List</span>
   </button>
-  <button class="mobile-nav-btn" onclick="openMapView()">
+  <button class="mobile-nav-btn" data-nav="map" onclick="setActiveMobileNavBtn('map');openMapView()">
     <svg class="ui-icon"><use href="#i-map"></use></svg>
     <span>Map</span>
   </button>
-  <button class="mobile-nav-btn" onclick="openRandom()">
+  <button class="mobile-nav-btn" data-nav="spin" onclick="setActiveMobileNavBtn('spin');openRandom()">
     <svg class="ui-icon"><use href="#i-dice"></use></svg>
     <span>Spin</span>
   </button>
-  <button class="mobile-nav-btn" onclick="toggleFilterPanel(true)">
+  <button class="mobile-nav-btn" data-nav="filter" onclick="setActiveMobileNavBtn('filter');toggleFilterPanel(true)">
     <svg class="ui-icon"><use href="#i-filter"></use></svg>
     <span>Filter</span>
   </button>
-  <button class="mobile-nav-btn" onclick="openAdd()">
+  <button class="mobile-nav-btn" data-nav="add" onclick="openAdd()">
     <svg class="ui-icon"><use href="#i-plus"></use></svg>
     <span>Add</span>
   </button>
@@ -4923,6 +4969,7 @@ input[type="text"],
     grid-template-columns: repeat(5, 1fr);
     gap: 4px;
     padding: 6px;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
     border: 1px solid var(--border);
     border-radius: 18px;
     background: rgba(18,16,12,0.94);

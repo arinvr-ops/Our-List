@@ -5,7 +5,8 @@
       "Bash(Get-Item \"C:\\\\Users\\\\arinv\\\\OneDrive - Prairie Electric\\\\Desktop\\\\our-list\\\\index.html\")",
       "Bash(Select-Object LastWriteTime, Length)",
       "PowerShell(Get-Item *)",
-      "PowerShell(Get-Content \"C:\\\\Users\\\\arinv\\\\OneDrive - Prairie Electric\\\\Desktop\\\\our-list\\\\index.html\" | Select-Object -Index \\(3524..3579\\))"
+      "PowerShell(Get-Content \"C:\\\\Users\\\\arinv\\\\OneDrive - Prairie Electric\\\\Desktop\\\\our-list\\\\index.html\" | Select-Object -Index \\(3524..3579\\))",
+      "Bash(node -e ' *)"
     ]
   }
 }
