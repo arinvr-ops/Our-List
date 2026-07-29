@@ -696,7 +696,7 @@ select {
   border-radius: 16px 16px 0 0;
   padding: 18px 18px 80px;
   position: fixed; bottom: 0; left: 0; right: 0;
-  max-height: 90dvh; overflow-y: auto; overflow-x: hidden;
+  max-height: 90dvh; overflow-y: scroll; overflow-x: hidden;
   -webkit-overflow-scrolling: touch; box-sizing: border-box;
 }
 .modal-handle { width: 36px; height: 4px; border-radius: 2px; background: var(--border); margin: 0 auto 14px; }
@@ -1163,8 +1163,15 @@ input, textarea, select {
             <h2 id="featureName">Our List</h2>
             <p id="featureNote">Loading your saved spots...</p>
             <div class="feature-meta" id="featureMeta"></div>
+            <a class="card-location-link" id="featureAddress" href="#" target="_blank" rel="noopener" style="display:none;margin-top:10px;">
+              <svg class="ui-icon"><use href="#i-pin"></use></svg>
+              <span></span>
+            </a>
           </div>
           <div class="feature-score">
+            <button class="premium-icon-btn" id="featureEditBtn" type="button" title="Edit">
+              <svg class="ui-icon"><use href="#i-edit"></use></svg>
+            </button>
             <a class="feature-route" id="featureRoute" href="#" target="_blank" rel="noopener">
               <svg class="ui-icon"><use href="#i-map"></use></svg>
               Route
@@ -1177,9 +1184,16 @@ input, textarea, select {
       <aside class="tonight-panel">
         <div>
           </div>
-        <div class="choice-card">
+        <div class="choice-card" style="position:relative;">
+          <button class="icon-btn" id="choiceEditBtn" type="button" title="Edit" style="position:absolute;top:10px;right:10px;">
+            <svg class="ui-icon"><use href="#i-edit"></use></svg>
+          </button>
           <div class="choice-name" id="choiceName">Surprise me</div>
           <div class="choice-detail" id="choiceDetail">Spin from the currently filtered list.</div>
+          <a class="card-location-link" id="choiceAddress" href="#" target="_blank" rel="noopener" style="display:none;margin-top:8px;">
+            <svg class="ui-icon"><use href="#i-pin"></use></svg>
+            <span></span>
+          </a>
         </div>
         <div class="panel-actions">
           <button class="text-btn primary-action" type="button" onclick="openRandom()"><svg class="ui-icon"><use href="#i-dice"></use></svg> Spin</button>
@@ -2681,6 +2695,9 @@ function spinRandom() {
 
 // ---- MODAL ----
 function openAdd() {
+  document.body.style.overflow = 'hidden';
+  document.body.style.position = 'fixed';
+  document.body.style.width = '100%';
   const fab = document.querySelector('.fab');
   if (fab) fab.style.display = 'none';
   populateAreaList();
@@ -2703,12 +2720,14 @@ function openAdd() {
   document.getElementById('deleteBtn').style.display = 'none';
   renderStarPicker(0);
   document.getElementById('modal').classList.add('open');
-  document.body.style.overflow = 'hidden';
 }
 
 function openEdit(id) {
   const s = db.spots.find(x => x.id === id);
   if (!s) return;
+  document.body.style.overflow = 'hidden';
+  document.body.style.position = 'fixed';
+  document.body.style.width = '100%';
   populateAreaList();
   editingId = id; modalStars = s.stars || 0;
   hideDeleteConfirm();
@@ -2751,15 +2770,16 @@ function openEdit(id) {
   document.getElementById('deleteBtn').style.display = '';
   renderStarPicker(modalStars);
   document.getElementById('modal').classList.add('open');
-  document.body.style.overflow = 'hidden';
 }
 
 function closeModal() {
+  document.body.style.overflow = '';
+  document.body.style.position = '';
+  document.body.style.width = '';
   const fab = document.querySelector('.fab');
   if (fab) fab.style.display = '';
   _acWidget = null;
   document.getElementById('modal').classList.remove('open');
-  document.body.style.overflow = '';
   const _nr = document.getElementById('nameResults'); if(_nr) _nr.style.display='none';
   document.querySelectorAll('.ac-list').forEach(l => l.classList.remove('open'));
   if (document.activeElement) document.activeElement.blur();
@@ -3005,7 +3025,7 @@ function getFilteredList() {
 function spotMapsUrl(s) {
   if (!s) return '';
   if (s.lat && s.lng) return `https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}`;
-  if (s.location) return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(s.location)}`;
+  if (s.location) return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.location)}`;
   return '';
 }
 
@@ -3047,6 +3067,8 @@ function updatePreviewPanels(list) {
   const featureMeta = document.getElementById('featureMeta');
   const featureRoute = document.getElementById('featureRoute');
   const featureCard = document.getElementById('featureCard');
+  const featureAddress = document.getElementById('featureAddress');
+  const featureEditBtn = document.getElementById('featureEditBtn');
   if (featured && featureName) {
     const route = spotMapsUrl(featured);
     featureName.textContent = featured.name;
@@ -3062,6 +3084,16 @@ function updatePreviewPanels(list) {
       featureRoute.href = route || '#';
       featureRoute.style.display = route ? 'inline-flex' : 'none';
     }
+    if (featureAddress) {
+      if (featured.location && route) {
+        featureAddress.querySelector('span').textContent = featured.location;
+        featureAddress.href = route;
+        featureAddress.style.display = 'inline-flex';
+      } else {
+        featureAddress.style.display = 'none';
+      }
+    }
+    if (featureEditBtn) featureEditBtn.onclick = () => openEdit(featured.id);
     if (featureCard) featureCard.style.setProperty('--feature-color', catColor(featured.cat));
   }
 
@@ -3069,8 +3101,21 @@ function updatePreviewPanels(list) {
   if (choice) {
     const choiceName = document.getElementById('choiceName');
     const choiceDetail = document.getElementById('choiceDetail');
+    const choiceAddress = document.getElementById('choiceAddress');
+    const choiceEditBtn = document.getElementById('choiceEditBtn');
     if (choiceName) choiceName.textContent = choice.name;
     if (choiceDetail) choiceDetail.textContent = choice.note || choice.location || catLabel(choice.cat);
+    if (choiceAddress) {
+      const choiceRoute = spotMapsUrl(choice);
+      if (choice.location && choiceRoute) {
+        choiceAddress.querySelector('span').textContent = choice.location;
+        choiceAddress.href = choiceRoute;
+        choiceAddress.style.display = 'inline-flex';
+      } else {
+        choiceAddress.style.display = 'none';
+      }
+    }
+    if (choiceEditBtn) choiceEditBtn.onclick = () => openEdit(choice.id);
   }
 
   const worth = document.getElementById('worthItList');
