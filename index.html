@@ -1265,10 +1265,11 @@ input, textarea, select {
 <!-- Random picker overlay -->
 <div class="rand-overlay" id="randOverlay">
   <div class="rand-card" id="randCard">
+    <button id="randEditBtn" onclick="editRandSpot()" title="Edit spot" style="position:absolute;top:14px;right:14px;background:none;border:1px solid var(--border);color:var(--muted);width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:0.9rem;line-height:1;">✎</button>
     <div class="rand-cat" id="randCat"></div>
     <div class="rand-name" id="randName"></div>
     <div class="rand-note" id="randNote"></div>
-    <div class="rand-loc" id="randLoc" onclick="openRandMaps()" style="cursor:pointer;"></div>
+    <a class="rand-loc" id="randLoc" href="" target="_blank" rel="noopener" style="cursor:pointer;text-decoration:none;"></a>
   </div>
   <div class="rand-btns">
     <button class="rand-btn rand-shuffle" onclick="spinRandom()">🎲 Again</button>
@@ -2632,18 +2633,10 @@ function closeRandom() { document.getElementById('randOverlay').classList.remove
 
 let _currentRandSpot = null;
 
-function openRandMaps() {
-  const locEl = document.getElementById('randLoc');
-  const locText = locEl ? locEl.textContent.replace('📍 ','').trim() : '';
-  if (!locText) return;
-
-  let url;
-  if (_currentRandSpot && _currentRandSpot.lat && _currentRandSpot.lng) {
-    url = `https://www.google.com/maps/dir/?api=1&destination=${_currentRandSpot.lat},${_currentRandSpot.lng}`;
-  } else if (locText) {
-    url = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(locText)}`;
-  }
-  if (url) window.open(url, '_blank');
+function editRandSpot() {
+  if (!_currentRandSpot) return;
+  closeRandom();
+  openEdit(_currentRandSpot.id);
 }
 
 function spinRandom() {
@@ -2661,10 +2654,16 @@ function spinRandom() {
     const locEl = document.getElementById('randLoc');
     if (s.location) {
       locEl.textContent = '📍 ' + s.location;
-      locEl.style.textDecoration = (s.lat && s.lng) || s.location ? 'underline' : 'none';
-      locEl.style.color = (s.lat && s.lng) || s.location ? 'var(--accent)' : 'var(--muted)';
+      locEl.style.textDecoration = 'underline';
+      locEl.style.color = 'var(--accent)';
+      if (s.lat && s.lng) {
+        locEl.href = `https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}`;
+      } else {
+        locEl.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.location)}`;
+      }
     } else {
       locEl.textContent = '';
+      locEl.removeAttribute('href');
     }
     const color = catColor(s.cat);
     const randAccentStyle = document.getElementById('randAccentStyle') || document.getElementById('randBefore');
@@ -2704,6 +2703,7 @@ function openAdd() {
   document.getElementById('deleteBtn').style.display = 'none';
   renderStarPicker(0);
   document.getElementById('modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
 }
 
 function openEdit(id) {
@@ -2751,6 +2751,7 @@ function openEdit(id) {
   document.getElementById('deleteBtn').style.display = '';
   renderStarPicker(modalStars);
   document.getElementById('modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
 }
 
 function closeModal() {
@@ -2758,6 +2759,7 @@ function closeModal() {
   if (fab) fab.style.display = '';
   _acWidget = null;
   document.getElementById('modal').classList.remove('open');
+  document.body.style.overflow = '';
   const _nr = document.getElementById('nameResults'); if(_nr) _nr.style.display='none';
   document.querySelectorAll('.ac-list').forEach(l => l.classList.remove('open'));
   if (document.activeElement) document.activeElement.blur();
@@ -3283,7 +3285,7 @@ function geoapifyToPlace(feature) {
   const coords = feature.geometry.coordinates;
   const name = p.name || '';
   const addr = p.formatted || '';
-  return { lat: coords[1], lng: coords[0], display: name + (addr ? ' - ' + addr : ''), name };
+  return { lat: coords[1], lng: coords[0], display: name + (addr ? ' - ' + addr : ''), name, address: addr };
 }
 
 async function searchPlaces(query) {
@@ -3300,7 +3302,7 @@ async function searchPlace(query) {
     res.innerHTML = places.map(place => {
       return `<div class="place-result-item"
         data-lat="${place.lat}" data-lng="${place.lng}"
-        data-desc="${place.display.replace(/"/g,'&quot;')}"
+        data-addr="${(place.address || '').replace(/"/g,'&quot;')}"
         data-name="${(place.name || '').replace(/"/g,'&quot;')}"
         style="padding:10px 14px;cursor:pointer;font-size:0.84rem;color:var(--text);border-bottom:1px solid var(--border);"
         onmouseover="this.style.background='#2a2820'" onmouseout="this.style.background=''">
@@ -3311,7 +3313,7 @@ async function searchPlace(query) {
       const item = e.target.closest('.place-result-item');
       if (!item) return;
       res.style.display = 'none';
-      selectPlaceNominatim(parseFloat(item.dataset.lat), parseFloat(item.dataset.lng), item.dataset.desc.replace(/&quot;/g,'"'), item.dataset.name.replace(/&quot;/g,'"'));
+      selectPlaceNominatim(parseFloat(item.dataset.lat), parseFloat(item.dataset.lng), item.dataset.addr.replace(/&quot;/g,'"'), item.dataset.name.replace(/&quot;/g,'"'));
     };
     res.style.display = 'block';
   } catch(e) {
@@ -3330,7 +3332,7 @@ async function searchPlaceFromName(query) {
       const name = place.name || place.display;
       return `<div class="name-result-item"
         data-lat="${place.lat}" data-lng="${place.lng}"
-        data-desc="${place.display.replace(/"/g,'&quot;')}"
+        data-addr="${(place.address || '').replace(/"/g,'&quot;')}"
         data-name="${name.replace(/"/g,'&quot;')}"
         style="padding:10px 14px;cursor:pointer;font-size:0.84rem;color:var(--text);border-bottom:1px solid var(--border);"
         onmouseover="this.style.background='#2a2820'" onmouseout="this.style.background=''">
@@ -3344,7 +3346,7 @@ async function searchPlaceFromName(query) {
       res.style.display = 'none';
       const placeName = item.dataset.name.replace(/&quot;/g, '"');
       document.getElementById('mName').value = placeName;
-      selectPlaceNominatim(parseFloat(item.dataset.lat), parseFloat(item.dataset.lng), item.dataset.desc.replace(/&quot;/g, '"'), placeName);
+      selectPlaceNominatim(parseFloat(item.dataset.lat), parseFloat(item.dataset.lng), item.dataset.addr.replace(/&quot;/g, '"'), placeName);
     };
   } catch(e) {
     console.warn('Name search error:', e);
@@ -3382,18 +3384,17 @@ function nominatimTypeToCuisine(cls, type) {
   return '';
 }
 
-async function selectPlaceNominatim(lat, lng, description, guessedName) {
+async function selectPlaceNominatim(lat, lng, address, guessedName) {
   document.getElementById('placeResults').style.display = 'none';
-  const parts = (description || '').split(',');
-  const shortAddr = parts.slice(0, -1).join(',').trim() || description || '';
+  const shortAddr = address || '';
   document.getElementById('mPlaceSearch').value = shortAddr;
   setPinFromCoords(lat, lng, guessedName || shortAddr);
 
-  // Auto-fill name if empty
+  // Auto-fill name (business name only) if empty
   const nameEl = document.getElementById('mName');
-  if (!nameEl.value) nameEl.value = guessedName || parts[0].trim();
+  if (!nameEl.value) nameEl.value = guessedName || shortAddr;
 
-  // Auto-fill address
+  // Auto-fill address (street address only, no business name prefix)
   if (shortAddr) document.getElementById('mLocation').value = shortAddr;
 
   try {
@@ -3425,13 +3426,10 @@ async function selectPlaceNominatim(lat, lng, description, guessedName) {
       const guessedCuisine = nominatimTypeToCuisine(data.class, data.type);
       if (guessedCuisine) cuisineEl.value = guessedCuisine;
     }
-
-    // Auto-fill area from reverse geocoding
-    if (data.address) {
-      const area = extractAreaFromNominatim(data.address);
-      if (area) document.getElementById('mArea').value = area;
-    }
   } catch(e) { console.warn('Reverse geocode error:', e); }
+
+  // Auto-fill area
+  reverseGeocodeArea(lat, lng);
 
   showStatus('Location pinned - fields auto-filled');
 }
