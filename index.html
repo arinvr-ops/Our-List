@@ -2184,11 +2184,32 @@ function buildFoodSubPills() {
   };
 }
 
+// Mutates activeCategories for one toggle. A parent ("All Food") and its own
+// subcategories are mutually exclusive: picking a subcategory drops the parent
+// default, and clearing the last subcategory restores it.
+function applyCategoryToggle(key) {
+  if (key === 'all') { activeCategories = []; return; }
+  const parent = CAT_MAP[key] ? CAT_MAP[key].parent : null;
+  const hasSubs = CATS.some(c => c.parent === key);
+
+  if (activeCategories.includes(key)) {
+    activeCategories = activeCategories.filter(k => k !== key);
+    // Last subcategory cleared - fall back to the parent's "All X" default.
+    const siblingStillOn = activeCategories.some(k => CAT_MAP[k] && CAT_MAP[k].parent === parent);
+    if (parent && !siblingStillOn && !activeCategories.includes(parent)) activeCategories.push(parent);
+  } else {
+    // Selecting a subcategory supersedes its parent's "All X" default...
+    if (parent) activeCategories = activeCategories.filter(k => k !== parent);
+    // ...and selecting "All X" supersedes any of its subcategories.
+    if (hasSubs) activeCategories = activeCategories.filter(k => !CAT_MAP[k] || CAT_MAP[k].parent !== key);
+    activeCategories.push(key);
+  }
+}
+
 // Single entry point for category selection so pills, dropdown and drawer agree.
 function toggleCategory(key, keepDropdownOpen) {
   if (!keepDropdownOpen) closeAllDropdowns();
-  if (key === 'all') activeCategories = [];
-  else toggleInArray(activeCategories, key);
+  applyCategoryToggle(key);
   pruneCuisines();
   buildCatPills();
   buildTypePills();
@@ -2549,8 +2570,7 @@ function renderFilterDrawer() {
 
 function handleDrawerFilter(action, value) {
   if (action === 'category') {
-    if (value === 'all') activeCategories = [];
-    else toggleInArray(activeCategories, value);
+    applyCategoryToggle(value);
     pruneCuisines();
     buildCatPills();
     buildTypePills();
