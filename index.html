@@ -2033,8 +2033,9 @@ function startRealtime() {
     } catch(e) {}
   }, 8000);
 }
-let activeCategory = 'all';
-let activeCuisine  = 'All';
+// Multi-select filters. Empty array = no restriction (show everything).
+let activeCategories = [];
+let activeCuisines   = [];
 let activeStar     = 0;
 let favOnly        = false;
 let beenOnly       = false;
@@ -2044,6 +2045,56 @@ let activeView = 'active'; // active | archive | repeats
 let activeLocation = 'All'; // location filter
 let editingId      = null;
 let modalStars     = 0;
+
+// ---- MULTI-SELECT FILTER HELPERS ----
+function toggleInArray(arr, val) {
+  const i = arr.indexOf(val);
+  if (i === -1) arr.push(val);
+  else arr.splice(i, 1);
+  return arr;
+}
+
+// A selected parent key ('food') matches all of its subcategories too.
+function catKeyMatches(key, spot) {
+  return key === 'food' ? isFood(spot.cat) : spot.cat === key;
+}
+
+function spotMatchesCategories(spot) {
+  return !activeCategories.length || activeCategories.some(k => catKeyMatches(k, spot));
+}
+
+// True when `key` is selected outright, or is a parent whose child is selected.
+function isCategoryActive(key) {
+  if (activeCategories.includes(key)) return true;
+  return activeCategories.some(k => CAT_MAP[k] && CAT_MAP[k].parent === key);
+}
+
+function categoryScopedSpots() {
+  if (!activeCategories.length) return db.spots;
+  return db.spots.filter(spotMatchesCategories);
+}
+
+function availableCuisines() {
+  return Array.from(new Set(categoryScopedSpots().map(s => s.cuisine).filter(Boolean))).sort();
+}
+
+// After categories change, drop cuisines that are no longer reachable so the
+// combination can't strand the user on an empty list.
+function pruneCuisines() {
+  if (!activeCuisines.length) return;
+  const avail = new Set(availableCuisines());
+  activeCuisines = activeCuisines.filter(c => avail.has(c));
+}
+
+// Every parent category that currently has a selection on it or under it.
+function activeSubcategoryParents() {
+  const parents = [];
+  activeCategories.forEach(k => {
+    const parentKey = CATS.some(c => c.parent === k) ? k : (CAT_MAP[k] && CAT_MAP[k].parent) || null;
+    if (parentKey && !parents.includes(parentKey)) parents.push(parentKey);
+  });
+  return parents;
+}
 
 // ---- CATEGORY COLORS ON CARDS ----
 function applyCardColors() {
@@ -2102,29 +2153,23 @@ let _subDropdownAnchor = null; // stores the Food pill element for positioning
 function buildFoodSubPills() {
   const row = document.getElementById('subCatRow');
   if (!row) return;
-  const activeCat = CAT_MAP[activeCategory];
-  let parentKey = null;
-  if (CATS.some(c => c.parent === activeCategory)) {
-    parentKey = activeCategory;
-  } else if (activeCat && activeCat.parent) {
-    parentKey = activeCat.parent;
-  }
+  const parentKeys = activeSubcategoryParents();
 
-  if (!parentKey) {
+  if (!parentKeys.length) {
     row.innerHTML = '';
     row.classList.remove('has-subcategories');
     return;
   }
 
-  const parent = CAT_MAP[parentKey];
-  const children = CATS.filter(c => c.parent === parentKey);
-  const items = [
-    { key: parentKey, label: `All ${parent ? parent.label : catLabel(parentKey)}`, color: catColor(parentKey) },
-    ...children.map(c => ({ key: c.key, label: c.label, color: c.color }))
-  ];
+  const items = [];
+  parentKeys.forEach(parentKey => {
+    const parent = CAT_MAP[parentKey];
+    items.push({ key: parentKey, label: `All ${parent ? parent.label : catLabel(parentKey)}`, color: catColor(parentKey) });
+    CATS.filter(c => c.parent === parentKey).forEach(c => items.push({ key: c.key, label: c.label, color: c.color }));
+  });
 
   row.innerHTML = items.map(item => {
-    const isActive = (item.key === parentKey && activeCategory === parentKey) || activeCategory === item.key;
+    const isActive = activeCategories.includes(item.key);
     return `<button class="cat-pill food-sub-pill${isActive?' active':''}" data-cat="${item.key}"
       style="border-color:${isActive?item.color:item.color+'44'};${isActive?`background:${item.color};color:#0f0e0d;font-weight:600;`:`color:${item.color}cc;`}">
       <span class="dot" style="background:${item.color}"></span>${item.label}
@@ -2135,30 +2180,47 @@ function buildFoodSubPills() {
   row.onclick = e => {
     const btn = e.target.closest('.food-sub-pill');
     if (!btn) return;
-    activeCategory = btn.dataset.cat;
-    activeCuisine = 'All';
-    closeAllDropdowns();
-    buildCatPills();
-    buildTypePills();
-    render();
+    toggleCategory(btn.dataset.cat);
   };
+}
+
+// Single entry point for category selection so pills, dropdown and drawer agree.
+function toggleCategory(key, keepDropdownOpen) {
+  if (!keepDropdownOpen) closeAllDropdowns();
+  if (key === 'all') activeCategories = [];
+  else toggleInArray(activeCategories, key);
+  pruneCuisines();
+  buildCatPills();
+  buildTypePills();
+  render();
+}
+
+// Single entry point for cuisine selection.
+function toggleCuisine(value, keepDropdownOpen) {
+  if (!keepDropdownOpen) closeAllDropdowns();
+  if (value === '__all') activeCuisines = [];
+  else toggleInArray(activeCuisines, value);
+  buildTypePills();
+  render();
 }
 
 function buildCatPills() {
   const row = document.getElementById('catRow');
   const topCats = CATS.filter(c => c.parent === null);
-  const activeParent = CAT_MAP[activeCategory]?.parent || activeCategory;
+  const noneActive = activeCategories.length === 0;
 
-  const allBtn = `<button class="cat-pill${activeCategory==='all'?' active':''}" data-cat="all"
-    style="border-color:${activeCategory==='all'?'var(--accent)':'#ffffff22'};${activeCategory==='all'?'background:var(--accent);color:#0f0e0d;font-weight:600;':''}">
+  const allBtn = `<button class="cat-pill${noneActive?' active':''}" data-cat="all"
+    style="border-color:${noneActive?'var(--accent)':'#ffffff22'};${noneActive?'background:var(--accent);color:#0f0e0d;font-weight:600;':''}">
     <span class="dot" style="background:var(--accent)"></span>All
   </button>`;
 
   const topPills = topCats.map(c => {
-    const isActive = activeCategory === c.key || activeParent === c.key;
+    const isActive = isCategoryActive(c.key);
     const hasSubs = CATS.some(child => child.parent === c.key);
-    const activeSub = hasSubs && CAT_MAP[activeCategory]?.parent === c.key
-      ? ' · ' + catLabel(activeCategory) : '';
+    const subLabels = hasSubs
+      ? activeCategories.filter(k => CAT_MAP[k] && CAT_MAP[k].parent === c.key).map(catLabel)
+      : [];
+    const activeSub = subLabels.length ? ' · ' + subLabels.join(', ') : '';
     return `<button class="cat-pill${isActive?' active':''}" data-cat="${c.key}"
       style="border-color:${isActive?c.color:c.color+'44'};${isActive?`background:${c.color};color:#0f0e0d;font-weight:600;`:`color:${c.color}cc;`}">
       <span class="dot" style="background:${c.color}"></span>${c.label}${activeSub}${hasSubs?' ▾':''}
@@ -2171,13 +2233,7 @@ function buildCatPills() {
   row.onclick = e => {
     const btn = e.target.closest('.cat-pill');
     if (!btn) return;
-    const newCat = btn.dataset.cat;
-    closeAllDropdowns();
-    activeCategory = newCat;
-    activeCuisine = 'All';
-    buildCatPills();
-    buildTypePills();
-    render();
+    toggleCategory(btn.dataset.cat);
   };
 }
 
@@ -2189,20 +2245,23 @@ function openSubCatDropdown(anchorBtn) {
   menu.style.left = Math.min(rect.left, window.innerWidth - 210) + 'px';
   menu.style.maxHeight = (window.innerHeight - rect.bottom - 20) + 'px';
 
-  const foodActive = activeCategory === 'food' || FOOD_SUBS.includes(activeCategory);
   const items = [
     { key: 'food', label: 'All Food', color: catColor('food') },
     ...FOOD_SUBS.map(k => ({ key: k, label: catLabel(k), color: catColor(k) }))
   ];
 
-  menu.innerHTML = items.map(item => {
-    const isActive = (item.key === 'food' && activeCategory === 'food') || activeCategory === item.key;
-    return `<div class="cat-dropdown-item${isActive?' active':''}" data-cat="${item.key}">
-      <span class="dot" style="background:${item.color}"></span>
-      ${item.label}
-      ${isActive ? '<span class="check">✓</span>' : ''}
-    </div>`;
-  }).join('');
+  // Re-rendered in place after each pick so the menu stays open for multi-select.
+  const paint = () => {
+    menu.innerHTML = items.map(item => {
+      const isActive = activeCategories.includes(item.key);
+      return `<div class="cat-dropdown-item${isActive?' active':''}" data-cat="${item.key}">
+        <span class="dot" style="background:${item.color}"></span>
+        ${item.label}
+        ${isActive ? '<span class="check">✓</span>' : ''}
+      </div>`;
+    }).join('');
+  };
+  paint();
 
   menu.style.display = 'block';
   requestAnimationFrame(() => menu.classList.add('open'));
@@ -2210,12 +2269,8 @@ function openSubCatDropdown(anchorBtn) {
   menu.onclick = e => {
     const item = e.target.closest('.cat-dropdown-item');
     if (!item) return;
-    activeCategory = item.dataset.cat;
-    activeCuisine = 'All';
-    closeAllDropdowns();
-    buildCatPills();
-    buildTypePills();
-    render();
+    toggleCategory(item.dataset.cat, true);
+    paint();
   };
 }
 
@@ -2223,25 +2278,19 @@ function buildTypePills() {
   const typeRow = document.getElementById('typeRow');
   typeRow.innerHTML = '';
 
-  let spots;
-  if (activeCategory === 'all') {
-    spots = db.spots;
-  } else if (activeCategory === 'food') {
-    spots = db.spots.filter(s => isFood(s.cat));
-  } else {
-    spots = db.spots.filter(s => s.cat === activeCategory);
-  }
-  const types = Array.from(new Set(spots.map(s => s.cuisine))).sort();
+  const types = availableCuisines();
 
-  // Show type dropdown only when a category is selected
-  const activeColor = catColor(activeCategory === 'food' ? 'food' : activeCategory);
+  // Show type dropdown only when at least one category is selected
+  const activeColor = catColor(activeCategories.length === 1 ? activeCategories[0] : 'food');
   let btn = null;
-  if (activeCategory !== 'all' && types.length) {
-    const label = activeCuisine === 'All' ? 'All types ▾' : activeCuisine + ' ▾';
+  if (activeCategories.length && types.length) {
+    const label = !activeCuisines.length
+      ? 'All types ▾'
+      : activeCuisines.length === 1 ? activeCuisines[0] + ' ▾' : activeCuisines.length + ' types ▾';
     btn = document.createElement('button');
     btn.id = 'typeFilterBtn';
     btn.className = 'cat-pill';
-    if (activeCuisine !== 'All') {
+    if (activeCuisines.length) {
       btn.style.cssText = `background:${activeColor}33;border-color:${activeColor};color:${activeColor};font-weight:500;flex-shrink:0;`;
     } else {
       btn.style.cssText = 'border-color:#ffffff22;flex-shrink:0;color:var(--muted);';
@@ -2304,13 +2353,18 @@ function openTypeDropdown(anchorBtn, types) {
   menu.style.left = Math.min(rect.left, window.innerWidth - 190) + 'px';
   menu.style.maxHeight = (window.innerHeight - rect.bottom - 20) + 'px';
 
-  const allTypes = ['All', ...types];
-  menu.innerHTML = allTypes.map(t => {
-    const isActive = activeCuisine === t;
-    return `<div class="cat-dropdown-item${isActive?' active':''}" data-type="${htmlAttr(t)}">
-      ${t}${isActive ? '<span class="check">✓</span>' : ''}
-    </div>`;
-  }).join('');
+  const allTypes = [{ value: '__all', label: 'All types' }, ...types.map(t => ({ value: t, label: t }))];
+
+  // Re-rendered in place after each pick so the menu stays open for multi-select.
+  const paint = () => {
+    menu.innerHTML = allTypes.map(t => {
+      const isActive = t.value === '__all' ? !activeCuisines.length : activeCuisines.includes(t.value);
+      return `<div class="cat-dropdown-item${isActive?' active':''}" data-type="${htmlAttr(t.value)}">
+        ${htmlText(t.label)}${isActive ? '<span class="check">✓</span>' : ''}
+      </div>`;
+    }).join('');
+  };
+  paint();
 
   menu.style.display = 'block';
   requestAnimationFrame(() => menu.classList.add('open'));
@@ -2318,10 +2372,8 @@ function openTypeDropdown(anchorBtn, types) {
   menu.onclick = e => {
     const item = e.target.closest('.cat-dropdown-item');
     if (!item) return;
-    activeCuisine = item.dataset.type;
-    closeAllDropdowns();
-    buildTypePills();
-    render();
+    toggleCuisine(item.dataset.type, true);
+    paint();
   };
 }
 
@@ -2384,24 +2436,19 @@ function toggleFavOnly() {
   render();
 }
 function clearFilters() {
-  activeCategory = 'all';
-  activeCuisine = 'All';
+  activeCategories = [];
+  activeCuisines = [];
   activeLocation = 'All';
   activeStar = 0;
   beenOnly = false;
   wantOnly = false;
   favOnly = false;
+  const favBtn = document.getElementById('favOnlyBtn');
+  if (favBtn) favBtn.classList.remove('active-fav');
   document.getElementById('searchInput').value = '';
   buildCatPills();
   buildTypePills();
   render();
-}
-
-function activeSubcategoryParent() {
-  const activeCat = CAT_MAP[activeCategory];
-  if (CATS.some(c => c.parent === activeCategory)) return activeCategory;
-  if (activeCat && activeCat.parent) return activeCat.parent;
-  return null;
 }
 
 function drawerChip(label, action, value, active, color) {
@@ -2432,26 +2479,28 @@ function renderFilterDrawer() {
   const cats = document.getElementById('drawerCategoryFilters');
   if (cats) {
     cats.innerHTML = [
-      drawerChip('All', 'category', 'all', activeCategory === 'all', '#efc45a'),
+      drawerChip('All', 'category', 'all', activeCategories.length === 0, '#efc45a'),
       ...CATS.filter(c => c.parent === null).map(c => {
-        const activeParent = CAT_MAP[activeCategory]?.parent || activeCategory;
         const hasSubs = CATS.some(child => child.parent === c.key);
         const label = `${c.label}${hasSubs ? ' +' : ''}`;
-        return drawerChip(label, 'category', c.key, activeCategory === c.key || activeParent === c.key, c.color);
+        return drawerChip(label, 'category', c.key, isCategoryActive(c.key), c.color);
       })
     ].join('');
   }
 
   const sub = document.getElementById('drawerSubcategoryFilters');
   if (sub) {
-    const parentKey = activeSubcategoryParent();
-    if (parentKey) {
-      const parent = CAT_MAP[parentKey];
-      const children = CATS.filter(c => c.parent === parentKey);
-      sub.innerHTML = [
-        drawerChip(`All ${parent ? parent.label : catLabel(parentKey)}`, 'category', parentKey, activeCategory === parentKey, catColor(parentKey)),
-        ...children.map(c => drawerChip(c.label, 'category', c.key, activeCategory === c.key, c.color))
-      ].join('');
+    const parentKeys = activeSubcategoryParents();
+    if (parentKeys.length) {
+      const rows = [];
+      parentKeys.forEach(parentKey => {
+        const parent = CAT_MAP[parentKey];
+        rows.push(drawerChip(`All ${parent ? parent.label : catLabel(parentKey)}`, 'category', parentKey,
+          activeCategories.includes(parentKey), catColor(parentKey)));
+        CATS.filter(c => c.parent === parentKey).forEach(c =>
+          rows.push(drawerChip(c.label, 'category', c.key, activeCategories.includes(c.key), c.color)));
+      });
+      sub.innerHTML = rows.join('');
       sub.style.display = 'flex';
     } else {
       sub.innerHTML = '';
@@ -2459,19 +2508,15 @@ function renderFilterDrawer() {
     }
   }
 
-  let scopedSpots;
-  if (activeCategory === 'all') scopedSpots = db.spots;
-  else if (activeCategory === 'food') scopedSpots = db.spots.filter(s => isFood(s.cat));
-  else scopedSpots = db.spots.filter(s => s.cat === activeCategory);
-
   const typeGroup = document.getElementById('drawerTypeGroup');
-  const types = Array.from(new Set(scopedSpots.map(s => s.cuisine).filter(Boolean))).sort();
+  const types = availableCuisines();
   const typeGrid = document.getElementById('drawerTypeFilters');
   if (typeGroup && typeGrid) {
-    if (activeCategory !== 'all' && types.length) {
+    if (activeCategories.length && types.length) {
+      const typeColor = catColor(activeCategories.length === 1 ? activeCategories[0] : 'food');
       typeGrid.innerHTML = [
-        drawerChip('All types', 'type', 'All', activeCuisine === 'All', '#efc45a'),
-        ...types.map(t => drawerChip(t, 'type', t, activeCuisine === t, catColor(activeCategory)))
+        drawerChip('All types', 'type', '__all', activeCuisines.length === 0, '#efc45a'),
+        ...types.map(t => drawerChip(t, 'type', t, activeCuisines.includes(t), typeColor))
       ].join('');
       typeGroup.style.display = '';
     } else {
@@ -2504,12 +2549,14 @@ function renderFilterDrawer() {
 
 function handleDrawerFilter(action, value) {
   if (action === 'category') {
-    activeCategory = value;
-    activeCuisine = 'All';
+    if (value === 'all') activeCategories = [];
+    else toggleInArray(activeCategories, value);
+    pruneCuisines();
     buildCatPills();
     buildTypePills();
   } else if (action === 'type') {
-    activeCuisine = value || 'All';
+    if (!value || value === '__all') activeCuisines = [];
+    else toggleInArray(activeCuisines, value);
     buildTypePills();
   } else if (action === 'area') {
     activeLocation = value || 'All';
@@ -2583,8 +2630,8 @@ function syncFilterPanelState() {
 }
 
 function anyFilterActive() {
-  return activeCategory !== 'all'
-    || activeCuisine !== 'All'
+  return activeCategories.length > 0
+    || activeCuisines.length > 0
     || activeLocation !== 'All'
     || activeStar > 0
     || beenOnly || wantOnly || favOnly
@@ -3006,7 +3053,7 @@ function toggleWant(id) {
   sbFetch('PATCH', 'spots?id=eq.' + id, { want: s.want }).catch(() => {});
 }
 function filterByCuisineTag(cuisine) {
-  activeCuisine = cuisine;
+  activeCuisines = [cuisine];
   buildTypePills();
   render();
 }
@@ -3025,12 +3072,9 @@ function getFilteredList() {
     } else {
       if (s.been) return false; // active list = unvisited only
     }
-    if (activeCategory !== 'all') {
-      if (activeCategory === 'food') {
-        if (!isFood(s.cat)) return false;
-      } else if (s.cat !== activeCategory) return false;
-    }
-    if (activeCuisine !== 'All' && s.cuisine !== activeCuisine) return false;
+    // Multi-select: OR within each group, AND across groups.
+    if (!spotMatchesCategories(s)) return false;
+    if (activeCuisines.length && !activeCuisines.includes(s.cuisine)) return false;
     if (activeStar === 5 && (s.stars||0) !== 5) return false;
     if (activeStar > 0 && activeStar < 5 && (s.stars||0) < activeStar) return false;
     if (favOnly && !s.fav) return false;
@@ -3059,19 +3103,20 @@ function setLayoutMode(mode, el) {
 }
 
 // Clears a single active filter from its chip's ✕ button, then re-renders.
-function clearChipFilter(kind) {
+// `value` narrows multi-select groups to the one entry being removed.
+function clearChipFilter(kind, value) {
   if (kind === 'view') {
     activeView = 'active';
     document.querySelectorAll('.view-tab').forEach(b => b.classList.toggle('active', b.dataset.view === 'active'));
     const sel = document.getElementById('sortSelect');
     if (sel) sel.value = 'view-active';
   } else if (kind === 'category') {
-    activeCategory = 'all';
-    activeCuisine = 'All';
+    activeCategories = value ? activeCategories.filter(k => k !== value) : [];
+    pruneCuisines();
     buildCatPills();
     buildTypePills();
   } else if (kind === 'type') {
-    activeCuisine = 'All';
+    activeCuisines = value ? activeCuisines.filter(c => c !== value) : [];
     buildTypePills();
   } else if (kind === 'area') {
     activeLocation = 'All';
@@ -3105,7 +3150,7 @@ function wireActiveFilterChips() {
     const clearBtn = e.target.closest('[data-chip-clear]');
     if (clearBtn) {
       e.stopPropagation();
-      clearChipFilter(clearBtn.dataset.chipClear);
+      clearChipFilter(clearBtn.dataset.chipClear, clearBtn.dataset.chipValue || '');
       return;
     }
     if (e.target.closest('[data-chip]')) toggleFilterPanel(true);
@@ -3124,8 +3169,8 @@ function renderActiveFilterChips(list) {
     const viewLabels = { repeats: 'Worth it', noback: 'One & Done', archive: 'Decide Later' };
     chips.push({ kind: 'view', label: viewLabels[activeView] || activeView });
   }
-  if (activeCategory !== 'all') chips.push({ kind: 'category', label: catLabel(activeCategory), color: catColor(activeCategory) });
-  if (activeCuisine !== 'All') chips.push({ kind: 'type', label: activeCuisine });
+  activeCategories.forEach(k => chips.push({ kind: 'category', value: k, label: catLabel(k), color: catColor(k) }));
+  activeCuisines.forEach(t => chips.push({ kind: 'type', value: t, label: t }));
   if (activeLocation !== 'All') chips.push({ kind: 'area', label: activeLocation });
   if (activeStar > 0) chips.push({ kind: 'rating', label: activeStar === 5 ? '5 stars' : `${activeStar}+ stars` });
   if (favOnly) chips.push({ kind: 'fav', label: 'Favorites' });
@@ -3144,7 +3189,7 @@ function renderActiveFilterChips(list) {
     const style = c.color ? ` style="--chip-color:${htmlAttr(c.color)}"` : '';
     return `<span class="chip selected" data-chip="${htmlAttr(c.kind)}" role="button" tabindex="0"
       title="Open filters"${style}><span class="dot"></span>${htmlText(c.label)}<button
-      class="chip-x" type="button" data-chip-clear="${htmlAttr(c.kind)}"
+      class="chip-x" type="button" data-chip-clear="${htmlAttr(c.kind)}" data-chip-value="${htmlAttr(c.value || '')}"
       aria-label="Clear ${htmlAttr(c.label)} filter" title="Clear ${htmlAttr(c.label)}">✕</button></span>`;
   }).join('');
 }
