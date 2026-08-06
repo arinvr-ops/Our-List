@@ -3058,27 +3058,95 @@ function setLayoutMode(mode, el) {
   document.querySelectorAll('.seg-btn').forEach(btn => btn.classList.toggle('active', btn === el || btn.dataset.layout === mode));
 }
 
+// Clears a single active filter from its chip's ✕ button, then re-renders.
+function clearChipFilter(kind) {
+  if (kind === 'view') {
+    activeView = 'active';
+    document.querySelectorAll('.view-tab').forEach(b => b.classList.toggle('active', b.dataset.view === 'active'));
+    const sel = document.getElementById('sortSelect');
+    if (sel) sel.value = 'view-active';
+  } else if (kind === 'category') {
+    activeCategory = 'all';
+    activeCuisine = 'All';
+    buildCatPills();
+    buildTypePills();
+  } else if (kind === 'type') {
+    activeCuisine = 'All';
+    buildTypePills();
+  } else if (kind === 'area') {
+    activeLocation = 'All';
+    buildTypePills();
+  } else if (kind === 'rating') {
+    activeStar = 0;
+    document.querySelectorAll('.star-pill').forEach((btn, i) => btn.classList.toggle('active', i === 0));
+  } else if (kind === 'fav') {
+    favOnly = false;
+    const b = document.getElementById('favOnlyBtn');
+    if (b) b.classList.remove('active-fav');
+    buildTypePills();
+  } else if (kind === 'been') {
+    beenOnly = false;
+    buildTypePills();
+  } else if (kind === 'want') {
+    wantOnly = false;
+    buildTypePills();
+  } else if (kind === 'search') {
+    const input = document.getElementById('searchInput');
+    if (input) input.value = '';
+  }
+  render();
+}
+
+function wireActiveFilterChips() {
+  const row = document.getElementById('activeFilterChips');
+  if (!row || row.dataset.wired) return;
+  row.dataset.wired = 'true';
+  row.addEventListener('click', e => {
+    const clearBtn = e.target.closest('[data-chip-clear]');
+    if (clearBtn) {
+      e.stopPropagation();
+      clearChipFilter(clearBtn.dataset.chipClear);
+      return;
+    }
+    if (e.target.closest('[data-chip]')) toggleFilterPanel(true);
+  });
+}
+
 function renderActiveFilterChips(list) {
   const row = document.getElementById('activeFilterChips');
   const count = document.getElementById('resultCount');
   if (count) count.textContent = `${list.length} spot${list.length !== 1 ? 's' : ''}`;
   if (!row) return;
+  wireActiveFilterChips();
 
   const chips = [];
-  if (activeView !== 'active') chips.push(activeView.replace('repeats','Worth it').replace('noback','One & Done').replace('archive','Decide Later'));
-  if (activeCategory !== 'all') chips.push(catLabel(activeCategory));
-  if (activeCuisine !== 'All') chips.push(activeCuisine);
-  if (activeLocation !== 'All') chips.push(activeLocation);
-  if (activeStar > 0) chips.push(activeStar === 5 ? '5 stars' : `${activeStar}+ stars`);
-  if (favOnly) chips.push('Favorites');
-  if (beenOnly) chips.push('Been');
-  if (wantOnly) chips.push('Want');
+  if (activeView !== 'active') {
+    const viewLabels = { repeats: 'Worth it', noback: 'One & Done', archive: 'Decide Later' };
+    chips.push({ kind: 'view', label: viewLabels[activeView] || activeView });
+  }
+  if (activeCategory !== 'all') chips.push({ kind: 'category', label: catLabel(activeCategory), color: catColor(activeCategory) });
+  if (activeCuisine !== 'All') chips.push({ kind: 'type', label: activeCuisine });
+  if (activeLocation !== 'All') chips.push({ kind: 'area', label: activeLocation });
+  if (activeStar > 0) chips.push({ kind: 'rating', label: activeStar === 5 ? '5 stars' : `${activeStar}+ stars` });
+  if (favOnly) chips.push({ kind: 'fav', label: 'Favorites' });
+  if (beenOnly) chips.push({ kind: 'been', label: 'Been' });
+  if (wantOnly) chips.push({ kind: 'want', label: 'Want' });
   const q = document.getElementById('searchInput')?.value.trim();
-  if (q) chips.push(`Search: ${q}`);
+  if (q) chips.push({ kind: 'search', label: `Search: ${q}` });
 
-  row.innerHTML = (chips.length ? chips : ['All spots']).map(label =>
-    `<button class="chip${chips.length ? ' selected' : ''}" type="button"><span class="dot"></span>${htmlText(label)}</button>`
-  ).join('');
+  if (!chips.length) {
+    row.innerHTML = `<span class="chip" data-chip="open" role="button" tabindex="0"
+      title="Open filters"><span class="dot"></span>All Spots</span>`;
+    return;
+  }
+
+  row.innerHTML = chips.map(c => {
+    const style = c.color ? ` style="--chip-color:${htmlAttr(c.color)}"` : '';
+    return `<span class="chip selected" data-chip="${htmlAttr(c.kind)}" role="button" tabindex="0"
+      title="Open filters"${style}><span class="dot"></span>${htmlText(c.label)}<button
+      class="chip-x" type="button" data-chip-clear="${htmlAttr(c.kind)}"
+      aria-label="Clear ${htmlAttr(c.label)} filter" title="Clear ${htmlAttr(c.label)}">✕</button></span>`;
+  }).join('');
 }
 
 function updatePreviewPanels(list) {
@@ -5239,6 +5307,56 @@ header.topbar {
   border-color: rgba(239, 196, 90, 0.45);
   background: rgba(239, 196, 90, 0.14);
   color: var(--gold);
+}
+
+/* Active filter chips in the sticky bar */
+.active-row .chips {
+  max-width: 100%;
+}
+
+.chips .chip {
+  flex: 0 0 auto;
+  padding-right: 5px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.chips .chip[data-chip="open"] {
+  padding-right: 11px;
+}
+
+.chips .chip.selected {
+  border-color: color-mix(in srgb, var(--chip-color, var(--gold)) 46%, transparent);
+  background: color-mix(in srgb, var(--chip-color, var(--gold)) 14%, transparent);
+  color: var(--chip-color, var(--gold));
+}
+
+.chips .chip:hover {
+  border-color: color-mix(in srgb, var(--chip-color, var(--gold)) 70%, transparent);
+}
+
+.chip-x {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  color: inherit;
+  font-family: inherit;
+  font-size: 0.66rem;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.72;
+  transition: opacity 160ms ease, background 160ms ease;
+}
+
+.chip-x:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.16);
 }
 
 .dot {

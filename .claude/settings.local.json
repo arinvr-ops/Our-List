@@ -6,7 +6,8 @@
       "Bash(Select-Object LastWriteTime, Length)",
       "PowerShell(Get-Item *)",
       "PowerShell(Get-Content \"C:\\\\Users\\\\arinv\\\\OneDrive - Prairie Electric\\\\Desktop\\\\our-list\\\\index.html\" | Select-Object -Index \\(3524..3579\\))",
-      "Bash(node -e ' *)"
+      "Bash(node -e ' *)",
+      "PowerShell(Get-ChildItem \"index.html\" | Select-Object Name, Length; \\(Get-Content \"index.html\" | Measure-Object -Line\\).Lines)"
     ]
   }
 }
