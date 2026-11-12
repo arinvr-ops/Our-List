@@ -3488,7 +3488,14 @@ function geoapifyToPlace(feature) {
   const coords = feature.geometry.coordinates;
   const name = p.name || '';
   const addr = p.formatted || '';
-  return { lat: coords[1], lng: coords[0], display: name + (addr ? ' - ' + addr : ''), name, address: addr };
+  // Geoapify's formatted address often starts with the business name - drop it so the
+  // display string doesn't repeat it ("Taco Bell - Taco Bell, 7710 SW Barbur Blvd...").
+  let addrOnly = addr;
+  if (name && addrOnly.toLowerCase().startsWith(name.toLowerCase())) {
+    addrOnly = addrOnly.slice(name.length).replace(/^[\s,\u2013\u2014-]+/, '');
+  }
+  const display = name ? (addrOnly ? name + ' - ' + addrOnly : name) : addrOnly;
+  return { lat: coords[1], lng: coords[0], display, name, address: addr };
 }
 
 async function searchPlaces(query) {
